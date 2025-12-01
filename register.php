@@ -6,9 +6,6 @@
     <title>নিবন্ধন | BreachTimes</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <style>
-    @import url('https://banglawebfonts.pages.dev/css/hind-siliguri.css');
-    </style> 
     <link href="https://banglawebfonts.pages.dev/css/hind-siliguri.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>

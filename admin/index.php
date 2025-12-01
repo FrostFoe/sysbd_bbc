@@ -63,6 +63,35 @@ $bbcData = get_bbc_data();
       }
       body { font-family: "Hind Siliguri", sans-serif; }
       .responsive-table td { vertical-align: middle; }
+
+      /* Quill Editor Theme Support */
+      .ql-toolbar {
+        background: var(--bg-muted);
+        border-color: var(--border-color);
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+      }
+      .ql-container {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        font-family: "Hind Siliguri", sans-serif;
+      }
+      .ql-editor {
+        min-height: 200px;
+        font-size: 1rem;
+        color: var(--text-card);
+      }
+      .ql-toolbar .ql-stroke {
+        stroke: var(--text-muted);
+      }
+      .ql-toolbar .ql-fill {
+        fill: var(--text-muted);
+      }
+      .ql-editor.ql-blank::before {
+        color: var(--text-muted);
+      }
     </style>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">
@@ -217,7 +246,7 @@ $bbcData = get_bbc_data();
 
                 <div>
                     <label class="block text-sm font-bold mb-2 text-card-text">বিস্তারিত বিবরণ (Main Content)</label>
-                    <div id="quill-editor" class="bg-white dark:bg-[#1f2937] text-card-text rounded-lg border border-border-color h-64 overflow-y-auto"></div>
+                    <div id="quill-editor" class="bg-card text-card-text rounded-lg border border-border-color h-64 overflow-y-auto"></div>
                 </div>
                 
                 <div class="pt-4 flex justify-end gap-3 border-t border-border-color">

@@ -1029,8 +1029,10 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
                 `;
             }
 
+            const mainPadding = state.showBreaking ? "pt-12" : "";
+
             return `
-                <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-4 min-h-[60vh] animate-fade-in">
+                <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-4 min-h-[60vh] animate-fade-in ${mainPadding}">
                     ${sectionsToRender.map(renderSection).join("")}
                     ${extras}
                 </main>
@@ -1088,8 +1090,8 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
             app.innerHTML = `
                 ${mobileMenu}
                 ${searchOverlay}
-                ${headerHtml}
                 ${state.view === "home" && state.showBreaking ? renderBreakingNews() : ""}
+                ${headerHtml}
                 ${mainHtml}
                 ${footerHtml}
                 ${backToTop}
@@ -1100,7 +1102,7 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 
         function renderBreakingNews() {
             return `
-                <div class="bg-bbcRed text-white text-xs md:text-sm font-medium py-2 px-4 flex justify-between items-center relative z-[51]">
+                <div class="fixed top-0 left-0 right-0 bg-bbcRed text-white text-xs md:text-sm font-medium py-2 px-4 flex justify-between items-center z-[100]">
                     <div class="flex items-center gap-3 max-w-[1380px] mx-auto w-full px-2">
                         <span class="uppercase animate-pulse font-bold tracking-widest text-[10px] bg-white/20 px-2 py-0.5 rounded">ব্রেকিং</span>
                         <span class="truncate opacity-95 hover:opacity-100 cursor-pointer">${state.siteConfig.breakingNews}</span>
@@ -1123,7 +1125,7 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
                 .join("");
 
             return `
-                <header class="border-b border-border-color sticky top-0 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
+                <header class="border-b border-border-color sticky top-[40px] bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
                     <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
                         <div class="h-[70px] flex items-center justify-between">
                             <div class="flex items-center gap-6">
