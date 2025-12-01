@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_response(['error' => 'Method not allowed'], 405);
 }
 
-$id = $_POST['id'] ?? uniqid(); // Use existing ID or generate new
+$id = !empty($_POST['id']) ? $_POST['id'] : uniqid(); // Use existing ID or generate new
 $title = $_POST['title'] ?? '';
 $category = $_POST['category'] ?? 'খবর';
 $summary = $_POST['summary'] ?? '';

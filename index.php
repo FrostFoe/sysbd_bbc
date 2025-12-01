@@ -1,4 +1,10 @@
-<?php require_once 'includes/functions.php'; $bbcData = get_bbc_data(); ?>
+<?php 
+session_start();
+require_once 'includes/functions.php'; 
+$bbcData = get_bbc_data(); 
+$user = isset($_SESSION['user_email']) ? $_SESSION['user_email'] : null;
+$isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+?>
 <!doctype html>
 <html lang="bn">
 
@@ -311,255 +317,7 @@
         };
 
         const initialData = <?php echo json_encode($bbcData); ?>;
-        /*
-        const initialData_ignored = {
-            sections: [
-                {
-                    id: "vermont",
-                    title: "শীর্ষ সংবাদ",
-                    type: "hero-grid",
-                    highlightColor: "#B80000",
-                    associatedCategory: "খবর",
-                    articles: [
-                        {
-                            id: "1",
-                            title:
-                                "ওয়াশিংটন ডিসি ঘটনার পর যুক্তরাষ্ট্রে সব আশ্রয় প্রার্থনার সিদ্ধান্ত স্থগিত",
-                            summary:
-                                "প্রেসিডেন্ট ট্রাম্প 'তৃতীয় বিশ্বের দেশগুলো' থেকে অভিবাসন বন্ধ করার ঘোষণা দেওয়ার কয়েক ঘণ্টা পরই এই নির্দেশনা আসে।",
-                            image:
-                                "https://ichef.bbci.co.uk/news/480/cpsprodpb/43e9/live/a3d64660-cc34-11f0-9fb5-5f3a3703a365.jpg",
-                            timestamp: "২ ঘণ্টা আগে",
-                            category: "যুক্তরাষ্ট্র ও কানাডা",
-                            readTime: "৫ মিনিট",
-                            comments: [],
-                            culpritProfile: {
-                                name: "জন ডো (ছদ্মনাম)",
-                                crime: "অবৈধ ইমিগ্রেশন ও জালিয়াতি",
-                                status: "পলাতক",
-                                description:
-                                    "অভিযুক্ত ব্যক্তি দীর্ঘ ৫ বছর ধরে অবৈধভাবে সীমান্ত পারাপারের চক্র পরিচালনা করে আসছেন। তার বিরুদ্ধে একাধিক জালিয়াতির মামলা রয়েছে।",
-                                image: "https://placehold.co/400x400/333/FFF?text=Suspect",
-                                timeline: [
-                                    { year: "২০১০", event: "প্রথম জালিয়াতির অভিযোগ" },
-                                    {
-                                        year: "২০২৪",
-                                        event: "আন্তর্জাতিক গ্রেফতারি পরোয়ানা জারি",
-                                    },
-                                ],
-                                associates: [{ name: "করিম শেখ", role: "মূল সহযোগী" }],
-                                evidence: [{ title: "নকল পাসপোর্ট কপি", type: "doc" }],
-                            },
-                            content:
-                                "<p class=\"font-bold text-xl md:text-2xl leading-relaxed opacity-90 border-l-4 border-bbcRed pl-4\">প্রেসিডেন্ট ট্রাম্প 'তৃতীয় বিশ্বের দেশগুলো' থেকে অভিবাসন বন্ধ করার ঘোষণা দেওয়ার কয়েক ঘণ্টা পরই এই নির্দেশনা আসে।</p><p>লরেম ইপসাম ডলর সিট আমেট, কনসেক্টেচার এডিপিসিং এলিট। সেড ডু আইউসমড টেম্পোর ইনসিডিন্ট ইউট ল্যাবোর এট ডলোর ম্যাগনা আলিকুয়া। এই প্রতিবেদনটি বিশদভাবে বিশ্লেষণ করে যে কীভাবে বর্তমান পরিস্থিতি আমাদের সমাজ ও অর্থনীতির ওপর প্রভাব ফেলছে।</p><h2>নতুন নির্দেশনা</h2><p>ব্রিচটাইমসের অনুসন্ধানে বেরিয়ে এসেছে নতুন সব তথ্য। আমাদের প্রতিনিধিরা সরেজমিনে গিয়ে এই ঘটনার পেছনের কারণগুলো খতিয়ে দেখেছেন। বিস্তারিত তথ্যের জন্য আমাদের সাথেই থাকুন।</p>",
-                        },
-                        {
-                            id: "2",
-                            title:
-                                "হংকংয়ের আগুন কীভাবে ছড়িয়েছিল: একটি দৃশ্যমান নির্দেশিকা",
-                            summary:
-                                "হংকংয়ের সাম্প্রতিক অগ্নিকাণ্ডের ঘটনাটি ছিল ভয়াবহ। কীভাবে এই আগুন এত দ্রুত ছড়িয়ে পড়ল, তার একটি বিস্তারিত বিশ্লেষণ।",
-                            image:
-                                "https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/3fa3/live/626a1d70-ccaf-11f0-8c06-f5d460985095.jpg",
-                            timestamp: "৪ ঘণ্টা আগে",
-                            category: "এশিয়া",
-                            readTime: "৩ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>হংকংয়ের সাম্প্রতিক অগ্নিকাণ্ডের ঘটনাটি ছিল ভয়াবহ। কীভাবে এই আগুন এত দ্রুত ছড়িয়ে পড়ল, তার একটি বিস্তারিত বিশ্লেষণ নিচে দেওয়া হলো।</p><p>আগুন লাগার প্রধান কারণ ছিল বৈদ্যুতিক শর্ট সার্কিট। বাতাসের তীব্র গতির কারণে আগুন দ্রুত পার্শ্ববর্তী ভবনগুলোতে ছড়িয়ে পড়ে।</p>",
-                        },
-                    ],
-                },
-                {
-                    id: "indiana",
-                    title: "সাপ্তাহিক পাঠ",
-                    type: "feature",
-                    highlightColor: "#B80000",
-                    associatedCategory: "ভ্রমণ",
-                    articles: [
-                        {
-                            id: "w1",
-                            title: "ক্যাবল কারে পৌঁছানো এক অপরূপ গাড়ি-মুক্ত গ্রাম",
-                            summary:
-                                "ইতিহাসজুড়ে এই মধ্যযুগীয় গ্রামটি বাইরের জগত থেকে প্রায় বিচ্ছিন্ন ছিল। কিন্তু এখন বিশ্বের সবচেয়ে খাড়া ক্যাবল কার পর্যটকদের ৪৩০ জন বাসিন্দার এই গ্রামে নিয়ে যায়।",
-                            image: "https://ichef.bbci.co.uk/images/ic/1024xn/p0ky88jq.jpg",
-                            category: "ভ্রমণ",
-                            readTime: "৭ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>সুইজারল্যান্ডের আল্পস পর্বতমালার কোলে অবস্থিত এই গ্রামটি যেন রূপকথার পাতা থেকে উঠে এসেছে। এখানে কোনো গাড়ি চলে না, কেবল ক্যাবল কারই একমাত্র বাহন।</p>",
-                        },
-                        {
-                            id: "w2",
-                            title: "চেরনোবিলের এই কালো ছত্রাক কি রেডিয়েশন খেয়ে ফেলে?",
-                            summary:
-                                "চেরনোবিলের পারমাণবিক বিপর্যয়স্থলে পাওয়া মোল্ড মনে হচ্ছে রেডিয়েশন খেয়ে বেঁচে আছে। আমরা কি এটি মহাকাশ ভ্রমণকারীদের সুরক্ষায় ব্যবহার করতে পারি?",
-                            image: "https://ichef.bbci.co.uk/images/ic/1920xn/p0mk4zj0.jpg",
-                            category: "ভবিষ্যৎ",
-                            readTime: "৫ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>বিজ্ঞানীরা অবাক হয়ে দেখছেন যে চেরনোবিলের রেডিয়েশন জোনে এক ধরণের কালো ছত্রাক জন্মাচ্ছে যা রেডিয়েশন শোষণ করে শক্তি উৎপাদন করতে পারে।</p>",
-                        },
-                    ],
-                },
-                {
-                    id: "montana",
-                    title: "আর্টস ইন মোশন",
-                    type: "feature",
-                    style: "dark",
-                    associatedCategory: "সংস্কৃতি",
-                    articles: [
-                        {
-                            id: "aim1",
-                            title: "এলিফ শাফাক: 'আমার লেখার ধরন একটু মাতাল'",
-                            summary:
-                                "ব্রিটিশ-তুর্কি ঔপন্যাসিক এলিফ শাফাক ব্রিচটাইমসকে জানান, তার লেখা কোনো ধরাবাঁধা পরিকল্পনার চেয়ে বরং অনুভূতির দ্বারা বেশি পরিচালিত হয়।",
-                            image: "https://ichef.bbci.co.uk/images/ic/1920xn/p0mk3x8f.jpg",
-                            category: "স্পনসরড",
-                            readTime: "৪ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>জনপ্রিয় লেখিকা এলিফ শাফাক তার নতুন বই এবং লেখার প্রক্রিয়া নিয়ে খোলামেলা আলোচনা করেছেন। তিনি বলেন, তার গল্পগুলো চরিত্রের আবেগের সাথে সাথে প্রবাহিত হয়।</p>",
-                        },
-                        {
-                            id: "aim2",
-                            title: "আধুনিক শিল্পকলার নতুন দিগন্ত",
-                            summary:
-                                "ডিজিটাল আর্ট কীভাবে প্রচলিত শিল্প মাধ্যমগুলোকে চ্যালেঞ্জ করছে তার একটি গভীর বিশ্লেষণ।",
-                            image:
-                                "https://placehold.co/600x400/1a1a1a/FFF?text=Digital+Art",
-                            category: "শিল্পকলা",
-                            readTime: "৫ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>NFT এবং ডিজিটাল ক্যানভাস শিল্পকলার জগতে বিপ্লব ঘটিয়েছে। শিল্পীরা এখন কোডিং এবং অ্যালগরিদম ব্যবহার করে অদ্ভুত সব শিল্পকর্ম তৈরি করছেন।</p>",
-                        },
-                    ],
-                },
-                {
-                    id: "iowa",
-                    title: "সপ্তাহের সেরা অডিও",
-                    type: "audio",
-                    highlightColor: "#B80000",
-                    associatedCategory: "অডিও",
-                    articles: [
-                        {
-                            id: "a1",
-                            title: "মিস ইউনিভার্সের আন্তর্জাতিক নাটক",
-                            image:
-                                "https://ichef.bbci.co.uk/images/ic/480x480/p0mjv56b.jpg",
-                            category: "দ্য গ্লোবাল স্টোরি",
-                            readTime: "১০ মিনিট",
-                            comments: [],
-                            content: "<p>অডিও বিবরণ...</p>",
-                        },
-                        {
-                            id: "a2",
-                            title: "মারিয়া রেসা: তথ্যের কেয়ামত",
-                            image:
-                                "https://ichef.bbci.co.uk/images/ic/480x480/p0mk6bzd.jpg",
-                            category: "দ্য ইন্টারভিউ",
-                            readTime: "১২ মিনিট",
-                            comments: [],
-                            content: "<p>অডিও বিবরণ...</p>",
-                        },
-                    ],
-                },
-                {
-                    id: "virginia",
-                    title: "আরও খবর",
-                    type: "grid",
-                    highlightColor: "#B80000",
-                    associatedCategory: "খবর",
-                    articles: [
-                        {
-                            id: "mn1",
-                            title:
-                                "যুক্তরাজ্যে টেক্সট স্ক্যামাররা মাসে হাজার হাজার পাউন্ড হাতিয়ে নিচ্ছে",
-                            image:
-                                "https://ichef.bbci.co.uk/news/480/cpsprodpb/774b/live/5930ff60-cb9e-11f0-8c06-f5d460985095.png",
-                            category: "প্রযুক্তি",
-                            readTime: "৩ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>প্রতারকরা নতুন নতুন কৌশলে মানুষের মোবাইলে টেক্সট পাঠিয়ে টাকা হাতিয়ে নিচ্ছে। পুলিশ সবাইকে সতর্ক থাকার পরামর্শ দিয়েছে।</p>",
-                        },
-                        {
-                            id: "mn2",
-                            title: "এশিয়ার একাধিক দেশে বন্যায় বহু মানুষের মৃত্যু",
-                            image:
-                                "https://ichef.bbci.co.uk/news/480/cpsprodpb/515d/live/9c90b640-cc68-11f0-9fb5-5f3a3703a365.jpg",
-                            category: "এশিয়া",
-                            readTime: "২ মিনিট",
-                            comments: [],
-                            content:
-                                "<p>টানা বৃষ্টিতে এশিয়ার বিভিন্ন দেশে বন্যা পরিস্থিতি ভয়াবহ রূপ নিয়েছে। হাজার হাজার মানুষ পানিবন্দী হয়ে পড়েছে।</p>",
-                        },
-                    ],
-                },
-                {
-                    id: "texas",
-                    title: "সম্পাদকের পছন্দ",
-                    type: "reel",
-                    highlightColor: "#B80000",
-                    associatedCategory: "ভিডিও",
-                    articles: [
-                        {
-                            id: "r1",
-                            title: "রোমান দালানগুলো হাজার বছর টিকে থাকে কেন?",
-                            image: "https://ichef.bbci.co.uk/images/ic/1920xn/p0mk4lwp.jpg",
-                            category: "ইতিহাস",
-                            isVideo: true,
-                            readTime: "ভিডিও",
-                            comments: [],
-                            content: "<p>ভিডিও বিবরণ...</p>",
-                        },
-                        {
-                            id: "r2",
-                            title: "যে যন্ত্রটি লাখো স্মৃতি ধরে রেখেছে",
-                            image: "https://ichef.bbci.co.uk/images/ic/1920xn/p0mjsmkk.jpg",
-                            category: "সংস্কৃতি",
-                            isVideo: true,
-                            readTime: "ভিডিও",
-                            comments: [],
-                            content: "<p>ভিডিও বিবরণ...</p>",
-                        },
-                    ],
-                },
-                {
-                    id: "wyoming",
-                    title: "সংবাদ সংগ্রহ",
-                    type: "list",
-                    associatedCategory: "খবর",
-                    articles: [
-                        {
-                            id: "l1",
-                            title:
-                                "ওয়াশিংটন ডিসিতে ন্যাশনাল গার্ডের ওপর গুলির ঘটনায় যা জানা যাচ্ছে",
-                            image:
-                                "https://ichef.bbci.co.uk/news/480/cpsprodpb/473d/live/ef902dc0-cc32-11f0-9fb5-5f3a3703a365.jpg",
-                            category: "যুক্তরাষ্ট্র ও কানাডা",
-                            readTime: "৩ মিনিট",
-                            comments: [],
-                            content: "<p>বিস্তারিত সংবাদ...</p>",
-                        },
-                        {
-                            id: "l2",
-                            title:
-                                "গিনি-বিসাউয়ের অভ্যুত্থানকে 'ধোঁকাবাজি' বললেন পশ্চিম আফ্রিকার নেতারা",
-                            image:
-                                "https://ichef.bbci.co.uk/news/480/cpsprodpb/8796/live/89c4f500-cca2-11f0-aa92-07851ff0caaf.jpg",
-                            category: "আফ্রিকা",
-                            readTime: "৪ মিনিট",
-                            comments: [],
-                            content: "<p>বিস্তারিত সংবাদ...</p>",
-                        },
-                    ],
-                },
-            ],
-        };
-        */
+
 
         const state = {
             siteConfig: initialConfig,
@@ -567,8 +325,8 @@
             view: "home",
             category: "home",
             bookmarks: [],
-            user: null,
-            isAdmin: false,
+            user: <?php echo json_encode($user); ?>,
+            isAdmin: <?php echo json_encode($isAdmin); ?>,
             fontSize: "md",
             selectedArticleId: null,
             isLoading: false,
@@ -1322,13 +1080,10 @@
             else if (view === "home") mainHtml = renderHomeView();
 
             if (!isLoading && view === "detail") mainHtml = renderDetailView();
-            if (!isLoading && view === "admin") mainHtml = renderAdminView();
 
-            const authOverlay = view === "auth" ? renderAuthView() : "";
             const mobileMenu = renderMobileMenu();
             const searchOverlay = renderSearchOverlay();
             const backToTop = renderBackToTop();
-            const adminModals = renderAdminModals();
 
             app.innerHTML = `
                 ${mobileMenu}
@@ -1338,44 +1093,9 @@
                 ${mainHtml}
                 ${footerHtml}
                 ${backToTop}
-                ${authOverlay}
-                ${adminModals}
             `;
 
             lucide.createIcons();
-
-            // Initialize Quill Editor
-            if (
-                state.showEditor &&
-                document.getElementById("quill-editor") &&
-                !document.querySelector(".ql-toolbar")
-            ) {
-                const editorContainer = document.getElementById("quill-editor");
-                editorContainer.innerHTML = "";
-
-                quillEditor = new Quill("#quill-editor", {
-                    theme: "snow",
-                    placeholder: "বিস্তারিত লিখুন...",
-                    modules: {
-                        toolbar: [
-                            ["bold", "italic", "underline", "strike"],
-                            [{ header: [1, 2, 3, false] }],
-                            [{ list: "ordered" }, { list: "bullet" }],
-                            ["link", "image", "video"],
-                            ["clean"],
-                        ],
-                    },
-                });
-
-                quillEditor.enable();
-
-                if (state.editArticle && state.editArticle.content) {
-                    quillEditor.clipboard.dangerouslyPasteHTML(
-                        0,
-                        state.editArticle.content,
-                    );
-                }
-            }
         }
 
         function renderBreakingNews() {
@@ -1432,13 +1152,13 @@
                                 <div class="hidden md:flex gap-3 items-center">
                                     ${user
                     ? `
-                                        ${isAdmin ? `<button onclick="navigate('admin')" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> অ্যাডমিন</button>` : ""}
+                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> অ্যাডমিন</a>` : ""}
                                         <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 btn-bounce">
                                             <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${user.charAt(0).toUpperCase()}</div> সাইন আউট
                                         </button>
                                     `
                     : `
-                                        <button onclick="setState({authMode: 'signin', view: 'auth'})" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all btn-bounce">সাইন ইন</button>
+                                        <a href="login.php" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all btn-bounce">সাইন ইন</a>
                                     `
                 }
                                 </div>
@@ -1521,14 +1241,14 @@
                                         <div class="w-10 h-10 rounded-full bg-bbcRed text-white flex items-center justify-center font-bold text-lg">${user.charAt(0).toUpperCase()}</div>
                                         <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">স্বাগতম</span><span class="text-xs text-muted-text truncate max-w-[200px]">${user}</span></div>
                                     </div>
-                                    ${isAdmin ? `<button onclick="navigate('admin')" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> অ্যাডমিন প্যানেল</button>` : ""}
+                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> অ্যাডমিন প্যানেল</a>` : ""}
                                     <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors btn-bounce"><i data-lucide="log-out" class="w-5 h-5"></i> সাইন আউট</button>
                                 </div>
                             `
                     : `
                                 <div class="grid grid-cols-2 gap-4">
-                                    <button onclick="setState({authMode: 'signin', view: 'auth', isMobileMenuOpen: false})" class="w-full py-3 bg-bbcDark dark:bg-white text-white dark:text-black rounded-xl font-bold shadow-lg btn-bounce">সাইন ইন</button>
-                                    <button onclick="setState({authMode: 'register', view: 'auth', isMobileMenuOpen: false})" class="w-full py-3 border border-bbcDark dark:border-white text-bbcDark dark:text-white rounded-xl font-bold hover:bg-muted-bg transition-colors btn-bounce">নিবন্ধন</button>
+                                    <a href="login.php" class="w-full py-3 bg-bbcDark dark:bg-white text-white dark:text-black rounded-xl font-bold shadow-lg btn-bounce text-center">সাইন ইন</a>
+                                    <a href="register.php" class="w-full py-3 border border-bbcDark dark:border-white text-bbcDark dark:text-white rounded-xl font-bold hover:bg-muted-bg transition-colors btn-bounce text-center">নিবন্ধন</a>
                                 </div>
                             `
                 }
@@ -1765,41 +1485,15 @@
             `;
         }
 
-        function renderAuthView() {
-            return `
-                <div class="min-h-screen bg-gray-50 dark:bg-[#0f0f0f] flex flex-col items-center justify-center p-4 fixed inset-0 z-[80]">
-                    <button onclick="navigate('home')" class="absolute top-6 right-6 text-gray-500 hover:text-black dark:hover:text-white p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all"><i data-lucide="x" class="w-8 h-8"></i></button>
-                    <div class="bg-card p-8 md:p-12 w-full max-w-[480px] shadow-2xl rounded-2xl border border-border-color text-center relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-bbcRed to-orange-600"></div>
-                        <h1 class="text-2xl font-bold mb-2 text-bbcDark dark:text-white">${state.authMode === "signin" ? "স্বাগতম!" : "নিবন্ধন করুন"}</h1>
-                        <div class="space-y-4 text-left mt-8">
-                             <div>
-                                <label class="block text-xs font-bold uppercase text-gray-400 mb-1">ইমেইল</label>
-                                <input type="email" value="${state.formInputs.email}" oninput="state.formInputs.email = this.value" class="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#121212] dark:text-white">
-                             </div>
-                             <button onclick="handleAuth()" class="w-full bg-bbcDark dark:bg-white text-white dark:text-black font-bold py-3.5 rounded-lg hover:shadow-lg transition-all">${state.authMode === "signin" ? "সাইন ইন" : "নিবন্ধন সম্পন্ন করুন"}</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
 
-        function handleAuth() {
-            if (state.formInputs.email) {
-                const isAdmin = state.formInputs.email === "admin@breachtimes.com";
-                setState({
-                    user: state.formInputs.email,
-                    isAdmin: isAdmin,
-                    view: "home",
-                    authMode: "signin",
-                });
-                showToastMsg(`স্বাগতম, ${state.formInputs.email.split("@")[0]}!`);
+
+        async function handleLogout() {
+            try {
+                await fetch('api/logout.php');
+                window.location.reload();
+            } catch (e) {
+                console.error(e);
             }
-        }
-
-        function handleLogout() {
-            setState({ user: null, isAdmin: false, view: "home" });
-            showToastMsg("সফলভাবে লগআউট হয়েছে");
         }
 
         function renderBackToTop() {
@@ -1810,228 +1504,13 @@
             `;
         }
 
-        function renderAdminView() {
-            const allArticles = state.bbcData.sections.flatMap((s) =>
-                s.articles.map((a) => ({ ...a, sectionTitle: s.title })),
-            );
-            return `
-                <main class="bg-page min-h-screen font-sans animate-fade-in pb-12 pt-8">
-                    <div class="max-w-[1380px] mx-auto px-4 lg:px-8">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                            <div><h1 class="text-3xl font-bold text-bbcDark dark:text-white mb-2">অ্যাডমিন ড্যাশবোর্ড</h1></div>
-                            <div class="flex gap-2">
-                                <button onclick="exportData()" class="bg-muted-bg text-card-text px-4 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-gray-700"><i data-lucide="download" class="w-5 h-5"></i> ব্যাকআপ</button>
-                                <button onclick="triggerImport()" class="bg-muted-bg text-card-text px-4 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-gray-700"><i data-lucide="upload" class="w-5 h-5"></i> রিস্টোর</button>
-                                <button onclick="openEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5"></i> নতুন সংবাদ</button>
-                            </div>
-                        </div>
-                         <div class="bg-card rounded-3xl shadow-soft border border-border-color">
-                             <table class="w-full text-left border-collapse responsive-table">
-                                <thead class="hidden md:table-header-group"><tr class="bg-muted-bg text-gray-500 text-xs uppercase"><th class="p-6">শিরোনাম</th><th class="p-6">বিভাগ</th><th class="p-6 text-right">অ্যাকশন</th></tr></thead>
-                                <tbody class="text-bbcDark dark:text-gray-200 divide-y divide-border-color">
-                                    ${allArticles
-                    .map(
-                        (a) => `
-                                        <tr class="hover:bg-muted-bg">
-                                            <td class="p-4"><div class="flex items-center gap-4"><img src="${a.image}" class="w-16 h-10 rounded object-cover"><div class="font-bold text-sm truncate max-w-xs">${a.title}</div></div></td>
-                                            <td class="p-4"><span class="bg-muted-bg px-2 py-1 rounded text-xs">${a.category}</span></td>
-                                            <td class="p-4 text-right">
-                                                <div class="flex justify-end gap-2">
-                                                    <button onclick="openEditor('${a.id}')" class="p-2 text-blue-600 hover:bg-blue-100 rounded"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                                    <button onclick="deleteArticle('${a.id}')" class="p-2 text-red-600 hover:bg-red-100 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `,
-                    )
-                    .join("")}
-                                </tbody>
-                             </table>
-                         </div>
-                    </div>
-                </main>
-            `;
-        }
 
-        async function deleteArticle(id) {
-            if (!confirm("মুছে ফেলবেন?")) return;
-            try {
-                const res = await fetch('api/delete_article.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToastMsg("মুছে ফেলা হয়েছে! পেজ রিলোড হচ্ছে...");
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showToastMsg("সমস্যা হয়েছে!");
-                }
-            } catch (e) {
-                console.error(e);
-                showToastMsg("সার্ভার এরর!");
-            }
-        }
-
-        function openEditor(id) {
-            let article = null;
-            if (id) {
-                const all = state.bbcData.sections.flatMap((s) => s.articles);
-                article = all.find((a) => a.id === id);
-            }
-            setState({ showEditor: true, editArticle: article });
-        }
-
-        function closeEditor() {
-            setState({ showEditor: false, editArticle: null });
-            quillEditor = null;
-        }
-
-        async function saveArticle(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            
-            if (quillEditor) {
-                formData.append('content', quillEditor.root.innerHTML);
-            }
-            if (state.editArticle) {
-                formData.append('id', state.editArticle.id);
-            }
-
-            try {
-                const res = await fetch('api/save_article.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToastMsg("সংরক্ষিত হয়েছে! পেজ রিলোড হচ্ছে...");
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showToastMsg("সমস্যা হয়েছে!");
-                }
-            } catch (e) {
-                console.error(e);
-                showToastMsg("সার্ভার এরর!");
-            }
-            closeEditor();
-        }
-
-        function renderAdminModals() {
-            if (!state.showEditor) return "";
-            const article = state.editArticle || {};
-            const profile = article.culpritProfile || {};
-
-            const timelineText = profile.timeline
-                ? profile.timeline.map((t) => `${t.year}: ${t.event}`).join("\n")
-                : "";
-            const associateText = profile.associates
-                ? profile.associates.map((a) => `${a.name}: ${a.role}`).join("\n")
-                : "";
-
-            return `
-                <div class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-                    <div class="bg-card w-full max-w-4xl rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <div class="sticky top-0 bg-card p-6 border-b border-border-color flex justify-between items-center z-10">
-                            <h2 class="text-xl font-bold text-card-text">${article.id ? "আর্টিকেল এডিট করুন" : "নতুন সংবাদ যোগ করুন"}</h2>
-                            <button onclick="closeEditor()" class="p-2 hover:bg-muted-bg rounded-full transition-colors text-card-text"><i data-lucide="x" class="w-6 h-6"></i></button>
-                        </div>
-                        <form onsubmit="saveArticle(event)" class="p-6 space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-4">
-                                    <h3 class="font-bold text-bbcRed uppercase text-sm tracking-wider border-b pb-2">সাধারণ তথ্য</h3>
-                                    <div>
-                                        <label class="block text-sm font-bold mb-2 text-card-text">শিরোনাম</label>
-                                        <input name="title" value="${article.title || ""}" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-bold mb-2 text-card-text">বিভাগ</label>
-                                            <input name="category" value="${article.category || "খবর"}" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-bold mb-2 text-card-text">সেকশন</label>
-                                            <select name="sectionId" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
-                                                ${state.bbcData.sections.map((s) => `<option value="${s.id}" ${article.sectionId === s.id ? "selected" : ""}>${s.title}</option>`).join("")}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-bold mb-2 text-card-text">ছবি (URL অথবা আপলোড)</label>
-                                        <div class="flex gap-2 mb-2">
-                                            <input type="file" onchange="handleImageUpload(this)" class="block w-full text-sm text-card-text file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-muted-bg file:text-bbcRed hover:file:bg-gray-200">
-                                        </div>
-                                        <input name="image" placeholder="অথবা ছবির লিংক দিন..." value="${article.image || ""}" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-bold mb-2 text-card-text">সারাংশ</label>
-                                        <textarea name="summary" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">${article.summary || ""}</textarea>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-4 border-l pl-6 border-border-color">
-                                    <div class="flex items-center justify-between border-b pb-2">
-                                        <h3 class="font-bold text-bbcRed uppercase text-sm tracking-wider">অপরাধীর প্রোফাইল (ঐচ্ছিক)</h3>
-                                        <label class="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" name="hasProfile" ${article.culpritProfile ? "checked" : ""} class="w-4 h-4 text-bbcRed rounded border-gray-300 focus:ring-bbcRed">
-                                            <span class="text-sm font-bold text-card-text">সক্রিয় করুন</span>
-                                        </label>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-xs font-bold mb-1 text-muted-text">নাম</label>
-                                            <input name="profileName" value="${profile.name || ""}" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold mb-1 text-muted-text">অপরাধ</label>
-                                            <input name="profileCrime" value="${profile.crime || ""}" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-xs font-bold mb-1 text-muted-text">স্ট্যাটাস</label>
-                                            <select name="profileStatus" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                                                <option value="পলাতক" ${profile.status === "পলাতক" ? "selected" : ""}>পলাতক</option>
-                                                <option value="গ্রেফতার" ${profile.status === "গ্রেফতার" ? "selected" : ""}>গ্রেফতার</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-bold mb-1 text-muted-text">ছবি URL</label>
-                                            <input name="profileImage" value="${profile.image || ""}" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold mb-1 text-muted-text">বিবরণ</label>
-                                        <textarea name="profileDesc" rows="2" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">${profile.description || ""}</textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold mb-1 text-muted-text">সময়রেখা (সাল: ঘটনা)</label>
-                                        <textarea name="profileTimeline" rows="3" placeholder="2020: ঘটনা ১&#10;2024: ঘটনা ২" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm font-mono">${timelineText}</textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold mb-1 text-muted-text">সহযোগী (নাম: ভূমিকা)</label>
-                                        <textarea name="profileAssociates" rows="2" placeholder="করিম: মূল হোতা" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm font-mono">${associateText}</textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-bold mb-2 text-card-text">বিস্তারিত বিবরণ (Main Content)</label>
-                                <div id="quill-editor" class="bg-white dark:bg-[#1f2937] text-card-text rounded-lg border border-border-color h-64 overflow-y-auto"></div>
-                            </div>
-                            
-                            <div class="pt-4 flex justify-end gap-3 border-t border-border-color">
-                                <button type="button" onclick="closeEditor()" class="px-6 py-2.5 rounded-lg font-bold text-muted-text hover:bg-muted-bg transition-colors">বাতিল</button>
-                                <button type="submit" class="bg-bbcRed text-white px-8 py-2.5 rounded-lg font-bold shadow-lg hover:opacity-90 transition-all">সংরক্ষণ করুন</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
 
         init();
+    </script>
+</body>
+
+</html>
     </script>
 </body>
 
