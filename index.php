@@ -1,9 +1,10 @@
-<?php 
+<?php
 session_start();
-require_once 'includes/functions.php'; 
-$bbcData = get_bbc_data(); 
-$user = isset($_SESSION['user_email']) ? $_SESSION['user_email'] : null;
-$isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+require_once "includes/functions.php";
+$bbcData = get_bbc_data();
+$user = isset($_SESSION["user_email"]) ? $_SESSION["user_email"] : null;
+$isAdmin = isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin";
+$initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 ?>
 <!doctype html>
 <html lang="bn">
@@ -318,12 +319,29 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 
         const initialData = <?php echo json_encode($bbcData); ?>;
 
+        const CATEGORY_MAP = {
+            news: "খবর",
+            sport: "খেলা",
+            business: "ব্যবসা",
+            innovation: "উদ্ভাবন",
+            culture: "সংস্কৃতি",
+            arts: "শিল্পকলা",
+            travel: "ভ্রমণ",
+            earth: "পৃথিবী",
+            audio: "অডিও",
+            video: "ভিডিও",
+            live: "লাইভ",
+        };
+
+        function getCategoryKey(value) {
+            return Object.keys(CATEGORY_MAP).find(key => CATEGORY_MAP[key] === value) || value;
+        }
 
         const state = {
             siteConfig: initialConfig,
             bbcData: initialData,
             view: "home",
-            category: "home",
+            category: "<?php echo htmlspecialchars($initialCategory); ?>",
             bookmarks: [],
             user: <?php echo json_encode($user); ?>,
             isAdmin: <?php echo json_encode($isAdmin); ?>,
@@ -901,7 +919,7 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
                             <span class="w-2 h-8 rounded-full" style="background-color: ${borderColor}"></span>
                             ${section.title}
                         </h2>
-                        ${section.type !== "hero-grid" ? `<button class="text-sm font-bold hover:text-bbcRed transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 ${titleColor}">সব দেখুন <i data-lucide="chevron-right" class="w-4 h-4"></i></button>` : ""}
+                        ${section.type !== "hero-grid" ? `<a href="?category=${getCategoryKey(section.associatedCategory)}" class="text-sm font-bold hover:text-bbcRed transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 ${titleColor}">সব দেখুন <i data-lucide="chevron-right" class="w-4 h-4"></i></a>` : ""}
                     </div>
                     ${content}
                     ${section.style === "dark" ? `<div class="absolute -right-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>` : ""}
@@ -940,20 +958,7 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
                     },
                 ];
             } else if (state.category !== "home") {
-                const catMap = {
-                    news: "খবর",
-                    sport: "খেলা",
-                    business: "ব্যবসা",
-                    innovation: "উদ্ভাবন",
-                    culture: "সংস্কৃতি",
-                    arts: "শিল্পকলা",
-                    travel: "ভ্রমণ",
-                    earth: "পৃথিবী",
-                    audio: "অডিও",
-                    video: "ভিডিও",
-                    live: "লাইভ",
-                };
-                const target = catMap[state.category] || state.category;
+                const target = CATEGORY_MAP[state.category] || state.category;
                 sectionsToRender = state.bbcData.sections.filter(
                     (s) => s.associatedCategory === target || s.title.includes(target),
                 );
@@ -1117,7 +1122,7 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
             const navItems = siteConfig.menuItems
                 .map(
                     (item) => `
-                <a href="#" onclick="event.preventDefault(); navigate('${item.id}')" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
+                <a href="?category=${item.id}" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
                     ${item.label}
                 </a>
             `,
@@ -1260,10 +1265,10 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
                     .map(
                         (item) => `
                                 <li class="border-b border-gray-100 dark:border-gray-800/50 pb-2 last:border-0">
-                                    <button onclick="navigate('${item.id}')" class="w-full text-left py-4 flex justify-between items-center hover:text-bbcRed hover:pl-3 transition-all duration-300 group">
+                                    <a href="?category=${item.id}" class="w-full text-left py-4 flex justify-between items-center hover:text-bbcRed hover:pl-3 transition-all duration-300 group">
                                         <span class="flex items-center gap-3"><i data-lucide="${getIconName(item.icon)}" class="w-4 h-4"></i> ${item.label}</span>
                                         <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-bbcRed transition-colors"></i>
-                                    </button>
+                                    </a>
                                 </li>
                             `,
                     )

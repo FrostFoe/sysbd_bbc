@@ -1,11 +1,11 @@
 <?php
 session_start();
-require_once '../includes/functions.php';
+require_once "../includes/functions.php";
 
 // Check if user is admin
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: ../login.php');
-    exit;
+if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
+    header("Location: ../login.php");
+    exit();
 }
 
 $bbcData = get_bbc_data();
@@ -121,34 +121,46 @@ $bbcData = get_bbc_data();
                     <tbody class="text-card-text divide-y divide-border-color">
                         <?php
                         $allArticles = [];
-                        foreach ($bbcData['sections'] as $section) {
-                            foreach ($section['articles'] as $article) {
-                                $article['sectionId'] = $section['id'];
+                        foreach ($bbcData["sections"] as $section) {
+                            foreach ($section["articles"] as $article) {
+                                $article["sectionId"] = $section["id"];
                                 $allArticles[] = $article;
                             }
                         }
-                        foreach ($allArticles as $a): 
-                        ?>
+                        foreach ($allArticles as $a): ?>
                         <tr class="flex flex-col md:table-row hover:bg-muted-bg transition-colors border-b md:border-none border-border-color last:border-none">
                             <td class="p-4 md:w-1/2">
                                 <div class="flex items-center gap-4">
-                                    <img src="<?php echo htmlspecialchars($a['image'] ?? ''); ?>" onerror="this.src='https://placehold.co/600x400/1a1a1a/FFF?text=BreachTimes'" class="w-16 h-10 rounded object-cover shrink-0">
-                                    <div class="font-bold text-sm line-clamp-2"><?php echo htmlspecialchars($a['title']); ?></div>
+                                    <img src="<?php echo htmlspecialchars(
+                                        $a["image"] ?? "",
+                                    ); ?>" onerror="this.src='https://placehold.co/600x400/1a1a1a/FFF?text=BreachTimes'" class="w-16 h-10 rounded object-cover shrink-0">
+                                    <div class="font-bold text-sm line-clamp-2"><?php echo htmlspecialchars(
+                                        $a["title"],
+                                    ); ?></div>
                                 </div>
                             </td>
                             <td class="px-4 pb-2 md:py-4 md:w-1/4 flex md:table-cell items-center justify-between">
                                 <span class="md:hidden text-xs font-bold text-muted-text uppercase">বিভাগ</span>
-                                <span class="bg-muted-bg px-2 py-1 rounded text-xs"><?php echo htmlspecialchars($a['category']); ?></span>
+                                <span class="bg-muted-bg px-2 py-1 rounded text-xs"><?php echo htmlspecialchars(
+                                    $a["category"],
+                                ); ?></span>
                             </td>
                             <td class="px-4 pb-4 md:py-4 md:w-1/4 text-right flex md:table-cell items-center justify-between md:justify-end">
                                 <span class="md:hidden text-xs font-bold text-muted-text uppercase">অ্যাকশন</span>
                                 <div class="flex justify-end gap-2">
-                                    <button onclick='openEditor(<?php echo htmlspecialchars(json_encode($a), ENT_QUOTES, 'UTF-8'); ?>)' class="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                    <button onclick="deleteArticle('<?php echo $a['id']; ?>')" class="p-2 text-red-600 hover:bg-red-100 rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    <button onclick='openEditor(<?php echo htmlspecialchars(
+                                        json_encode($a),
+                                        ENT_QUOTES,
+                                        "UTF-8",
+                                    ); ?>)' class="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    <button onclick="deleteArticle('<?php echo $a[
+                                        "id"
+                                    ]; ?>')" class="p-2 text-red-600 hover:bg-red-100 rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                 </div>
                             </td>
                         </tr>
-                        <?php endforeach; ?>
+                        <?php endforeach;
+                        ?>
                     </tbody>
                 </table>
             </div>
@@ -179,8 +191,15 @@ $bbcData = get_bbc_data();
                             <div>
                                 <label class="block text-sm font-bold mb-2 text-card-text">সেকশন</label>
                                 <select name="sectionId" id="article-sectionId" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
-                                    <?php foreach ($bbcData['sections'] as $s): ?>
-                                        <option value="<?php echo $s['id']; ?>"><?php echo htmlspecialchars($s['title']); ?></option>
+                                    <?php foreach (
+                                        $bbcData["sections"]
+                                        as $s
+                                    ): ?>
+                                        <option value="<?php echo $s[
+                                            "id"
+                                        ]; ?>"><?php echo htmlspecialchars(
+    $s["title"],
+); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
