@@ -353,7 +353,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             isSearchOpen: false,
             searchQuery: "",
             searchResults: [],
-            showBreaking: true,
+            showBreaking: false,
             showBackToTop: false,
             scrollProgress: 0,
             showSettings: false,
@@ -420,12 +420,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             render();
         }
 
-        // --- FEATURE FUNCTIONS ---
-
-        // 3. Live Weather API Implementation
         async function fetchWeather() {
             try {
-                // Using Open-Meteo API (Free, no key required) for Dhaka
                 const res = await fetch(
                     "https://api.open-meteo.com/v1/forecast?latitude=23.8103&longitude=90.4125&current_weather=true",
                 );
@@ -433,7 +429,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 const temp = data.current_weather.temperature;
                 const code = data.current_weather.weathercode;
                 
-                // Weather codes mapping
                 let icon = "sun";
                 if (code > 3) icon = "cloud";
                 if (code > 45) icon = "cloud-fog";
@@ -470,14 +465,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             }
         }
 
-        // 1. Image Upload Logic
         function handleImageUpload(input) {
             const file = input.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function (e) {
-                // Set the base64 string to the text input so saveArticle can pick it up
                 const urlInput = document.querySelector('input[name="image"]');
                 if (urlInput) {
                     urlInput.value = e.target.result;
@@ -487,7 +480,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             reader.readAsDataURL(file);
         }
 
-        // 4. Data Backup Logic (Export)
         function exportData() {
             const data = JSON.stringify(state.bbcData, null, 2);
             const blob = new Blob([data], { type: "application/json" });
@@ -501,7 +493,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             showToastMsg("ডাটা ডাউনলোড হয়েছে!");
         }
 
-        // 4. Data Backup Logic (Import)
         function triggerImport() {
             document.getElementById("import-input").click();
         }
@@ -530,14 +521,11 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             reader.readAsText(file);
         }
 
-        // 6. Font Size Logic
         function setFontSize(size) {
             setState({ fontSize: size });
         }
 
-        // --- STORAGE FUNCTIONS ---
         function loadStateFromStorage() {
-            // const savedData = localStorage.getItem("breachtimes-data");
             const savedBookmarks = localStorage.getItem("breachtimes-bookmarks");
 
             /*
@@ -559,7 +547,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         }
 
         function saveStateToStorage() {
-            // localStorage.setItem("breachtimes-data", JSON.stringify(state.bbcData));
             localStorage.setItem(
                 "breachtimes-bookmarks",
                 JSON.stringify(state.bookmarks),
@@ -1130,7 +1117,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 .join("");
 
             return `
-                <header class="border-b border-border-color sticky top-[40px] bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
+                <header class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
                     <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
                         <div class="h-[70px] flex items-center justify-between">
                             <div class="flex items-center gap-6">

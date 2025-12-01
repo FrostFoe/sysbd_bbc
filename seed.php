@@ -264,7 +264,6 @@ $initialData = [
     ],
 ];
 
-// Clear existing data
 $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
 $pdo->exec("TRUNCATE TABLE sections");
 $pdo->exec("TRUNCATE TABLE articles");

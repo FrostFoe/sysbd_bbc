@@ -13,15 +13,6 @@ $content = $_POST["content"] ?? "";
 $sectionId = $_POST["sectionId"] ?? "news";
 $image = $_POST["image"] ?? "";
 
-// Handle Image Upload if file is present
-// Note: In the JS, the image is read as DataURL and put into the input.
-// But if we want "proper file organization", we should handle file uploads.
-// However, the JS `handleImageUpload` puts the base64 string into the text input `image`.
-// So `$_POST['image']` will contain the base64 string or URL.
-// We can save this directly or decode and save to file.
-// For simplicity and "preserving UI", we'll keep the base64/URL string in DB.
-
-// Check if article exists
 $stmt = $pdo->prepare("SELECT id FROM articles WHERE id = ?");
 $stmt->execute([$id]);
 $exists = $stmt->fetch();
@@ -54,7 +45,6 @@ if ($exists) {
     ]);
 }
 
-// Handle Culprit Profile
 if (isset($_POST["hasProfile"]) && $_POST["hasProfile"] === "on") {
     $profileName = $_POST["profileName"] ?? "";
     $profileCrime = $_POST["profileCrime"] ?? "";
@@ -62,7 +52,6 @@ if (isset($_POST["hasProfile"]) && $_POST["hasProfile"] === "on") {
     $profileDesc = $_POST["profileDesc"] ?? "";
     $profileImage = $_POST["profileImage"] ?? "";
 
-    // Check if profile exists
     $stmt = $pdo->prepare(
         "SELECT id FROM culprit_profiles WHERE article_id = ?",
     );
@@ -97,7 +86,6 @@ if (isset($_POST["hasProfile"]) && $_POST["hasProfile"] === "on") {
         $profileId = $pdo->lastInsertId();
     }
 
-    // Handle Timeline
     $pdo->prepare("DELETE FROM culprit_timeline WHERE profile_id = ?")->execute(
         [$profileId],
     );
@@ -114,7 +102,6 @@ if (isset($_POST["hasProfile"]) && $_POST["hasProfile"] === "on") {
         }
     }
 
-    // Handle Associates
     $pdo->prepare(
         "DELETE FROM culprit_associates WHERE profile_id = ?",
     )->execute([$profileId]);
@@ -131,9 +118,6 @@ if (isset($_POST["hasProfile"]) && $_POST["hasProfile"] === "on") {
         }
     }
 } else {
-    // If profile unchecked, delete it? Or just ignore?
-    // The UI logic implies if unchecked, it's not active.
-    // We can delete it to be clean.
     $pdo->prepare("DELETE FROM culprit_profiles WHERE article_id = ?")->execute(
         [$id],
     );

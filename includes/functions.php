@@ -5,7 +5,6 @@ function get_bbc_data()
 {
     global $pdo;
 
-    // Fetch sections
     $stmt = $pdo->query("SELECT * FROM sections ORDER BY sort_order ASC");
     $sections = $stmt->fetchAll();
 
@@ -22,7 +21,6 @@ function get_bbc_data()
             "articles" => [],
         ];
 
-        // Fetch articles for this section
         $stmt = $pdo->prepare(
             "SELECT * FROM articles WHERE section_id = ? ORDER BY created_at DESC",
         );
@@ -43,14 +41,12 @@ function get_bbc_data()
                 "comments" => [],
             ];
 
-            // Fetch comments
             $stmt = $pdo->prepare(
                 "SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC",
             );
             $stmt->execute([$article["id"]]);
             $articleData["comments"] = $stmt->fetchAll();
 
-            // Fetch culprit profile
             $stmt = $pdo->prepare(
                 "SELECT * FROM culprit_profiles WHERE article_id = ?",
             );
@@ -69,14 +65,12 @@ function get_bbc_data()
                     "evidence" => [], // Not in DB schema yet but in JS, keeping empty for now
                 ];
 
-                // Fetch timeline
                 $stmt = $pdo->prepare(
                     "SELECT year, event FROM culprit_timeline WHERE profile_id = ?",
                 );
                 $stmt->execute([$profile["id"]]);
                 $profileData["timeline"] = $stmt->fetchAll();
 
-                // Fetch associates
                 $stmt = $pdo->prepare(
                     "SELECT name, role FROM culprit_associates WHERE profile_id = ?",
                 );

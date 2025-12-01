@@ -2,7 +2,6 @@
 session_start();
 require_once "../includes/functions.php";
 
-// Check if user is admin
 if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
     header("Location: ../login.php");
     exit();
@@ -277,7 +276,6 @@ $bbcData = get_bbc_data();
     </div>
 
     <script>
-        // Theme Initialization
         const savedTheme = localStorage.getItem("breachtimes-theme");
         const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         if (savedTheme === "dark" || (!savedTheme && systemDark)) {
@@ -330,7 +328,6 @@ $bbcData = get_bbc_data();
             document.getElementById('article-image').value = article ? article.image : '';
             document.getElementById('article-summary').value = article ? article.summary : '';
             
-            // Profile
             const profile = article && article.culpritProfile ? article.culpritProfile : {};
             document.getElementById('article-hasProfile').checked = !!(article && article.culpritProfile);
             document.getElementById('profile-name').value = profile.name || '';
@@ -345,7 +342,6 @@ $bbcData = get_bbc_data();
             const associateText = profile.associates ? profile.associates.map(a => `${a.name}: ${a.role}`).join("\n") : "";
             document.getElementById('profile-associates').value = associateText;
 
-            // Quill
             if (!quillEditor) {
                 quillEditor = new Quill("#quill-editor", {
                     theme: "snow",

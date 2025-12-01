@@ -14,7 +14,6 @@ if (!$data || !isset($data["email"]) || !isset($data["password"])) {
 $email = $data["email"];
 $password = $data["password"];
 
-// Basic validation
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(["success" => false, "message" => "Invalid email format"]);
     exit();
@@ -29,7 +28,6 @@ if (strlen($password) < 6) {
 }
 
 try {
-    // Check if user exists
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->fetch()) {
@@ -40,7 +38,6 @@ try {
         exit();
     }
 
-    // Create user
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare(
         "INSERT INTO users (email, password, role) VALUES (?, ?, 'user')",

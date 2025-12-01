@@ -15,8 +15,6 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-    // In production, log this error and show a generic message
-    // For now, we might want to create the database if it doesn't exist
     try {
         $pdo = new PDO(
             "mysql:host=$host;charset=$charset",
@@ -27,7 +25,6 @@ try {
         $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db`");
         $pdo->exec("USE `$db`");
 
-        // Import schema if tables don't exist
         $schema = file_get_contents(__DIR__ . "/../database.sql");
         $pdo->exec($schema);
     } catch (\PDOException $e2) {
