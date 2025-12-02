@@ -175,7 +175,7 @@ $bbcData = get_bbc_data();
             </div>
             <form id="articleForm" onsubmit="saveArticle(event)" class="p-6 space-y-6">
                 <input type="hidden" name="id" id="article-id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
                     <div class="space-y-4">
                         <h3 class="font-bold text-bbcRed uppercase text-sm tracking-wider border-b pb-2">সাধারণ তথ্য</h3>
                         <div>
@@ -213,51 +213,6 @@ $bbcData = get_bbc_data();
                         <div>
                             <label class="block text-sm font-bold mb-2 text-card-text">সারাংশ</label>
                             <textarea name="summary" id="article-summary" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4 border-l pl-6 border-border-color">
-                        <div class="flex items-center justify-between border-b pb-2">
-                            <h3 class="font-bold text-bbcRed uppercase text-sm tracking-wider">অপরাধীর প্রোফাইল (ঐচ্ছিক)</h3>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" name="hasProfile" id="article-hasProfile" class="w-4 h-4 text-bbcRed rounded border-gray-300 focus:ring-bbcRed">
-                                <span class="text-sm font-bold text-card-text">সক্রিয় করুন</span>
-                            </label>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold mb-1 text-muted-text">নাম</label>
-                                <input name="profileName" id="profile-name" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold mb-1 text-muted-text">অপরাধ</label>
-                                <input name="profileCrime" id="profile-crime" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold mb-1 text-muted-text">স্ট্যাটাস</label>
-                                <select name="profileStatus" id="profile-status" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                                    <option value="পলাতক">পলাতক</option>
-                                    <option value="গ্রেফতার">গ্রেফতার</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold mb-1 text-muted-text">ছবি URL</label>
-                                <input name="profileImage" id="profile-image" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold mb-1 text-muted-text">বিবরণ</label>
-                            <textarea name="profileDesc" id="profile-desc" rows="2" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold mb-1 text-muted-text">সময়রেখা (সাল: ঘটনা)</label>
-                            <textarea name="profileTimeline" id="profile-timeline" rows="3" placeholder="2020: ঘটনা ১&#10;2024: ঘটনা ২" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm font-mono"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold mb-1 text-muted-text">সহযোগী (নাম: ভূমিকা)</label>
-                            <textarea name="profileAssociates" id="profile-associates" rows="2" placeholder="করিম: মূল হোতা" class="w-full p-2 rounded border border-border-color bg-muted-bg text-card-text text-sm font-mono"></textarea>
                         </div>
                     </div>
                 </div>
@@ -328,20 +283,6 @@ $bbcData = get_bbc_data();
             document.getElementById('article-image').value = article ? article.image : '';
             document.getElementById('article-summary').value = article ? article.summary : '';
             
-            const profile = article && article.culpritProfile ? article.culpritProfile : {};
-            document.getElementById('article-hasProfile').checked = !!(article && article.culpritProfile);
-            document.getElementById('profile-name').value = profile.name || '';
-            document.getElementById('profile-crime').value = profile.crime || '';
-            document.getElementById('profile-status').value = profile.status || 'পলাতক';
-            document.getElementById('profile-image').value = profile.image || '';
-            document.getElementById('profile-desc').value = profile.description || '';
-            
-            const timelineText = profile.timeline ? profile.timeline.map(t => `${t.year}: ${t.event}`).join("\n") : "";
-            document.getElementById('profile-timeline').value = timelineText;
-            
-            const associateText = profile.associates ? profile.associates.map(a => `${a.name}: ${a.role}`).join("\n") : "";
-            document.getElementById('profile-associates').value = associateText;
-
             if (!quillEditor) {
                 quillEditor = new Quill("#quill-editor", {
                     theme: "snow",

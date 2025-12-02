@@ -11,33 +11,12 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('admin','user') DEFAULT 'user',
-  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`email`, `password`, `role`) VALUES
-('admin@breachtimes.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin'); -- password: password
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `sections`
 --
 
-CREATE TABLE `sections` (
+CREATE TABLE IF NOT EXISTS `sections_en` (
   `id` varchar(50) NOT NULL,
   `title` varchar(255) NOT NULL,
   `type` varchar(50) NOT NULL,
@@ -54,7 +33,7 @@ CREATE TABLE `sections` (
 -- Table structure for table `articles`
 --
 
-CREATE TABLE `articles` (
+CREATE TABLE IF NOT EXISTS `articles_en` (
   `id` varchar(50) NOT NULL,
   `section_id` varchar(50) NOT NULL,
   `title` varchar(255) NOT NULL,
@@ -68,7 +47,7 @@ CREATE TABLE `articles` (
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `section_id` (`section_id`),
-  CONSTRAINT `fk_articles_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_articles_section_en` FOREIGN KEY (`section_id`) REFERENCES `sections_en` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -77,7 +56,7 @@ CREATE TABLE `articles` (
 -- Table structure for table `comments`
 --
 
-CREATE TABLE `comments` (
+CREATE TABLE IF NOT EXISTS `comments_en` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `article_id` varchar(50) NOT NULL,
   `user_name` varchar(255) NOT NULL,
@@ -86,7 +65,7 @@ CREATE TABLE `comments` (
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `article_id` (`article_id`),
-  CONSTRAINT `fk_comments_article` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_comments_article_en` FOREIGN KEY (`article_id`) REFERENCES `articles_en` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 COMMIT;

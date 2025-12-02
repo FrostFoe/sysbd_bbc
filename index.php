@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once "includes/functions.php";
-$bbcData = get_bbc_data();
 $user = isset($_SESSION["user_email"]) ? $_SESSION["user_email"] : null;
 $isAdmin = isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin";
 $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
@@ -75,6 +74,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
       body {
         font-family: "Hind Siliguri", sans-serif;
+      }
+
+      html {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      ::-webkit-scrollbar {
+        display: none;
       }
 
       ::-webkit-scrollbar {
@@ -317,7 +324,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             ],
         };
 
-        const initialData = <?php echo json_encode($bbcData); ?>;
+        const initialData = { sections: [] };
 
         const CATEGORY_MAP = {
             news: "খবর",
@@ -349,6 +356,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             selectedArticleId: null,
             isLoading: false,
             darkMode: false,
+            language: "bn",
             isMobileMenuOpen: false,
             isSearchOpen: false,
             searchQuery: "",
@@ -369,12 +377,18 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
         function init() {
             loadStateFromStorage();
+            fetchBbcData();
             fetchWeather(); // Call Weather API
 
             const savedTheme = localStorage.getItem("breachtimes-theme");
             const systemDark = window.matchMedia(
                 "(prefers-color-scheme: dark)",
             ).matches;
+
+            const savedLanguage = localStorage.getItem("breachtimes-language");
+            if (savedLanguage) {
+                state.language = savedLanguage;
+            }
 
             if (savedTheme === "dark" || (!savedTheme && systemDark)) {
                 state.darkMode = true;
@@ -557,7 +571,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             Object.assign(state, updates);
             if (shouldRender) render();
         }
-
         function handleHashChange() {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
@@ -568,6 +581,19 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 navigate("home", false);
             }
         }
+
+        async function fetchBbcData() {
+            setState({ isLoading: true });
+            try {
+                const response = await fetch(`get_data.php?lang=${state.language}`);
+                const data = await response.json();
+                setState({ bbcData: data, isLoading: false });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setState({ isLoading: false });
+            }
+        }
+
 
         function updateURL(targetView, param = null) {
             if (targetView === "detail" && param) {
@@ -635,6 +661,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 localStorage.setItem("breachtimes-theme", "light");
             }
             render();
+        }
+
+        function toggleLanguage() {
+            const newLang = state.language === "bn" ? "en" : "bn";
+            setState({ language: newLang });
+            localStorage.setItem("breachtimes-language", newLang);
+            fetchBbcData();
         }
 
         function navigate(id, pushState = true) {
@@ -1134,6 +1167,9 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 </a>
                             </div>
                             <div class="flex items-center gap-2 md:gap-4">
+                                <button onclick="toggleLanguage()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-green-400 transition-all active:scale-90">
+                                    <span class="text-sm font-bold">${state.language === 'bn' ? 'EN' : 'BN'}</span>
+                                </button>
                                 <button onclick="toggleTheme()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-yellow-400 transition-all active:scale-90">
                                     <i data-lucide="${darkMode ? "sun" : "moon"}" class="w-5 h-5"></i>
                                 </button>
@@ -1221,7 +1257,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 category,
             } = state;
             return `
-                <div class="fixed inset-0 z-[60] bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 ${isMobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"}">
+                <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}">
                     <div class="flex justify-between items-center p-6 border-b border-border-color">
                         <div class="font-bold text-2xl dark:text-white tracking-tight">মেনু</div>
                         <button onclick="setState({isMobileMenuOpen: false})" class="p-2 hover:bg-muted-bg rounded-full transition-transform hover:rotate-90 dark:text-white btn-bounce"><i data-lucide="x" class="w-8 h-8"></i></button>
@@ -1376,8 +1412,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                     <div class="prose max-w-none font-size-${state.fontSize} space-y-8 ${proseColor} transition-all duration-300">
                                         ${article.content || `<p>বিস্তারিত আসছে...</p>`}
                                     </div>
-                                    
-                                    ${article.culpritProfile ? renderCulpritProfile(article.culpritProfile) : ""}
 
                                 </div>
 
@@ -1420,66 +1454,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 </main>
             `;
         }
-
-        function renderCulpritProfile(profile) {
-            return `
-                <div class="mt-12 bg-card border border-border-color rounded-xl shadow-lg overflow-hidden animate-fade-in relative">
-                    <div class="absolute top-4 right-4 z-20 transform rotate-12 border-4 rounded px-2 py-1 text-xl font-black uppercase opacity-80 select-none pointer-events-none ${profile.status && profile.status.includes("গ্রেফতার") ? "border-green-600 text-green-600" : "border-red-600 text-red-600"}">
-                        ${profile.status && profile.status.includes("গ্রেফতার") ? "ARRESTED" : "WANTED"}
-                    </div>
-                    <div class="bg-bbcRed p-6 text-white flex items-center justify-between">
-                        <h3 class="text-xl font-bold flex items-center gap-2 uppercase tracking-wider"><i data-lucide="siren" class="w-6 h-6 animate-pulse"></i> অপরাধীর প্রোফাইল</h3>
-                        <i data-lucide="shield" class="w-6 h-6 opacity-50"></i>
-                    </div>
-                    <div class="p-6 md:p-8">
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div class="flex-shrink-0 w-full md:w-56 space-y-4">
-                                <div class="aspect-[3/4] rounded-lg overflow-hidden border-4 border-muted-bg shadow-inner relative bg-gray-200">
-                                    <img src="${profile.image || PLACEHOLDER_IMAGE}" class="w-full h-full object-cover filter contrast-125">
-                                </div>
-                                <div class="text-center font-bold py-2 rounded ${profile.status && profile.status.includes("গ্রেফতার") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}">
-                                    ${profile.status}
-                                </div>
-                            </div>
-                            <div class="flex-grow space-y-6">
-                                <div>
-                                    <h4 class="text-3xl font-bold mb-1 text-card-text">${profile.name}</h4>
-                                    <div class="flex items-center gap-2 text-bbcRed font-bold bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded w-fit text-sm">
-                                        <i data-lucide="gavel" class="w-4 h-4"></i> ${profile.crime}
-                                    </div>
-                                </div>
-                                <p class="leading-relaxed text-sm text-card-text border-l-2 border-bbcRed pl-4 italic">"${profile.description}"</p>
-                                
-                                ${profile.timeline &&
-                    profile.timeline.length > 0
-                    ? `
-                                    <div class="pt-4 border-t border-border-color">
-                                        <h5 class="text-xs font-bold text-muted-text uppercase tracking-widest mb-4">অপরাধের সময়রেখা</h5>
-                                        <ul class="space-y-4 relative border-l-2 border-border-color ml-1.5 pl-4">
-                                            ${profile.timeline
-                        .map(
-                            (t) => `
-                                                <li class="relative">
-                                                    <span class="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-bbcRed border-2 border-card"></span>
-                                                    <span class="text-xs font-bold text-bbcRed block">${t.year}</span>
-                                                    <span class="text-sm text-card-text">${t.event}</span>
-                                                </li>
-                                            `,
-                        )
-                        .join("")}
-                                        </ul>
-                                    </div>
-                                `
-                    : ""
-                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-
 
         async function handleLogout() {
             try {

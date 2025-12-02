@@ -22,32 +22,6 @@ $initialData = [
                     "category" => "যুক্তরাষ্ট্র ও কানাডা",
                     "readTime" => "৫ মিনিট",
                     "comments" => [],
-                    "culpritProfile" => [
-                        "name" => "জন ডো (ছদ্মনাম)",
-                        "crime" => "অবৈধ ইমিগ্রেশন ও জালিয়াতি",
-                        "status" => "পলাতক",
-                        "description" =>
-                            "অভিযুক্ত ব্যক্তি দীর্ঘ ৫ বছর ধরে অবৈধভাবে সীমান্ত পারাপারের চক্র পরিচালনা করে আসছেন। তার বিরুদ্ধে একাধিক জালিয়াতির মামলা রয়েছে।",
-                        "image" =>
-                            "https://placehold.co/400x400/333/FFF?text=Suspect",
-                        "timeline" => [
-                            [
-                                "year" => "২০১০",
-                                "event" => "প্রথম জালিয়াতির অভিযোগ",
-                            ],
-                            [
-                                "year" => "২০২৪",
-                                "event" =>
-                                    "আন্তর্জাতিক গ্রেফতারি পরোয়ানা জারি",
-                            ],
-                        ],
-                        "associates" => [
-                            ["name" => "করিম শেখ", "role" => "মূল সহযোগী"],
-                        ],
-                        "evidence" => [
-                            ["title" => "নকল পাসপোর্ট কপি", "type" => "doc"],
-                        ],
-                    ],
                     "content" =>
                         '<p class="font-bold text-xl md:text-2xl leading-relaxed opacity-90 border-l-4 border-bbcRed pl-4">প্রেসিডেন্ট ট্রাম্প \'তৃতীয় বিশ্বের দেশগুলো\' থেকে অভিবাসন বন্ধ করার ঘোষণা দেওয়ার কয়েক ঘণ্টা পরই এই নির্দেশনা আসে।</p><p>লরেম ইপসাম ডলর সিট আমেট, কনসেক্টেচার এডিপিসিং এলিট। সেড ডু আইউসমড টেম্পোর ইনসিডিন্ট ইউট ল্যাবোর এট ডলোর ম্যাগনা আলিকুয়া। এই প্রতিবেদনটি বিশদভাবে বিশ্লেষণ করে যে কীভাবে বর্তমান পরিস্থিতি আমাদের সমাজ ও অর্থনীতির ওপর প্রভাব ফেলছে।</p><h2>নতুন নির্দেশনা</h2><p>ব্রিচটাইমসের অনুসন্ধানে বেরিয়ে এসেছে নতুন সব তথ্য। আমাদের প্রতিনিধিরা সরেজমিনে গিয়ে এই ঘটনার পেছনের কারণগুলো খতিয়ে দেখেছেন। বিস্তারিত তথ্যের জন্য আমাদের সাথেই থাকুন।</p>',
                 ],
@@ -265,11 +239,11 @@ $initialData = [
 ];
 
 $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+$pdo->exec("DROP TABLE IF EXISTS culprit_profiles");
+$pdo->exec("DROP TABLE IF EXISTS culprit_timeline");
+$pdo->exec("DROP TABLE IF EXISTS culprit_associates");
 $pdo->exec("TRUNCATE TABLE sections");
 $pdo->exec("TRUNCATE TABLE articles");
-$pdo->exec("TRUNCATE TABLE culprit_profiles");
-$pdo->exec("TRUNCATE TABLE culprit_timeline");
-$pdo->exec("TRUNCATE TABLE culprit_associates");
 $pdo->exec("TRUNCATE TABLE comments");
 $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
 
@@ -304,40 +278,6 @@ foreach ($initialData["sections"] as $section) {
             $article["content"] ?? null,
             isset($article["isVideo"]) && $article["isVideo"] ? 1 : 0,
         ]);
-
-        if (isset($article["culpritProfile"])) {
-            $profile = $article["culpritProfile"];
-            $stmt = $pdo->prepare(
-                "INSERT INTO culprit_profiles (article_id, name, crime, status, description, image) VALUES (?, ?, ?, ?, ?, ?)",
-            );
-            $stmt->execute([
-                $article["id"],
-                $profile["name"],
-                $profile["crime"],
-                $profile["status"],
-                $profile["description"],
-                $profile["image"],
-            ]);
-            $profileId = $pdo->lastInsertId();
-
-            if (isset($profile["timeline"])) {
-                foreach ($profile["timeline"] as $t) {
-                    $stmt = $pdo->prepare(
-                        "INSERT INTO culprit_timeline (profile_id, year, event) VALUES (?, ?, ?)",
-                    );
-                    $stmt->execute([$profileId, $t["year"], $t["event"]]);
-                }
-            }
-
-            if (isset($profile["associates"])) {
-                foreach ($profile["associates"] as $a) {
-                    $stmt = $pdo->prepare(
-                        "INSERT INTO culprit_associates (profile_id, name, role) VALUES (?, ?, ?)",
-                    );
-                    $stmt->execute([$profileId, $a["name"], $a["role"]]);
-                }
-            }
-        }
     }
 }
 

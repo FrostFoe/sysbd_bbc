@@ -1,11 +1,13 @@
 <?php
-require_once __DIR__ . "/db.php";
+require_once __DIR__ . "/includes/db.php";
 
-function get_bbc_data()
+function get_data($lang = "bn")
 {
     global $pdo;
 
-    $stmt = $pdo->query("SELECT * FROM sections ORDER BY sort_order ASC");
+    $suffix = $lang === "en" ? "_en" : "";
+
+    $stmt = $pdo->query("SELECT * FROM sections{$suffix} ORDER BY sort_order ASC");
     $sections = $stmt->fetchAll();
 
     $data = ["sections" => []];
@@ -22,7 +24,7 @@ function get_bbc_data()
         ];
 
         $stmt = $pdo->prepare(
-            "SELECT * FROM articles WHERE section_id = ? ORDER BY created_at DESC",
+            "SELECT * FROM articles{$suffix} WHERE section_id = ? ORDER BY created_at DESC",
         );
         $stmt->execute([$section["id"]]);
         $articles = $stmt->fetchAll();
@@ -42,7 +44,7 @@ function get_bbc_data()
             ];
 
             $stmt = $pdo->prepare(
-                "SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC",
+                "SELECT user_name as user, text, time FROM comments{$suffix} WHERE article_id = ? ORDER BY created_at DESC",
             );
             $stmt->execute([$article["id"]]);
             $articleData["comments"] = $stmt->fetchAll();
@@ -55,4 +57,10 @@ function get_bbc_data()
 
     return $data;
 }
+
+$lang = isset($_GET["lang"]) ? $_GET["lang"] : "bn";
+$data = get_data($lang);
+
+header("Content-Type: application/json");
+echo json_encode($data);
 ?>
