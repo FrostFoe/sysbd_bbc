@@ -23,17 +23,14 @@ $data = get_data($lang);
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="../assets/styles.css" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <style type="text/tailwindcss">
-        <?php include "../tailwind.config.css"; ?>
-    </style>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">
     <div id="toast-container" role="status" aria-live="polite" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
 
-    <main role="main" class="bg-page min-h-screen font-sans pb-12 pt-8">
+    <main role="main" class="bg-page min-h-screen font-sans pb-12 pt-8 animate-fade-in-up">
         <div class="max-w-[1380px] mx-auto px-4 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div class="flex items-center gap-4">
@@ -158,7 +155,7 @@ $data = get_data($lang);
     </main>
 
     <!-- Add/Edit Category Modal -->
-    <div id="category-modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div id="category-modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 animate-zoom-in">
         <div class="bg-card w-full max-w-2xl rounded-2xl shadow-2xl">
             <div class="sticky top-0 bg-card p-6 border-b border-border-color flex justify-between items-center z-10">
                 <h2 class="text-xl font-bold text-card-text" id="category-modal-title">নতুন বিভাগ যোগ করুন</h2>
@@ -193,7 +190,7 @@ $data = get_data($lang);
     </div>
 
     <!-- Add/Edit Section Modal -->
-    <div id="section-modal" role="dialog" aria-modal="true" aria-labelledby="section-modal-title" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div id="section-modal" role="dialog" aria-modal="true" aria-labelledby="section-modal-title" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 animate-zoom-in">
         <div class="bg-card w-full max-w-2xl rounded-2xl shadow-2xl">
             <div class="sticky top-0 bg-card p-6 border-b border-border-color flex justify-between items-center z-10">
                 <h2 class="text-xl font-bold text-card-text" id="section-modal-title">নতুন সেকশন যোগ করুন</h2>
@@ -243,7 +240,7 @@ $data = get_data($lang);
     </div>
 
     <!-- Editor Modal -->
-    <div id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 animate-zoom-in">
         <div class="bg-card w-[95%] max-w-[95%] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="sticky top-0 bg-card p-6 border-b border-border-color flex justify-between items-center z-10">
                 <h2 class="text-xl font-bold text-card-text" id="modal-title" data-translate="add_new_article">নতুন সংবাদ যোগ করুন</h2>
@@ -387,7 +384,7 @@ $data = get_data($lang);
         function showToastMsg(msg) {
             const container = document.getElementById("toast-container");
             const toast = document.createElement("div");
-            toast.className = "bg-bbcDark/80 dark:bg-muted-bg backdrop-blur text-page-text dark:text-card-text px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+            toast.className = "toast-enter fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-bbcDark/80 dark:bg-muted-bg backdrop-blur text-page-text dark:text-card-text px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
             toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-400 dark:text-green-600"></i> ${msg}`;
             container.appendChild(toast);
             lucide.createIcons();

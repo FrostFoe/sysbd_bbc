@@ -14,8 +14,8 @@ $articleId = $data["articleId"] ?? null;
 // If user is logged in, use their identifier; otherwise, default to "Anonymous"
 // Note: Direct use of user input here without sanitization for display might be risky for XSS.
 // Assuming user is either a name or an email which is generally safe, but needs verification.
-$user = $data["user"] ?? "Anonymous";
-$text = $data["text"] ?? "";
+$user = htmlspecialchars($data["user"] ?? "Anonymous", ENT_QUOTES, 'UTF-8');
+$text = htmlspecialchars($data["text"] ?? "", ENT_QUOTES, 'UTF-8');
 
 if (!$articleId || !$text) {
     send_response(["error" => "Missing required fields (articleId, text)"], 400);

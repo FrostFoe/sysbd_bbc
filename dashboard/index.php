@@ -64,10 +64,7 @@ $dashboard_content = "
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style type="text/tailwindcss">
-        <?php include "../tailwind.config.css"; ?>
-    </style>
+    <link href="../assets/styles.css" rel="stylesheet" />
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
@@ -80,7 +77,7 @@ $dashboard_content = "
     <div id="app"></div>
 
     <div id="toast-container"
-        class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2">
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2">
     </div>
 
     <!-- Hidden Input for Import -->
@@ -148,6 +145,19 @@ $dashboard_content = "
              }
         }
 
+        function showToastMsg(msg, type = 'success') {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const icon = type === 'error' ? 'alert-circle' : 'check-circle';
+            const color = type === 'error' ? 'text-red-500' : 'text-green-400 dark:text-green-600';
+            
+            toast.className = "toast-enter bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 ${color}"></i> ${msg}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
         function setState(updates, shouldRender = true) {
             Object.assign(state, updates);
             if (shouldRender) render();
@@ -181,12 +191,12 @@ $dashboard_content = "
                     if (data.success) {
                         window.location.href = '../login/index.php'; // Redirect to login after logout
                     } else {
-                        alert('Logout failed.');
+                        showToastMsg('Logout failed.', 'error');
                     }
                 })
                 .catch(err => {
                     console.error('Logout fetch error:', err);
-                    alert('An error occurred during logout.');
+                    showToastMsg('An error occurred during logout.', 'error');
                 });
         }
         
@@ -250,7 +260,7 @@ $dashboard_content = "
             `;
 
             const dashboardMainContent = `
-                <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-8 min-h-[60vh] animate-fade-in">
+                <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-8 min-h-[60vh] animate-fade-in-up">
                     <div class="bg-card p-8 rounded-2xl shadow-soft border border-border-color">
                         <h2 class="text-3xl font-bold mb-6 flex items-center gap-3 text-card-text">
                             <span class="w-2 h-8 rounded-full" style="background-color: #B80000"></span>

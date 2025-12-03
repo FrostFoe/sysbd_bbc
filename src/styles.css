@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Theme - Pure & Professional */
+    --bg-page: #ffffff;
+    --text-page: #09090b; /* Zinc 950 */
+    --bg-card: #ffffff;
+    --bg-card-elevated: #ffffff;
+    --text-card: #09090b;
+    --border-color: #e4e4e7; /* Zinc 200 */
+    --bg-muted: #f4f4f5; /* Zinc 100 */
+    --text-muted: #71717a; /* Zinc 500 */
+  }
+
+  :root.dark {
+    /* Dark Theme - Pure Dark */
+    --bg-page: #000000; /* Pure Black */
+    --text-page: #fafafa; /* Zinc 50 */
+    --bg-card: #09090b; /* Zinc 950 */
+    --bg-card-elevated: #18181b; /* Zinc 900 */
+    --text-card: #ffffff;
+    --border-color: #27272a; /* Zinc 800 */
+    --bg-muted: #18181b; /* Zinc 900 */
+    --text-muted: #a1a1aa; /* Zinc 400 */
+  }
+
+  body {
+    font-family: "Hind Siliguri", sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-page);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  html, body, * {
+    font-family: "Hind Siliguri", sans-serif !important;
+  }
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Hide scrollbar for specific elements */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(to right, #f4f4f5 8%, #e4e4e7 18%, #f4f4f5 33%);
+  background-size: 1200px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.dark .skeleton {
+  background: linear-gradient(to right, #18181b 8%, #27272a 18%, #18181b 33%);
+}
+
+.nav-link {
+  position: relative;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--color-bbcRed);
+}
+
+.nav-link.active {
+  opacity: 1;
+  color: var(--color-bbcRed);
+  font-weight: 600;
+}
+
+.dark .nav-link.active {
+  color: #ef4444;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0%;
+  height: 2px;
+  background-color: var(--color-bbcRed);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.dark .nav-link::after {
+  background-color: #ef4444;
+}
+
+.nav-link.active::after {
+  width: 100%;
+}
+
+.btn-bounce:active {
+  transform: scale(0.96);
+}
+
+.toast-enter {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Font sizes with !important to override defaults if needed */
+.font-size-sm p {
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1em;
+}
+
+.font-size-md p {
+  font-size: 1.125rem !important;
+  line-height: 1.8 !important;
+  margin-bottom: 1em;
+}
+
+.font-size-lg p {
+  font-size: 1.35rem !important;
+  line-height: 2 !important;
+  margin-bottom: 1em;
+}
+
+/* Quill Dark Mode Overrides & Fixes */
+.ql-toolbar {
+  background: var(--bg-muted);
+  border-color: var(--border-color);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.ql-container {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  font-family: "Hind Siliguri", sans-serif;
+}
+
+.ql-editor {
+  min-height: 200px;
+  font-size: 1rem;
+  color: var(--text-card);
+}
+
+.dark .ql-toolbar .ql-stroke {
+  stroke: var(--text-muted);
+}
+
+.dark .ql-toolbar .ql-fill {
+  fill: var(--text-muted);
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--bg-card);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .responsive-table td {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0;
+    text-align: left !important;
+  }
+
+  .responsive-table td:last-child {
+    border-top: 1px solid var(--border-color);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+  }
+}

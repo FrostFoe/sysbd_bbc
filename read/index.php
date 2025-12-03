@@ -69,13 +69,11 @@ if (!$article) {
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="../assets/styles.css" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <style type="text/tailwindcss">
-        <?php include "../tailwind.config.css"; ?>
-    </style>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
+    <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_#B80000]" style="width: 0%" aria-hidden="true"></div>
 
     <header role="banner" class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
@@ -113,7 +111,7 @@ if (!$article) {
         </div>
     </header>
 
-    <main role="main" class="bg-page min-h-screen font-sans animate-fade-in pb-12">
+    <main role="main" class="bg-page min-h-screen font-sans animate-fade-in-up pb-12">
         <div class="max-w-[1280px] mx-auto px-4 py-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div class="lg:col-span-8">
@@ -251,6 +249,19 @@ if (!$article) {
             proseEl.classList.add(`font-size-${size}`);
         }
 
+        function showToastMsg(msg, type = 'success') {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const icon = type === 'error' ? 'alert-circle' : 'check-circle';
+            const color = type === 'error' ? 'text-red-500' : 'text-green-400 dark:text-green-600';
+            
+            toast.className = "toast-enter fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 ${color}"></i> ${msg}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
         function handleShare() {
             if (navigator.share) {
                 navigator.share({
@@ -264,7 +275,7 @@ if (!$article) {
                 tempInput.select();
                 document.execCommand("copy");
                 document.body.removeChild(tempInput);
-                alert("লিঙ্ক ক্লিপবোর্ডে কপি হয়েছে!");
+                showToastMsg("লিঙ্ক ক্লিপবোর্ডে কপি হয়েছে!");
             }
         }
 
@@ -272,10 +283,10 @@ if (!$article) {
             const index = bookmarks.indexOf(id);
             if (index > -1) {
                 bookmarks.splice(index, 1);
-                alert("সংরক্ষণ সরানো হয়েছে");
+                showToastMsg("সংরক্ষণ সরানো হয়েছে");
             } else {
                 bookmarks.push(id);
-                alert("সংরক্ষিত হয়েছে!");
+                showToastMsg("সংরক্ষিত হয়েছে!");
             }
             localStorage.setItem("breachtimes-bookmarks", JSON.stringify(bookmarks));
         }
@@ -285,7 +296,7 @@ if (!$article) {
             const text = input.value.trim();
 
             if (!text) {
-                alert("অনুগ্রহ করে কিছু লিখুন!");
+                showToastMsg("অনুগ্রহ করে কিছু লিখুন!", 'error');
                 return;
             }
 
@@ -297,14 +308,14 @@ if (!$article) {
                 });
                 const result = await res.json();
                 if (result.success) {
-                    alert("মন্তব্য প্রকাশিত হয়েছে! পেজ রিলোড হচ্ছে...");
+                    showToastMsg("মন্তব্য প্রকাশিত হয়েছে! পেজ রিলোড হচ্ছে...");
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert("সমস্যা হয়েছে!");
+                    showToastMsg("সমস্যা হয়েছে!", 'error');
                 }
             } catch (e) {
                 console.error(e);
-                alert("সার্ভার ত্রুটি!");
+                showToastMsg("সার্ভার ত্রুটি!", 'error');
             }
         }
 

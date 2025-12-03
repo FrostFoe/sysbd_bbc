@@ -9,18 +9,16 @@
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="../assets/styles.css" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <style type="text/tailwindcss">
-        <?php include "../tailwind.config.css"; ?>
-    </style>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">
+    <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
     <div class="min-h-screen flex flex-col items-center justify-center p-4">
         <a href="../index.php" class="absolute top-6 right-6 text-muted-text hover:text-card-text p-2 rounded-full hover:bg-muted-bg transition-all">
             <i data-lucide="x" class="w-8 h-8"></i>
         </a>
-        <div class="bg-card p-8 md:p-12 w-full max-w-[480px] shadow-2xl rounded-2xl border border-border-color text-center relative overflow-hidden">
+        <div class="bg-card p-8 md:p-12 w-full max-w-[480px] shadow-2xl rounded-2xl border border-border-color text-center relative overflow-hidden animate-fade-in-up">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-bbcRed to-orange-600"></div>
             <h1 class="text-2xl font-bold mb-2 text-card-text">স্বাগতম!</h1>
             <p class="text-sm text-muted-text mb-8">আপনার অ্যাকাউন্টে লগইন করুন</p>
@@ -54,6 +52,19 @@
 
         lucide.createIcons();
         
+        function showToastMsg(msg, type = 'success') {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const icon = type === 'error' ? 'alert-circle' : 'check-circle';
+            const color = type === 'error' ? 'text-red-500' : 'text-green-400 dark:text-green-600';
+            
+            toast.className = "toast-enter fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 ${color}"></i> ${msg}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -83,11 +94,11 @@
                     }
                     // --- End Redirection Logic ---
                 } else {
-                    alert(result.message || 'Login failed');
+                    showToastMsg(result.message || 'Login failed', 'error');
                 }
             } catch (err) {
                 console.error('Login fetch error:', err);
-                alert('An error occurred during login. Please try again.');
+                showToastMsg('An error occurred during login. Please try again.', 'error');
             }
         });
     </script>

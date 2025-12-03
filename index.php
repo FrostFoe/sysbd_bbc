@@ -21,10 +21,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     <!-- QuillJS CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style type="text/tailwindcss">
-        <?php include "tailwind.config.css"; ?>
-    </style>
+    <link href="assets/styles.css" rel="stylesheet" />
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <!-- QuillJS Script -->
@@ -226,7 +223,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             user: <?php echo json_encode($user); ?>,
             isAdmin: <?php echo json_encode($isAdmin); ?>,
             fontSize: "md",
-            isLoading: false,
+            isLoading: true,
             darkMode: false,
             language: "bn",
             isMobileMenuOpen: false,
@@ -536,7 +533,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const container = document.getElementById("toast-container");
             const toast = document.createElement("div");
             toast.className =
-                "toast-enter bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+                "toast-enter fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
             toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-400 dark:text-green-600"></i> ${msg}`;
             container.appendChild(toast);
             lucide.createIcons();
@@ -870,7 +867,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             }
 
             return `
-                <section class="${containerClass} animate-fade-in relative z-10">
+                <section class="${containerClass} animate-fade-in-up relative z-10">
                     <div class="flex justify-between items-center mb-8">
                         <h2 class="text-2xl font-bold flex items-center gap-3 ${titleColor}">
                             <span class="w-2 h-8 rounded-full" style="background-color: ${borderColor}"></span>
@@ -1001,7 +998,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const mainPadding = ""; // Adjust if needed, currently no extra padding applied
 
             return `
-                <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-4 min-h-[60vh] animate-fade-in ${mainPadding}">
+                <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-4 min-h-[60vh] animate-fade-in-up ${mainPadding}">
                     ${sectionsToRender.map(renderSection).join("")}
                     ${extras}
                 </main>
@@ -1195,7 +1192,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 { label: t("saved"), id: "saved" },
             ];
             return `
-                <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}">
+                <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "translate-x-0 animate-slide-in-right" : "-translate-x-full"}">
                     <div class="flex justify-between items-center p-6 border-b border-border-color">
                         <div class="font-bold text-2xl dark:text-white tracking-tight">${t('menu')}</div>
                         <button onclick="setState({isMobileMenuOpen: false})" class="p-2 hover:bg-muted-bg rounded-full transition-transform hover:rotate-90 dark:text-white btn-bounce"><i data-lucide="x" class="w-8 h-8"></i></button>
@@ -1246,7 +1243,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         function renderSearchOverlay() {
             const { isSearchOpen, searchQuery, searchResults, darkMode } = state;
             return `
-                <div class="fixed inset-0 z-[70] bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-md overflow-y-auto transition-all duration-300 no-scrollbar ${isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"}">
+                <div class="fixed inset-0 z-[70] bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-md overflow-y-auto transition-all duration-300 no-scrollbar ${isSearchOpen ? "opacity-100 visible animate-zoom-in" : "opacity-0 invisible"}">
                     <div class="max-w-[1000px] mx-auto p-6 pt-12">
                         <div class="flex justify-end mb-12">
                             <button onclick="setState({isSearchOpen: false})" class="p-3 bg-muted-bg rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-black dark:text-white transition-all hover:rotate-90">
@@ -1267,24 +1264,36 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             `;
         }
 
-        function handleSearch(query) {
+        async function handleSearch(query) {
             state.searchQuery = query;
             if (query.length < 2) {
                 state.searchResults = [];
-            } else {
-                const allArticles = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
-                // Filter articles by title (case-insensitive) and escape the query for accurate matching if needed
-                const lowerQuery = query.toLowerCase();
-                state.searchResults = allArticles.filter((a) =>
-                    escapeHtml(a.title).toLowerCase().includes(lowerQuery),
-                );
+                renderSearchResults();
+                return;
             }
-            // Update the search results container directly
-            document.getElementById("search-results-container").innerHTML =
-                state.searchResults
+
+            try {
+                const res = await fetch(`api/search.php?q=${encodeURIComponent(query)}&lang=${state.language}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    state.searchResults = data;
+                } else {
+                    console.error("Search failed");
+                }
+            } catch (e) {
+                console.error("Search error", e);
+            }
+            renderSearchResults();
+        }
+
+        function renderSearchResults() {
+            const container = document.getElementById("search-results-container");
+            if (container) {
+                container.innerHTML = state.searchResults
                     .map((a) => renderArticleCard(a, "grid", state.darkMode))
                     .join("");
-            lucide.createIcons(); // Re-initialize icons for newly rendered elements
+                lucide.createIcons();
+            }
         }
 
         async function handleLogout() {
