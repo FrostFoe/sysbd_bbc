@@ -211,7 +211,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             user: <?php echo json_encode($user); ?>,
             isAdmin: <?php echo json_encode($isAdmin); ?>,
             fontSize: "md",
-            selectedArticleId: null,
             isLoading: false,
             darkMode: false,
             language: "bn",
@@ -220,17 +219,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             searchQuery: "",
             searchResults: [],
             showBreaking: false,
-            showBackToTop: false,
             scrollProgress: 0,
-            showSettings: false,
-            showEditor: false,
-            editArticle: null,
-            tempSettings: {},
-            authMode: "signin",
-            formInputs: { email: "", age: "" },
-            tempTimeline: [],
-            tempAssociates: [],
-            tempEvidence: [],
         };
         
         const t = (key) => translations[state.language][key] || key;
@@ -290,8 +279,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 }
             });
 
-            window.addEventListener("hashchange", handleHashChange);
-            handleHashChange();
+
 
             render();
         }
@@ -423,16 +411,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             Object.assign(state, updates);
             if (shouldRender) render();
         }
-        function handleHashChange() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const readId = params.get("read");
-            if (readId) {
-                openDetail(readId, false);
-            } else if (state.view !== "home") {
-                navigate("home", false);
-            }
-        }
+
 
         async function fetchBbcData() {
             setState({ isLoading: true });
@@ -447,26 +426,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         }
 
 
-        function updateURL(targetView, param = null) {
-            if (targetView === "detail" && param) {
-                window.location.hash = `read=${param}`;
-            } else {
-                history.pushState(
-                    "",
-                    document.title,
-                    window.location.pathname + window.location.search,
-                );
-            }
-        }
 
-        function simulateLoading(callback) {
-            setState({ isLoading: true });
-            window.scrollTo(0, 0);
-            setTimeout(() => {
-                setState({ isLoading: false }, false);
-                callback();
-            }, 600);
-        }
 
         function showToastMsg(msg) {
             const container = document.getElementById("toast-container");
@@ -540,20 +500,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     isMobileMenuOpen: false,
                     isSearchOpen: false,
                 });
-                if (pushState) updateURL("home");
             }
             window.scrollTo(0, 0);
         }
 
         function openDetail(id, pushState = true) {
-            simulateLoading(() => {
-                setState({ selectedArticleId: id, view: "detail" });
-                if (pushState) updateURL("detail", id);
-
-                const all = state.bbcData.sections.flatMap((s) => s.articles);
-                const article = all.find((a) => a.id === id);
-                if (article) document.title = `${article.title} | BreachTimes`;
-            });
+            // Navigate to dedicated article page
+            window.location.href = `read?id=${id}&lang=${state.language}`;
         }
 
         function handleShare() {
@@ -957,8 +910,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             if (isLoading) mainHtml = renderSkeleton();
             else if (view === "home") mainHtml = renderHomeView();
 
-            if (!isLoading && view === "detail") mainHtml = renderDetailView();
-
             const mobileMenu = renderMobileMenu();
             const searchOverlay = renderSearchOverlay();
             const backToTop = renderBackToTop();
@@ -1215,101 +1166,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     .map((a) => renderArticleCard(a, "grid", state.darkMode))
                     .join("");
             lucide.createIcons();
-        }
-
-        function renderDetailView() {
-            const all = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
-            const article =
-                all.find((a) => a.id === state.selectedArticleId) || all[0];
-            if (!article) return "";
-
-            const isBookmarked = state.bookmarks.includes(article.id);
-            const bookmarkFill = isBookmarked
-                ? state.darkMode
-                    ? "white"
-                    : "black"
-                : "none";
-            const titleColor = state.darkMode ? "text-white" : "text-bbcDark";
-            const metaColor = state.darkMode ? "text-gray-400" : "text-gray-500";
-            const proseColor = state.darkMode ? "text-gray-300" : "text-gray-800";
-
-            return `
-                <main class="bg-page min-h-screen font-sans animate-fade-in pb-12">
-                    <div class="max-w-[1280px] mx-auto px-4 py-8">
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                            <div class="lg:col-span-8">
-                                <div class="bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
-                                    <div class="mb-6">
-                                        <span class="bg-bbcRed text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block">${article.category}</span>
-                                        <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4 ${titleColor}">${article.title}</h1>
-                                        <div class="flex flex-wrap items-center gap-4 text-sm ${metaColor} font-medium">
-                                            <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> ${article.timestamp || (state.language === 'bn' ? "সদ্য" : "Just now")}</span>
-                                            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> ${article.readTime || (state.language === 'bn' ? "৩ মিনিট" : "3 min")}</span>
-                                        </div>
-                                    </div>
-                                    <div class="mb-10 relative aspect-video bg-muted-bg rounded-2xl overflow-hidden shadow-lg">
-                                        <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" class="w-full h-full object-cover">
-                                        ${article.isVideo ? `<div class="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px]"><div class="bg-white/90 rounded-full p-5 shadow-2xl animate-pulse"><i data-lucide="play" class="w-10 h-10 fill-black text-black ml-1"></i></div></div>` : ""}
-                                    </div>
-                                    <div class="flex items-center justify-between border-y border-border-color py-4 mb-8">
-                                        <div class="flex gap-3">
-                                            <div class="flex items-center gap-1 bg-muted-bg rounded-lg p-1">
-                                                <button onclick="setFontSize('sm')" class="w-8 h-8 flex items-center justify-center hover:bg-card rounded transition-colors text-xs font-bold text-card-text">A</button>
-                                                <button onclick="setFontSize('md')" class="w-8 h-8 flex items-center justify-center hover:bg-card rounded transition-colors text-sm font-bold text-card-text">A</button>
-                                                <button onclick="setFontSize('lg')" class="w-8 h-8 flex items-center justify-center hover:bg-card rounded transition-colors text-lg font-bold text-card-text">A</button>
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-3">
-                                             <button onclick="handleShare()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white transition-all text-sm font-bold text-card-text">
-                                                <i data-lucide="share-2" class="w-4 h-4"></i> ${t('share')}
-                                             </button>
-                                             <button onclick="toggleBookmark('${article.id}')" class="p-2.5 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white text-black dark:text-white transition-all shadow-sm flex items-center justify-center group"><i data-lucide="bookmark" class="w-5 h-5" fill="${bookmarkFill}"></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="prose max-w-none font-size-${state.fontSize} space-y-8 ${proseColor} transition-all duration-300">
-                                        ${article.content || `<p>${t('details_coming_soon')}</p>`}
-                                    </div>
-
-                                </div>
-
-                                <div class="mt-8 bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
-                                    <h3 class="text-2xl font-bold mb-6 text-card-text flex items-center gap-2"><i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> ${t('comments')}</h3>
-                                    <div class="mb-8">
-                                        <div class="relative">
-                                            <textarea id="comment-input" placeholder="${t('post_comment_placeholder')}" class="w-full p-4 rounded-xl border border-border-color bg-muted-bg text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-none shadow-inner" rows="3"></textarea>
-                                        </div>
-                                        <div class="flex justify-end mt-3">
-                                            <button onclick="postComment('${article.id}')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">${t('post_comment')}</button>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-6">
-                                        ${article.comments &&
-                    article.comments.length > 0
-                    ? article.comments
-                        .map(
-                            (c) => `
-                                            <div class="bg-muted-bg p-4 rounded-xl">
-                                                <div class="flex items-center gap-3 mb-2">
-                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md">${c.user.charAt(0)}</div>
-                                                    <div>
-                                                        <span class="font-bold text-sm text-card-text block">${c.user}</span>
-                                                        <span class="text-xs text-muted-text">${c.time}</span>
-                                                    </div>
-                                                </div>
-                                                <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color">${c.text}</p>
-                                            </div>
-                                        `,
-                        )
-                        .join("")
-                    : `<div class="text-center py-8 text-muted-text">${t('no_comments_yet')}</div>`
-                }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            `;
         }
 
         async function handleLogout() {
