@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS `articles` (
   `title` varchar(255) NOT NULL,
   `summary` text,
   `image` longtext,
-  `timestamp` varchar(100) DEFAULT NULL,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Changed to TIMESTAMP
   `category_id` varchar(50) DEFAULT NULL,
-  `read_time` varchar(50) DEFAULT NULL,
+  `read_time` varchar(50) DEFAULT NULL, -- Kept as VARCHAR for dynamic string like "3 min"
   `content` longtext,
   `is_video` tinyint(1) DEFAULT 0,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `article_id` varchar(50) NOT NULL,
   `user_name` varchar(255) NOT NULL,
   `text` text NOT NULL,
-  `time` varchar(100) DEFAULT NULL,
+  `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Changed to TIMESTAMP
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `article_id` (`article_id`)

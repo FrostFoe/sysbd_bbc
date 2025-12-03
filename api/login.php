@@ -8,7 +8,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 
 if (!$data || !isset($data["email"]) || !isset($data["password"])) {
     echo json_encode(["success" => false, "message" => "Invalid input"]);
-    exit();
+    exit(); // Exit after sending response
 }
 
 $email = $data["email"];
@@ -38,6 +38,9 @@ try {
         ]);
     }
 } catch (PDOException $e) {
+    // Log the error in a real application
+    error_log("Login database error: " . $e->getMessage());
     echo json_encode(["success" => false, "message" => "Database error"]);
 }
+exit(); // Ensure script terminates after response
 ?>

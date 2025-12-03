@@ -68,13 +68,26 @@
                 const result = await res.json();
                 
                 if (result.success) {
-                    window.location.href = 'index.php';
+                    // --- Redirection Logic ---
+                    // Use absolute paths to ensure correct redirection
+                    if (result.user && result.user.role) {
+                        if (result.user.role === 'admin') {
+                            window.location.href = '/admin/index.php'; // Redirect admin to admin panel
+                        } else {
+                            window.location.href = '/dashboard/index.php'; // Redirect normal user to dashboard
+                        }
+                    } else {
+                        // Fallback if role is missing or undefined, redirect to dashboard
+                        console.warn("User role not found in API response, redirecting to dashboard.");
+                        window.location.href = '/dashboard/index.php';
+                    }
+                    // --- End Redirection Logic ---
                 } else {
                     alert(result.message || 'Login failed');
                 }
             } catch (err) {
-                console.error(err);
-                alert('Something went wrong');
+                console.error('Login fetch error:', err);
+                alert('An error occurred during login. Please try again.');
             }
         });
     </script>

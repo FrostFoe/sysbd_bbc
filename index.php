@@ -51,10 +51,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
         const translations = {
             en: {
-                breaking: "Breaking",
-                breaking_news: "US suspends all asylum applications after DC incident",
-                ad_text: "Space available",
-                advertisement: "Advertisement",
                 home: "Home",
                 news: "News",
                 sport: "Sport",
@@ -93,7 +89,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 post_comment: "Post Comment",
                 post_comment_placeholder: "Share your thoughts...",
                 no_comments_yet: "No comments yet.",
-                subscribe_newsletter: "Subscribe to our newsletter for breaking news and analysis first.",
+                subscribe_newsletter: "Subscribe to our newsletter for the latest news and analysis first.",
                 your_email: "Your email address",
                 subscribe: "Subscribe",
                 subscribed_successfully: "Subscribed successfully!",
@@ -108,12 +104,16 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 invalid_file_format: "Invalid file format!",
                 file_read_error: "Error reading file!",
                 data_downloaded: "Data downloaded!",
+                // New translations for timestamp formatting
+                just_now: "Just now",
+                minute: "minute",
+                minutes: "minutes",
+                hour: "hour",
+                hours: "hours",
+                day: "day",
+                days: "days",
             },
             bn: {
-                breaking: "ব্রেকিং",
-                breaking_news: "ডিসি ঘটনার পর সব আশ্রয় প্রার্থনার সিদ্ধান্ত স্থগিত করেছে যুক্তরাষ্ট্র",
-                ad_text: "স্পেস উপলব্ধ",
-                advertisement: "বিজ্ঞাপন",
                 home: "হোম",
                 news: "খবর",
                 sport: "খেলা",
@@ -152,7 +152,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 post_comment: "মন্তব্য প্রকাশ করুন",
                 post_comment_placeholder: "আপনার মতামত জানান...",
                 no_comments_yet: "এখনও কোনো মন্তব্য নেই।",
-                subscribe_newsletter: "সবার আগে ব্রেকিং নিউজ এবং বিশ্লেষণ পেতে আপনার ইমেইল দিয়ে সাবস্ক্রাইব করুন।",
+                subscribe_newsletter: "সবার আগে সর্বশেষ সংবাদ এবং বিশ্লেষণ পেতে আপনার ইমেইল দিয়ে সাবস্ক্রাইব করুন।",
                 your_email: "আপনার ইমেইল ঠিকানা",
                 subscribe: "সাবস্ক্রাইব",
                 subscribed_successfully: "সাবস্ক্রাইব করা হয়েছে!",
@@ -167,6 +167,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 invalid_file_format: "ভুল ফরম্যাটের ফাইল!",
                 file_read_error: "ফাইল রিড করতে সমস্যা হয়েছে!",
                 data_downloaded: "ডাটা ডাউনলোড হয়েছে!",
+                // New translations for timestamp formatting
+                just_now: "এইমাত্র",
+                minute: "মিনিট",
+                minutes: "মিনিট",
+                hour: "ঘন্টা",
+                hours: "ঘন্টা",
+                day: "দিন",
+                days: "দিন",
             },
         };
 
@@ -200,7 +208,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         };
 
         function getCategoryKey(value, lang) {
-            return Object.keys(CATEGORY_MAP[lang]).find(key => CATEGORY_MAP[lang][key] === value) || value;
+            // This function seems to map category titles back to keys, but might need adjustment
+            // based on actual data structure and usage. For now, assuming it's for display mapping.
+            for (const key in CATEGORY_MAP[lang]) {
+                if (CATEGORY_MAP[lang][key] === value) {
+                    return key;
+                }
+            }
+            return value; // Return original value if not found
         }
 
         const state = {
@@ -218,11 +233,86 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             isSearchOpen: false,
             searchQuery: "",
             searchResults: [],
-            showBreaking: false,
             scrollProgress: 0,
         };
         
         const t = (key) => translations[state.language][key] || key;
+
+        // --- HTML Escaping and Timestamp Formatting Functions ---
+
+        // Function to escape HTML special characters to prevent XSS
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') {
+                return unsafe; // Return non-strings as is
+            }
+            // Use DOM manipulation for reliable escaping
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(unsafe));
+            return div.innerHTML;
+        }
+
+        // Function to format timestamps into human-readable relative times
+        function formatTimestamp(timestampString) {
+            if (!timestampString) return '';
+
+            let date;
+            try {
+                // Attempt to parse ISO 8601 format (e.g., from JS Date.toISOString())
+                // or MySQL DATETIME/TIMESTAMP format 'YYYY-MM-DD HH:MM:SS'
+                date = new Date(timestampString);
+                
+                // Check if date is valid after initial parsing
+                if (isNaN(date.getTime())) {
+                    // Try parsing MySQL format 'YYYY-MM-DD HH:MM:SS'
+                    const parts = timestampString.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+                    if (parts) {
+                        // Month is 0-indexed in JS Date constructor (parts[2] is month, so part[2]-1)
+                        date = new Date(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]);
+                    } else {
+                        // If both parsing methods fail, return the original string
+                        console.warn("Could not parse timestamp format:", timestampString);
+                        return timestampString;
+                    }
+                }
+            } catch (e) {
+                console.error("Error parsing timestamp:", timestampString, e);
+                return timestampString; // Return original string if any error occurs
+            }
+
+            // Check validity again after potential MySQL format parsing
+            if (isNaN(date.getTime())) {
+                console.warn("Parsed date is invalid:", timestampString);
+                return timestampString;
+            }
+
+            const now = new Date();
+            const secondsPast = (now.getTime() - date.getTime()) / 1000;
+
+            if (secondsPast < 60) {
+                return t('just_now');
+            } else if (secondsPast < 3600) {
+                const minutes = Math.floor(secondsPast / 60);
+                return `${minutes} ${minutes === 1 ? t('minute') : t('minutes')}`;
+            } else if (secondsPast < 86400) {
+                const hours = Math.floor(secondsPast / 3600);
+                return `${hours} ${hours === 1 ? t('hour') : t('hours')}`;
+            } else if (secondsPast < 2592000) { // ~30 days
+                const days = Math.floor(secondsPast / 86400);
+                return `${days} ${days === 1 ? t('day') : t('days')}`;
+            } else {
+                // For older dates, format using locale-specific options
+                const options = {
+                    year: 'numeric',
+                    month: state.language === 'bn' ? 'long' : 'short', // Use 'long' for Bengali month names
+                    day: 'numeric'
+                };
+                const locale = state.language === 'bn' ? 'bn-BD' : 'en-US';
+                return date.toLocaleDateString(locale, options);
+            }
+        }
+
+        // --- End Timestamp Formatting Functions ---
+
 
         function init() {
             loadStateFromStorage();
@@ -416,17 +506,31 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         async function fetchBbcData() {
             setState({ isLoading: true });
             try {
-                const response = await fetch(`get_data.php?lang=${state.language}`);
+                const urlParams = new URLSearchParams(window.location.search);
+                const category = urlParams.get('category');
+                const lang = state.language;
+                
+                let apiUrl = `get_data.php?lang=${lang}`;
+                if (category) {
+                    apiUrl += `&category=${encodeURIComponent(category)}`;
+                }
+                // Add pagination/limit parameters if needed from state
+                if (state.limit) apiUrl += `&limit=${state.limit}`;
+                if (state.page) apiUrl += `&page=${state.page}`;
+
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 setState({ bbcData: data, isLoading: false });
             } catch (error) {
                 console.error("Error fetching data:", error);
                 setState({ isLoading: false });
+                // Optionally show an error message to the user
+                showToastMsg(t('server_error'));
             }
         }
-
-
-
 
         function showToastMsg(msg) {
             const container = document.getElementById("toast-container");
@@ -463,7 +567,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
         function toggleTheme() {
             const newMode = !state.darkMode;
-            setState({ darkMode: newMode }, false);
+            setState({ darkMode: newMode }, false); // Render call is inside the if/else
             if (newMode) {
                 document.documentElement.classList.add("dark");
                 localStorage.setItem("breachtimes-theme", "dark");
@@ -471,15 +575,21 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 document.documentElement.classList.remove("dark");
                 localStorage.setItem("breachtimes-theme", "light");
             }
-            render();
+            render(); // Re-render to apply theme changes to components
         }
 
         function toggleLanguage() {
             const newLang = state.language === "bn" ? "en" : "bn";
-            setState({ language: newLang });
+            setState({ language: newLang }, false); // Temporarily update state
             localStorage.setItem("breachtimes-language", newLang);
             document.documentElement.lang = newLang;
+            
+            // Re-fetch data to get translations and content in the new language
             fetchBbcData();
+            fetchWeather(); // Weather API might also have language preferences, though not used here
+            
+            // Re-render immediately to update UI elements like menu and buttons
+            render(); 
         }
 
         function navigate(id, pushState = true) {
@@ -494,9 +604,20 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     isSearchOpen: false,
                 });
             } else {
+                // For category navigation, update the category state and re-render home view
+                // Push state to URL for bookmarking/sharing
+                if (pushState) {
+                    const url = new URL(window.location.href);
+                    if (id === "home") {
+                        url.searchParams.delete('category');
+                    } else {
+                        url.searchParams.set('category', id);
+                    }
+                    window.history.pushState({}, '', url);
+                }
                 setState({
                     category: id,
-                    view: "home",
+                    view: "home", // Ensure we are in the home view to render sections
                     isMobileMenuOpen: false,
                     isSearchOpen: false,
                 });
@@ -506,6 +627,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
         function openDetail(id, pushState = true) {
             // Navigate to dedicated article page
+            // window.location.href = `read?id=${id}&lang=${state.language}`; // This causes a full page reload, losing JS state
+
+            // Instead of full reload, navigate using history API and fetch data if necessary
+            // For simplicity and given the current structure, a full reload might be intended
+            // If client-side routing is desired, this would need significant changes to App structure.
+            // Let's stick to full reload for now for simplicity matching original behavior.
             window.location.href = `read?id=${id}&lang=${state.language}`;
         }
 
@@ -513,7 +640,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             if (navigator.share) {
                 navigator
                     .share({
-                        title: document.title,
+                        title: document.title, // Consider escaping document.title if it's user-generated
                         url: window.location.href,
                     })
                     .catch(console.error);
@@ -538,7 +665,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             }
 
             const userName = state.user
-                ? state.user.split("@")[0]
+                ? state.user.split("@")[0] // Simple way to get username from email
                 : t('unknown_user');
 
             try {
@@ -550,9 +677,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 const result = await res.json();
                 if (result.success) {
                     showToastMsg(t('comment_posted'));
+                    // Reload page to show new comment
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToastMsg(t('error_occurred'));
+                    // Display specific error from server if available
+                    const errorMsg = result.error || t('error_occurred');
+                    showToastMsg(errorMsg);
                 }
             } catch (e) {
                 console.error(e);
@@ -595,10 +725,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 </button>
             `;
 
+            // Format timestamp for display
+            const displayTimestamp = formatTimestamp(article.created_at || article.timestamp);
             const readTimeBadge = article.readTime
                 ? `
                 <span class="text-[10px] uppercase tracking-wider opacity-80 flex items-center gap-1 font-bold">
-                    <i data-lucide="clock" class="w-3 h-3"></i> ${article.readTime}
+                    <i data-lucide="clock" class="w-3 h-3"></i> ${escapeHtml(article.readTime)}
                 </span>
             `
                 : "";
@@ -607,11 +739,11 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 return `
                     <div class="flex-shrink-0 w-[280px] group cursor-pointer snap-start transform transition-all duration-300 hover:-translate-y-1" onclick="openDetail('${article.id}')">
                         <div class="aspect-[9/16] overflow-hidden relative rounded-2xl shadow-lg border border-border-color">
-                            <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${article.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${escapeHtml(article.title)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90"></div>
                             <div class="absolute bottom-5 left-5 right-5 text-white">
-                                <span class="bg-bbcRed text-white text-[10px] px-2 py-0.5 rounded font-bold mb-2 inline-block">${article.category}</span>
-                                <h3 class="font-bold text-lg leading-tight mb-1 group-hover:text-gray-200 transition-colors">${article.title}</h3>
+                                <span class="bg-bbcRed text-white text-[10px] px-2 py-0.5 rounded font-bold mb-2 inline-block">${escapeHtml(article.category)}</span>
+                                <h3 class="font-bold text-lg leading-tight mb-1 group-hover:text-gray-200 transition-colors">${escapeHtml(article.title)}</h3>
                             </div>
                             <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 ${bookmarkBtn}
@@ -628,16 +760,16 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 return `
                     <div class="group cursor-pointer relative transform transition-all duration-300 hover:-translate-y-1" onclick="openDetail('${article.id}')">
                         <div class="relative aspect-square mb-3 overflow-hidden rounded-2xl shadow-md group-hover:shadow-lg border border-border-color">
-                            <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${article.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${escapeHtml(article.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                             <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
                             <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur text-bbcDark rounded-full p-2 shadow-sm group-hover:scale-110 transition-transform">
                                 <i data-lucide="headset" class="w-4 h-4 fill-current"></i>
                             </div>
                             ${bookmarkBtn}
                         </div>
-                        <h3 class="text-base font-bold leading-snug group-hover:text-bbcRed transition-colors ${textColor}">${article.title}</h3>
+                        <h3 class="text-base font-bold leading-snug group-hover:text-bbcRed transition-colors ${textColor}">${escapeHtml(article.title)}</h3>
                         <div class="flex justify-between items-center mt-2 text-xs ${metaColor} font-medium">
-                            <span class="bg-muted-bg px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">${article.category}</span>
+                            <span class="bg-muted-bg px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">${escapeHtml(article.category)}</span>
                             ${readTimeBadge}
                         </div>
                     </div>
@@ -647,7 +779,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             return `
                 <article class="group cursor-pointer flex flex-col h-full relative ${bgClass} rounded-2xl overflow-hidden ${shadowClass} transition-all duration-300 hover:-translate-y-1 border ${borderClass}" onclick="openDetail('${article.id}')">
                     <div class="overflow-hidden aspect-video relative">
-                        <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${article.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${escapeHtml(article.title)}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                         <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             ${bookmarkBtn}
                         </div>
@@ -656,11 +788,11 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     </div>
                     <div class="flex flex-col flex-grow p-5">
                         <div class="mb-2 flex items-center gap-2">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-bbcRed bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded">${article.category}</span>
-                            <span class="text-[10px] text-muted-text">• ${article.timestamp || (state.language === 'bn' ? "সদ্য" : "Just now")}</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-bbcRed bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded">${escapeHtml(article.category)}</span>
+                            <span class="text-[10px] text-muted-text">• ${displayTimestamp}</span>
                         </div>
-                        <h3 class="text-lg md:text-xl font-bold mb-3 leading-tight group-hover:text-bbcRed transition-colors ${textColor}">${article.title}</h3>
-                        ${type === "hero-grid" && article.summary ? `<p class="${subTextColor} text-sm leading-relaxed mb-4 line-clamp-3">${article.summary}</p>` : ""}
+                        <h3 class="text-lg md:text-xl font-bold mb-3 leading-tight group-hover:text-bbcRed transition-colors ${textColor}">${escapeHtml(article.title)}</h3>
+                        ${type === "hero-grid" && article.summary ? `<p class="${subTextColor} text-sm leading-relaxed mb-4 line-clamp-3">${escapeHtml(article.summary)}</p>` : ""}
                         <div class="mt-auto pt-3 border-t ${borderClass} flex items-center justify-between text-xs ${metaColor}">
                             <span class="flex items-center gap-1 group-hover:translate-x-1 transition-transform">${t('read_more')} <i data-lucide="chevron-right" class="w-3 h-3"></i></span>
                             ${readTimeBadge}
@@ -699,7 +831,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color h-full">
                         <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color">
                             <div class="w-1.5 h-6 rounded-full" style="background-color: ${section.highlightColor}"></div>
-                            <h3 class="text-xl font-bold ${titleColor}">${section.title}</h3>
+                            <h3 class="text-xl font-bold ${titleColor}">${escapeHtml(section.title)}</h3>
                         </div>
                         <ul class="space-y-4">
                             ${section.articles
@@ -707,12 +839,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                             (article) => `
                                 <li class="group cursor-pointer p-2 rounded-xl hover:bg-muted-bg transition-colors" onclick="openDetail('${article.id}')">
                                     <div class="flex gap-4">
-                                        ${article.image ? `<div class="w-24 h-24 flex-shrink-0 aspect-square overflow-hidden rounded-lg relative"><img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${article.title}" class="w-full h-full object-cover"></div>` : ""}
+                                        ${article.image ? `<div class="w-24 h-24 flex-shrink-0 aspect-square overflow-hidden rounded-lg relative"><img src="${article.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${escapeHtml(article.title)}" class="w-full h-full object-cover"></div>` : ""}
                                         <div class="flex-grow">
-                                            <span class="text-[10px] font-bold text-bbcRed mb-1 block">${article.category}</span>
-                                            <h4 class="text-sm font-bold leading-snug group-hover:text-bbcRed transition-colors mb-2 ${titleColor} line-clamp-2">${article.title}</h4>
+                                            <span class="text-[10px] font-bold text-bbcRed mb-1 block">${escapeHtml(article.category)}</span>
+                                            <h4 class="text-sm font-bold leading-snug group-hover:text-bbcRed transition-colors mb-2 ${titleColor}">${escapeHtml(article.title)}</h4>
                                             <div class="flex justify-between items-center text-xs text-muted-text">
-                                                ${article.readTime ? `<span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${article.readTime}</span>` : ""}
+                                                ${article.readTime ? `<span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${escapeHtml(article.readTime)}</span>` : ""}
                                             </div>
                                         </div>
                                     </div>
@@ -742,7 +874,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     <div class="flex justify-between items-center mb-8">
                         <h2 class="text-2xl font-bold flex items-center gap-3 ${titleColor}">
                             <span class="w-2 h-8 rounded-full" style="background-color: ${borderColor}"></span>
-                            ${section.title}
+                            ${escapeHtml(section.title)}
                         </h2>
                         ${section.type !== "hero-grid" ? `<a href="?category=${getCategoryKey(section.associatedCategory, state.language)}" class="text-sm font-bold hover:text-bbcRed transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 ${titleColor}">${t('all')} <i data-lucide="chevron-right" class="w-4 h-4"></i></a>` : ""}
                     </div>
@@ -760,8 +892,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
             if (state.category === "saved") {
                 const savedIds = state.bookmarks;
-                const all = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
-                const savedArticles = all.filter((a) => savedIds.includes(a.id));
+                const allArticles = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
+                const savedArticles = allArticles.filter((a) => savedIds.includes(a.id));
 
                 if (savedArticles.length === 0) {
                     return `
@@ -774,18 +906,24 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         </div>
                     `;
                 }
+                // Render saved articles as a single section
                 sectionsToRender = [
                     {
-                        id: "saved",
+                        id: "saved-articles-section", // Unique ID for this dynamic section
                         title: t('saved'),
-                        type: "grid",
+                        type: "grid", // Or 'list', 'grid' etc. 'grid' is a safe default
                         articles: savedArticles,
+                        style: state.darkMode ? "dark" : "light", // Apply theme style
+                        highlightColor: "#B80000", // BBC Red
                     },
                 ];
             } else if (state.category !== "home") {
-                const target = CATEGORY_MAP[state.language][state.category] || state.category;
+                // Filter sections based on the selected category (using associatedCategory or section title)
+                // Note: getCategoryKey might need to be used to map display name back to internal ID/title for filtering
+                const targetCategoryTitle = CATEGORY_MAP[state.language][state.category] || state.category; // Trying to get the actual category title for comparison
+                
                 sectionsToRender = state.bbcData.sections.filter(
-                    (s) => s.associatedCategory === target || s.title.includes(target),
+                    (s) => s.associatedCategory === targetCategoryTitle || s.title === targetCategoryTitle,
                 );
             }
 
@@ -803,47 +941,48 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             let extras = "";
             if (state.category === "home") {
                 const titleColor = state.darkMode ? "text-white" : "text-black";
-                const worldNews = state.bbcData?.sections?.find(
-                    (s) => s.id === "virginia",
+                const worldNewsSection = state.bbcData?.sections?.find(
+                    (s) => s.id === "virginia", // Example section IDs
                 );
-                const businessNews = state.bbcData?.sections?.find(
+                const businessNewsSection = state.bbcData?.sections?.find(
                     (s) => s.id === "vermont",
                 );
-                const newsCollection = state.bbcData?.sections?.find(
+                const newsCollectionSection = state.bbcData?.sections?.find(
                     (s) => s.id === "wyoming",
                 );
 
-                const renderMiniList = (articles, colorClass) => `
+                // Helper to render mini articles list for 'extras' sections
+                const renderMiniList = (articles, colorClass, sectionStyle) => `
                     <ul class="space-y-4">
-                        ${articles
-                        .map(
-                            (a) => `
+                        ${articles.map((a) => `
                             <li class="group cursor-pointer p-2 rounded-xl hover:bg-muted-bg transition-colors" onclick="openDetail('${a.id}')">
                                 <div class="flex gap-4">
-                                    <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                                        <img src="${a.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${a.title}" class="w-full h-full object-cover">
-                                    </div>
+                                    ${a.image ? `<div class="w-20 h-20 flex-shrink-0 aspect-square overflow-hidden rounded-lg relative"><img src="${a.image}" onerror="this.src='${PLACEHOLDER_IMAGE}'" loading="lazy" alt="${escapeHtml(a.title)}" class="w-full h-full object-cover"></div>` : ""}
                                     <div class="flex-grow">
-                                        <h4 class="text-sm font-bold leading-snug group-hover:${colorClass} transition-colors ${titleColor} line-clamp-2">${a.title}</h4>
+                                        <h4 class="text-sm font-bold leading-snug group-hover:${colorClass} transition-colors ${titleColor} line-clamp-2">${escapeHtml(a.title)}</h4>
                                     </div>
                                 </div>
                             </li>
-                        `,
-                        )
-                        .join("")}
+                        `).join("")}
                     </ul>
                 `;
 
+                // Ensure sections are rendered with appropriate style
+                const renderStyledSection = (sectionData, type = "grid") => {
+                    if (!sectionData) return "";
+                    return renderSection({ ...sectionData, type: type });
+                };
+
                 extras = `
                     <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-fade-in">
-                        <div class="lg:col-span-1 h-full">${newsCollection ? renderSection({ ...newsCollection, type: "list" }) : ""}</div>
+                        <div class="lg:col-span-1 h-full">${renderStyledSection(newsCollectionSection, "list")}</div>
                         <div class="lg:col-span-1 h-full">
                             <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color h-full">
                                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color">
                                     <div class="w-1.5 h-6 rounded-full bg-blue-500"></div>
                                     <h3 class="text-xl font-bold ${titleColor}">${t('more_world_news')}</h3>
                                 </div>
-                                ${worldNews ? renderMiniList(worldNews.articles.slice(0, 3), "text-blue-500") : ""}
+                                ${worldNewsSection ? renderMiniList(worldNewsSection.articles.slice(0, 3), "text-blue-500", state.darkMode ? "dark" : "light") : ""}
                             </div>
                         </div>
                         <div class="lg:col-span-1 h-full">
@@ -852,14 +991,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                     <div class="w-1.5 h-6 rounded-full bg-green-500"></div>
                                     <h3 class="text-xl font-bold ${titleColor}">${t('business_news')}</h3>
                                 </div>
-                                ${businessNews ? renderMiniList(businessNews.articles.slice(2, 5), "text-green-500") : ""}
+                                ${businessNewsSection ? renderMiniList(businessNewsSection.articles.slice(2, 5), "text-green-500", state.darkMode ? "dark" : "light") : ""}
                             </div>
                         </div>
                     </section>
                 `;
             }
 
-            const mainPadding = state.showBreaking ? "pt-12" : "";
+            const mainPadding = ""; // Adjust if needed, currently no extra padding applied
 
             return `
                 <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-4 min-h-[60vh] animate-fade-in ${mainPadding}">
@@ -891,16 +1030,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const app = document.getElementById("app");
             const {
                 view,
-                showBreaking,
                 user,
+                isAdmin,
                 darkMode,
                 isMobileMenuOpen,
                 isSearchOpen,
                 isLoading,
-                showBackToTop,
-                formInputs,
-                authMode,
-                bookmarks,
+                category, // Needed for header active state
             } = state;
 
             const headerHtml = renderHeader();
@@ -909,6 +1045,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
             if (isLoading) mainHtml = renderSkeleton();
             else if (view === "home") mainHtml = renderHomeView();
+            // Add cases for other views like 'admin' if they exist and need rendering here
 
             const mobileMenu = renderMobileMenu();
             const searchOverlay = renderSearchOverlay();
@@ -917,26 +1054,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             app.innerHTML = `
                 ${mobileMenu}
                 ${searchOverlay}
-                ${state.view === "home" && state.showBreaking ? renderBreakingNews() : ""}
+            
                 ${headerHtml}
                 ${mainHtml}
                 ${footerHtml}
                 ${backToTop}
             `;
 
-            lucide.createIcons();
-        }
-
-        function renderBreakingNews() {
-            return `
-                <div class="fixed top-0 left-0 right-0 bg-bbcRed text-white text-xs md:text-sm font-medium py-2 px-4 flex justify-between items-center z-[100]">
-                    <div class="flex items-center gap-3 max-w-[1380px] mx-auto w-full px-2">
-                        <span class="uppercase animate-pulse font-bold tracking-widest text-[10px] bg-white/20 px-2 py-0.5 rounded">${t('breaking')}</span>
-                        <span class="truncate opacity-95 hover:opacity-100 cursor-pointer">${t('breaking_news')}</span>
-                    </div>
-                    <button onclick="setState({showBreaking: false})" class="hover:bg-black/20 rounded-full p-1 transition-colors ml-2"><i data-lucide="x" class="w-4 h-4"></i></button>
-                </div>
-            `;
+            lucide.createIcons(); // Re-initialize icons after rendering
         }
 
         function renderHeader() {
@@ -955,13 +1080,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             ];
             
             const navItems = menuItems.map((item) => `
-                <a href="?category=${item.id}" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
-                    ${item.label}
+                <a href="?category=${item.id}" onclick="event.preventDefault(); navigate('${item.id}')" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
+                    ${escapeHtml(item.label)}
                 </a>
             `).join("");
 
             return `
-                <header class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
+                <header class="border-b border-border-color sticky top-0 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
                     <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
                         <div class="h-[70px] flex items-center justify-between">
                             <div class="flex items-center gap-6">
@@ -995,7 +1120,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     ? `
                                         ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : ""}
                                         <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 btn-bounce">
-                                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${user.charAt(0).toUpperCase()}</div> ${t('sign_out')}
+                                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${escapeHtml(user.charAt(0).toUpperCase())}</div> ${t('sign_out')}
                                         </button>
                                     `
                     : `
@@ -1012,22 +1137,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         </div>
                     </div>
                 </header>
-                ${state.view === "home"
-                    ? `
-                <div class="py-8 flex flex-col items-center justify-center bg-transparent transition-colors px-4">
-                    <div class="w-full max-w-[320px] md:max-w-[728px] h-[90px] flex flex-col items-center justify-center text-xs bg-gray-100 dark:bg-[#1a1a1a] text-gray-400 dark:text-gray-600 rounded-xl border border-gray-200 dark:border-gray-800/50 shadow-sm transition-all hover:shadow-md overflow-hidden">
-                        <span class="text-[10px] uppercase tracking-widest mb-1 opacity-50">${t('advertisement')}</span>
-                        <span class="font-medium text-center px-2">${t('ad_text')}</span>
-                    </div>
-                </div>`
-                    : ""
-                }
+                
             `;
         }
 
         function renderFooter() {
             return `
-                <footer class="pt-16 pb-8 border-t bg-card text-card-text transition-colors border-border-color">
+                <footer class="pt-16 pb-8 bg-card text-card-text transition-colors border-t border-border-color">
                     <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 border-b border-border-color pb-12 gap-8">
                             <div class="flex items-center select-none gap-2">
@@ -1090,8 +1206,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     ? `
                                 <div class="flex flex-col gap-3">
                                     <div class="flex items-center gap-3 px-2 mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-bbcRed text-white flex items-center justify-center font-bold text-lg">${user.charAt(0).toUpperCase()}</div>
-                                        <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">${t('welcome')}</span><span class="text-xs text-muted-text truncate max-w-[200px]">${user}</span></div>
+                                        <div class="w-10 h-10 rounded-full bg-bbcRed text-white flex items-center justify-center font-bold text-lg">${escapeHtml(user.charAt(0).toUpperCase())}</div>
+                                        <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">${t('welcome')}</span><span class="text-xs text-muted-text truncate max-w-[200px]">${escapeHtml(user)}</span></div>
                                     </div>
                                     ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> ${t('admin_panel')}</a>` : ""}
                                     <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors btn-bounce"><i data-lucide="log-out" class="w-5 h-5"></i> ${t('sign_out')}</button>
@@ -1108,8 +1224,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         <ul class="space-y-2 font-bold text-xl text-bbcDark dark:text-gray-200">
                              ${menuItems.map((item) => `
                                 <li class="border-b border-gray-100 dark:border-gray-800/50 pb-2 last:border-0">
-                                    <a href="?category=${item.id}" class="w-full text-left py-4 flex justify-between items-center hover:text-bbcRed hover:pl-3 transition-all duration-300 group">
-                                        <span>${item.label}</span>
+                                    <a href="?category=${item.id}" onclick="event.preventDefault(); navigate('${item.id}'); setState({isMobileMenuOpen: false})" class="w-full text-left py-4 flex justify-between items-center hover:text-bbcRed hover:pl-3 transition-all duration-300 group">
+                                        <span>${escapeHtml(item.label)}</span>
                                         <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-bbcRed transition-colors"></i>
                                     </a>
                                 </li>
@@ -1139,7 +1255,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         </div>
                         <div class="relative mb-16 group">
                             <i data-lucide="search" class="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 w-10 h-10 group-focus-within:text-bbcRed transition-colors"></i>
-                            <input type="text" placeholder="${t('search_placeholder')}" value="${searchQuery}" 
+                            <input type="text" placeholder="${t('search_placeholder')}" value="${escapeHtml(searchQuery)}" 
                                 oninput="handleSearch(this.value)"
                                 class="w-full py-4 pl-14 text-4xl font-bold border-b-2 border-border-color focus:border-bbcRed dark:focus:border-bbcRed outline-none bg-transparent text-bbcDark dark:text-white placeholder-gray-300 dark:placeholder-gray-700 transition-colors">
                         </div>
@@ -1157,36 +1273,37 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 state.searchResults = [];
             } else {
                 const allArticles = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
+                // Filter articles by title (case-insensitive) and escape the query for accurate matching if needed
+                const lowerQuery = query.toLowerCase();
                 state.searchResults = allArticles.filter((a) =>
-                    a.title.toLowerCase().includes(query.toLowerCase()),
+                    escapeHtml(a.title).toLowerCase().includes(lowerQuery),
                 );
             }
+            // Update the search results container directly
             document.getElementById("search-results-container").innerHTML =
                 state.searchResults
                     .map((a) => renderArticleCard(a, "grid", state.darkMode))
                     .join("");
-            lucide.createIcons();
+            lucide.createIcons(); // Re-initialize icons for newly rendered elements
         }
 
         async function handleLogout() {
             try {
-                await fetch('api/logout.php');
+                const response = await fetch('api/logout.php');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // Clear relevant local storage items on logout
+                localStorage.removeItem("breachtimes-bookmarks");
+                // Reload the page to reflect logged-out state
                 window.location.reload();
             } catch (e) {
-                console.error(e);
+                console.error("Logout failed:", e);
+                showToastMsg(t('server_error')); // Show error to user
             }
         }
 
-        function renderBackToTop() {
-            return `
-                <button id="back-to-top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="fixed bottom-8 right-8 p-3 rounded-full shadow-xl z-50 transition-all duration-300 bg-black/80 backdrop-blur text-white hover:bg-black dark:bg-white/90 dark:text-black dark:hover:bg-white hover:scale-110 opacity-0 translate-y-10 pointer-events-none">
-                    <i data-lucide="chevron-up" class="w-5 h-5"></i>
-                </button>
-            `;
-        }
-
-
-
+        // Initialize the application
         init();
     </script>
 </body>

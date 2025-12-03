@@ -13,25 +13,27 @@
 
 @layer base {
   :root {
-    --bg-page: #f6f6f6;
-    --text-page: #1a1a1a;
+    /* Light Theme - Pure & Professional */
+    --bg-page: #ffffff;
+    --text-page: #09090b; /* Zinc 950 */
     --bg-card: #ffffff;
     --bg-card-elevated: #ffffff;
-    --text-card: #1a1a1a;
-    --border-color: #e5e7eb;
-    --bg-muted: #f3f4f6;
-    --text-muted: #6b7280;
+    --text-card: #09090b;
+    --border-color: #e4e4e7; /* Zinc 200 */
+    --bg-muted: #f4f4f5; /* Zinc 100 */
+    --text-muted: #71717a; /* Zinc 500 */
   }
 
   :root.dark {
-    --bg-page: #0a0a0a;
-    --text-page: #ededed;
-    --bg-card: #1a1a1a;
-    --bg-card-elevated: #1e1e1e;
+    /* Dark Theme - Pure Dark */
+    --bg-page: #000000; /* Pure Black */
+    --text-page: #fafafa; /* Zinc 50 */
+    --bg-card: #09090b; /* Zinc 950 */
+    --bg-card-elevated: #18181b; /* Zinc 900 */
     --text-card: #ffffff;
-    --border-color: #1f2937;
-    --bg-muted: #1f2937;
-    --text-muted: #9ca3af;
+    --border-color: #27272a; /* Zinc 800 */
+    --bg-muted: #18181b; /* Zinc 900 */
+    --text-muted: #a1a1aa; /* Zinc 400 */
   }
 }
 
@@ -39,6 +41,9 @@
 
 body {
   font-family: "Hind Siliguri", sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-page);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 html {
@@ -73,7 +78,7 @@ html {
 }
 
 .animate-fade-in {
-  animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes shimmer {
@@ -87,22 +92,33 @@ html {
 }
 
 .skeleton {
-  background: linear-gradient(to right, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+  background: linear-gradient(to right, #f4f4f5 8%, #e4e4e7 18%, #f4f4f5 33%);
   background-size: 1200px 100%;
   animation: shimmer 2s infinite linear;
 }
 
 .dark .skeleton {
-  background: linear-gradient(to right, #1e293b 8%, #334155 18%, #1e293b 33%);
+  background: linear-gradient(to right, #18181b 8%, #27272a 18%, #18181b 33%);
+}
+
+.nav-link {
+  position: relative;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--color-bbcRed);
 }
 
 .nav-link.active {
   opacity: 1;
-  color: #b80000;
+  color: var(--color-bbcRed);
+  font-weight: 600;
 }
 
 .dark .nav-link.active {
-  color: white;
+  color: #ef4444;
 }
 
 .nav-link::after {
@@ -111,11 +127,10 @@ html {
   bottom: 0;
   left: 50%;
   width: 0%;
-  height: 3px;
-  background-color: #b80000;
+  height: 2px;
+  background-color: var(--color-bbcRed);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(-50%);
-  border-radius: 2px 2px 0 0;
 }
 
 .dark .nav-link::after {
@@ -127,7 +142,7 @@ html {
 }
 
 .btn-bounce:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 .toast-enter {
@@ -167,15 +182,15 @@ html {
 
 /* Quill Dark Mode Overrides & Fixes */
 .ql-toolbar {
-  background: #f9fafb;
-  border-color: #e5e7eb;
+  background: var(--bg-muted);
+  border-color: var(--border-color);
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
 }
 
 .ql-container {
-  background: #ffffff;
-  border-color: #e5e7eb;
+  background: var(--bg-card);
+  border-color: var(--border-color);
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   font-family: "Hind Siliguri", sans-serif;
@@ -184,34 +199,19 @@ html {
 .ql-editor {
   min-height: 200px;
   font-size: 1rem;
-  color: #1a1a1a;
-}
-
-.dark .ql-toolbar {
-  background: #374151;
-  border-color: #4b5563;
+  color: var(--text-card);
 }
 
 .dark .ql-toolbar .ql-stroke {
-  stroke: #e5e7eb;
+  stroke: var(--text-muted);
 }
 
 .dark .ql-toolbar .ql-fill {
-  fill: #e5e7eb;
-}
-
-.dark .ql-container {
-  background: #1f2937;
-  border-color: #4b5563;
-  color: white;
-}
-
-.dark .ql-editor {
-  color: white;
+  fill: var(--text-muted);
 }
 
 .dark .ql-editor.ql-blank::before {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
@@ -227,7 +227,7 @@ html {
     margin-bottom: 1rem;
     background-color: var(--bg-card);
     border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .responsive-table td {

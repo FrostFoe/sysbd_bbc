@@ -76,9 +76,9 @@ if (!$article) {
     </style>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
-    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_#B80000]" style="width: 0%"></div>
+    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_#B80000]" style="width: 0%" aria-hidden="true"></div>
 
-    <header class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
+    <header role="banner" class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
         <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
             <div class="h-[70px] flex items-center justify-between">
                 <div class="flex items-center gap-6">
@@ -113,7 +113,7 @@ if (!$article) {
         </div>
     </header>
 
-    <main class="bg-page min-h-screen font-sans animate-fade-in pb-12">
+    <main role="main" class="bg-page min-h-screen font-sans animate-fade-in pb-12">
         <div class="max-w-[1280px] mx-auto px-4 py-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div class="lg:col-span-8">
@@ -144,10 +144,10 @@ if (!$article) {
                                 <button onclick="setFontSize('lg')" class="w-8 h-8 flex items-center justify-center hover:bg-card rounded transition-colors text-lg font-bold text-card-text">A</button>
                             </div>
                             <div class="flex gap-3">
-                                <button onclick="handleShare()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white transition-all text-sm font-bold text-card-text">
+                                <button aria-label="Share article" onclick="handleShare()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white transition-all text-sm font-bold text-card-text">
                                     <i data-lucide="share-2" class="w-4 h-4"></i> শেয়ার
                                 </button>
-                                <button onclick="toggleBookmark('<?php echo $article["id"]; ?>')" class="p-2.5 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white text-black dark:text-white transition-all shadow-sm flex items-center justify-center group">
+                                <button aria-label="Toggle bookmark" onclick="toggleBookmark('<?php echo $article["id"]; ?>')" class="p-2.5 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white text-black dark:text-white transition-all shadow-sm flex items-center justify-center group">
                                     <i data-lucide="bookmark" class="w-5 h-5"></i>
                                 </button>
                             </div>
