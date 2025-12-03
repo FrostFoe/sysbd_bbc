@@ -1,0 +1,245 @@
+@theme {
+  --color-bbcRed: #b80000;
+  --color-bbcDark: #1a1a1a;
+  --color-page: var(--bg-page);
+  --color-page-text: var(--text-page);
+  --color-card: var(--bg-card);
+  --color-card-elevated: var(--bg-card-elevated);
+  --color-card-text: var(--text-card);
+  --color-border-color: var(--border-color);
+  --color-muted-bg: var(--bg-muted);
+  --color-muted-text: var(--text-muted);
+}
+
+@layer base {
+  :root {
+    --bg-page: #f6f6f6;
+    --text-page: #1a1a1a;
+    --bg-card: #ffffff;
+    --bg-card-elevated: #ffffff;
+    --text-card: #1a1a1a;
+    --border-color: #e5e7eb;
+    --bg-muted: #f3f4f6;
+    --text-muted: #6b7280;
+  }
+
+  :root.dark {
+    --bg-page: #0a0a0a;
+    --text-page: #ededed;
+    --bg-card: #1a1a1a;
+    --bg-card-elevated: #1e1e1e;
+    --text-card: #ffffff;
+    --border-color: #1f2937;
+    --bg-muted: #1f2937;
+    --text-muted: #9ca3af;
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: "Hind Siliguri", sans-serif;
+}
+
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for specific elements */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(to right, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+  background-size: 1200px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.dark .skeleton {
+  background: linear-gradient(to right, #1e293b 8%, #334155 18%, #1e293b 33%);
+}
+
+.nav-link.active {
+  opacity: 1;
+  color: #b80000;
+}
+
+.dark .nav-link.active {
+  color: white;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0%;
+  height: 3px;
+  background-color: #b80000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  border-radius: 2px 2px 0 0;
+}
+
+.dark .nav-link::after {
+  background-color: #ef4444;
+}
+
+.nav-link.active::after {
+  width: 100%;
+}
+
+.btn-bounce:active {
+  transform: scale(0.95);
+}
+
+.toast-enter {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Font sizes with !important to override defaults if needed */
+.font-size-sm p {
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1em;
+}
+
+.font-size-md p {
+  font-size: 1.125rem !important;
+  line-height: 1.8 !important;
+  margin-bottom: 1em;
+}
+
+.font-size-lg p {
+  font-size: 1.35rem !important;
+  line-height: 2 !important;
+  margin-bottom: 1em;
+}
+
+/* Quill Dark Mode Overrides & Fixes */
+.ql-toolbar {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.ql-container {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  font-family: "Hind Siliguri", sans-serif;
+}
+
+.ql-editor {
+  min-height: 200px;
+  font-size: 1rem;
+  color: #1a1a1a;
+}
+
+.dark .ql-toolbar {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.dark .ql-toolbar .ql-stroke {
+  stroke: #e5e7eb;
+}
+
+.dark .ql-toolbar .ql-fill {
+  fill: #e5e7eb;
+}
+
+.dark .ql-container {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: white;
+}
+
+.dark .ql-editor {
+  color: white;
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: #9ca3af;
+}
+
+@media (max-width: 768px) {
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--bg-card);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .responsive-table td {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0;
+    text-align: left !important;
+  }
+
+  .responsive-table td:last-child {
+    border-top: 1px solid var(--border-color);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+  }
+}

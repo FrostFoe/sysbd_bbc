@@ -6,15 +6,21 @@ function get_data($lang = "bn")
     global $pdo;
 
     // Validate language
-    $lang = ($lang === "en") ? "en" : "bn";
+    $lang = $lang === "en" ? "en" : "bn";
+
+    // Fetch categories
+    $stmt = $pdo->query(
+        "SELECT id, title_bn, title_en, color FROM categories ORDER BY id ASC",
+    );
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $stmt = $pdo->prepare(
-        "SELECT * FROM sections WHERE lang = ? ORDER BY sort_order ASC"
+        "SELECT * FROM sections WHERE lang = ? ORDER BY sort_order ASC",
     );
     $stmt->execute([$lang]);
     $sections = $stmt->fetchAll();
 
-    $data = ["sections" => []];
+    $data = ["categories" => $categories, "sections" => []];
 
     foreach ($sections as $section) {
         $sectionData = [
@@ -28,7 +34,7 @@ function get_data($lang = "bn")
         ];
 
         $stmt = $pdo->prepare(
-            "SELECT * FROM articles WHERE section_id = ? AND lang = ? ORDER BY created_at DESC"
+            "SELECT * FROM articles WHERE section_id = ? AND lang = ? ORDER BY created_at DESC",
         );
         $stmt->execute([$section["id"], $lang]);
         $articles = $stmt->fetchAll();
@@ -38,7 +44,7 @@ function get_data($lang = "bn")
             $categoryName = null;
             if (!empty($article["category_id"])) {
                 $stmt = $pdo->prepare(
-                    "SELECT title_bn, title_en FROM categories WHERE id = ?"
+                    "SELECT title_bn, title_en FROM categories WHERE id = ?",
                 );
                 $stmt->execute([$article["category_id"]]);
                 $categoryData = $stmt->fetch();
@@ -65,7 +71,7 @@ function get_data($lang = "bn")
             ];
 
             $stmt = $pdo->prepare(
-                "SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC"
+                "SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC",
             );
             $stmt->execute([$article["id"]]);
             $articleData["comments"] = $stmt->fetchAll();

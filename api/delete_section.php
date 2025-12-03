@@ -15,7 +15,7 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 
 try {
     $lang = $_GET["lang"] ?? "bn";
-    $lang = ($lang === "en") ? "en" : "bn";
+    $lang = $lang === "en" ? "en" : "bn";
 
     $data = json_decode(file_get_contents("php://input"), true);
 

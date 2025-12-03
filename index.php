@@ -15,270 +15,16 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
     <style>
-    @import url('https://banglawebfonts.pages.dev/css/hind-siliguri.css');
-    </style> 
-    <link href="https://banglawebfonts.pages.dev/css/hind-siliguri.css" rel="stylesheet">
-
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+    </style>
+    
     <!-- QuillJS CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style type="text/tailwindcss">
-        @theme {
-        --color-bbcRed: #b80000;
-        --color-bbcDark: #1a1a1a;
-
-        --color-page: var(--bg-page);
-        --color-page-text: var(--text-page);
-        --color-card: var(--bg-card);
-        --color-card-elevated: var(--bg-card-elevated);
-        --color-card-text: var(--text-card);
-        --color-border-color: var(--border-color);
-        --color-muted-bg: var(--bg-muted);
-        --color-muted-text: var(--text-muted);
-      }
-
-      @layer base {
-        :root {
-          --bg-page: #f6f6f6;
-          --text-page: #1a1a1a;
-
-          --bg-card: #ffffff;
-          --bg-card-elevated: #ffffff;
-          --text-card: #1a1a1a;
-
-          --border-color: #e5e7eb;
-
-          --bg-muted: #f3f4f6;
-          --text-muted: #6b7280;
-        }
-
-        :root.dark {
-          --bg-page: #0a0a0a;
-          --text-page: #ededed;
-
-          --bg-card: #1a1a1a;
-          --bg-card-elevated: #1e1e1e;
-          --text-card: #ffffff;
-
-          --border-color: #1f2937;
-
-          --bg-muted: #1f2937;
-          --text-muted: #9ca3af;
-        }
-      }
-
-      @custom-variant dark (&:where(.dark, .dark *));
-
-      body {
-        font-family: "Hind Siliguri", sans-serif;
-      }
-
-      html {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      ::-webkit-scrollbar {
-        display: none;
-      }
-
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-      }
-      .dark ::-webkit-scrollbar-thumb {
-        background: #475569;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-
-      @keyframes fade-in {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .animate-fade-in {
-        animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      @keyframes shimmer {
-        0% {
-          background-position: -1000px 0;
-        }
-        100% {
-          background-position: 1000px 0;
-        }
-      }
-      .skeleton {
-        background: linear-gradient(
-          to right,
-          #f1f5f9 8%,
-          #e2e8f0 18%,
-          #f1f5f9 33%
-        );
-        background-size: 1200px 100%;
-        animation: shimmer 2s infinite linear;
-      }
-      .dark .skeleton {
-        background: linear-gradient(
-          to right,
-          #1e293b 8%,
-          #334155 18%,
-          #1e293b 33%
-        );
-      }
-
-      .nav-link.active {
-        opacity: 1;
-        color: #b80000;
-      }
-      .dark .nav-link.active {
-        color: white;
-      }
-      .nav-link::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 0%;
-        height: 3px;
-        background-color: #b80000;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        transform: translateX(-50%);
-        border-radius: 2px 2px 0 0;
-      }
-      .dark .nav-link::after {
-        background-color: #ef4444;
-      }
-      .nav-link.active::after {
-        width: 100%;
-      }
-
-      .btn-bounce:active {
-        transform: scale(0.95);
-      }
-      .toast-enter {
-        animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      @keyframes slide-up {
-        from {
-          transform: translate(-50%, 100%);
-          opacity: 0;
-        }
-        to {
-          transform: translate(-50%, 0);
-          opacity: 1;
-        }
-      }
-
-      /* Font sizes with !important to override defaults if needed */
-      .font-size-sm p {
-        font-size: 0.95rem !important;
-        line-height: 1.6 !important;
-        margin-bottom: 1em;
-      }
-      .font-size-md p {
-        font-size: 1.125rem !important;
-        line-height: 1.8 !important;
-        margin-bottom: 1em;
-      }
-      .font-size-lg p {
-        font-size: 1.35rem !important;
-        line-height: 2 !important;
-        margin-bottom: 1em;
-      }
-
-      /* Quill Dark Mode Overrides & Fixes */
-      .ql-toolbar {
-        background: #f9fafb;
-        border-color: #e5e7eb;
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
-      }
-      .ql-container {
-        background: #ffffff;
-        border-color: #e5e7eb;
-        border-bottom-left-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
-        font-family: "Hind Siliguri", sans-serif;
-      }
-      .ql-editor {
-        min-height: 200px;
-        font-size: 1rem;
-        color: #1a1a1a;
-      }
-
-      .dark .ql-toolbar {
-        background: #374151;
-        border-color: #4b5563;
-      }
-      .dark .ql-toolbar .ql-stroke {
-        stroke: #e5e7eb;
-      }
-      .dark .ql-toolbar .ql-fill {
-        fill: #e5e7eb;
-      }
-      .dark .ql-container {
-        background: #1f2937;
-        border-color: #4b5563;
-        color: white;
-      }
-      .dark .ql-editor {
-        color: white;
-      }
-      .dark .ql-editor.ql-blank::before {
-        color: #9ca3af;
-      }
-
-      @media (max-width: 768px) {
-        .responsive-table thead {
-          display: none;
-        }
-        .responsive-table tbody tr {
-          display: flex;
-          flex-direction: column;
-          border-bottom: 1px solid var(--border-color);
-          padding: 1rem;
-          margin-bottom: 1rem;
-          background-color: var(--bg-card);
-          border-radius: 0.75rem;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        .responsive-table td {
-          display: block;
-          width: 100%;
-          padding: 0.5rem 0;
-          text-align: left !important;
-        }
-        .responsive-table td:last-child {
-          border-top: 1px solid var(--border-color);
-          margin-top: 0.5rem;
-          padding-top: 1rem;
-        }
-      }
+        <?php include "tailwind.config.css"; ?>
     </style>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -425,8 +171,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             },
         };
 
-        const initialData = { sections: [] };
-
         const CATEGORY_MAP = {
             en: {
                 news: "News",
@@ -461,7 +205,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         }
 
         const state = {
-            bbcData: initialData,
+            bbcData: null,
             view: "home",
             category: "<?php echo htmlspecialchars($initialCategory); ?>",
             bookmarks: [],
@@ -1059,12 +803,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         function renderHomeView() {
             if (state.isLoading) return renderSkeleton();
 
-            let sectionsToRender = state.bbcData.sections;
+            let sectionsToRender = state.bbcData?.sections || [];
             const emptyStateColor = state.darkMode ? "text-white" : "text-bbcDark";
 
             if (state.category === "saved") {
                 const savedIds = state.bookmarks;
-                const all = state.bbcData.sections.flatMap((s) => s.articles);
+                const all = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
                 const savedArticles = all.filter((a) => savedIds.includes(a.id));
 
                 if (savedArticles.length === 0) {
@@ -1107,13 +851,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             let extras = "";
             if (state.category === "home") {
                 const titleColor = state.darkMode ? "text-white" : "text-black";
-                const worldNews = state.bbcData.sections.find(
+                const worldNews = state.bbcData?.sections?.find(
                     (s) => s.id === "virginia",
                 );
-                const businessNews = state.bbcData.sections.find(
+                const businessNews = state.bbcData?.sections?.find(
                     (s) => s.id === "vermont",
                 );
-                const newsCollection = state.bbcData.sections.find(
+                const newsCollection = state.bbcData?.sections?.find(
                     (s) => s.id === "wyoming",
                 );
 
@@ -1247,19 +991,19 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
         function renderHeader() {
             const { user, isAdmin, darkMode, category } = state;
+            
+            // Build menu items from database categories plus special items
+            const categoryItems = (state.bbcData?.categories || []).map(cat => ({
+                label: state.language === 'bn' ? cat.title_bn : cat.title_en,
+                id: cat.id
+            }));
+            
             const menuItems = [
-                { label: t("home"), id: "home", icon: "layout" },
-                { label: t("news"), id: "news", icon: "newspaper" },
-                { label: t("sport"), id: "sport", icon: "trophy" },
-                { label: t("business"), id: "business", icon: "bar-chart-2" },
-                { label: t("innovation"), id: "innovation", icon: "zap" },
-                { label: t("culture"), id: "culture", icon: "globe" },
-                { label: t("arts"), id: "arts", icon: "pen-tool" },
-                { label: t("travel"), id: "travel", icon: "map-pin" },
-                { label: t("audio"), id: "audio", icon: "headset" },
-                { label: t("video"), id: "video", icon: "tv" },
-                { label: t("saved"), id: "saved", icon: "bookmark" },
+                { label: t("home"), id: "home" },
+                ...categoryItems,
+                { label: t("saved"), id: "saved" },
             ];
+            
             const navItems = menuItems.map((item) => `
                 <a href="?category=${item.id}" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
                     ${item.label}
@@ -1372,18 +1116,17 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 darkMode,
                 category,
             } = state;
+            
+            // Build menu items from database categories plus special items
+            const categoryItems = (state.bbcData?.categories || []).map(cat => ({
+                label: state.language === 'bn' ? cat.title_bn : cat.title_en,
+                id: cat.id
+            }));
+            
             const menuItems = [
-                { label: t("home"), id: "home", icon: "layout" },
-                { label: t("news"), id: "news", icon: "newspaper" },
-                { label: t("sport"), id: "sport", icon: "trophy" },
-                { label: t("business"), id: "business", icon: "bar-chart-2" },
-                { label: t("innovation"), id: "innovation", icon: "zap" },
-                { label: t("culture"), id: "culture", icon: "globe" },
-                { label: t("arts"), id: "arts", icon: "pen-tool" },
-                { label: t("travel"), id: "travel", icon: "map-pin" },
-                { label: t("audio"), id: "audio", icon: "headset" },
-                { label: t("video"), id: "video", icon: "tv" },
-                { label: t("saved"), id: "saved", icon: "bookmark" },
+                { label: t("home"), id: "home" },
+                ...categoryItems,
+                { label: t("saved"), id: "saved" },
             ];
             return `
                 <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}">
@@ -1391,7 +1134,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         <div class="font-bold text-2xl dark:text-white tracking-tight">${t('menu')}</div>
                         <button onclick="setState({isMobileMenuOpen: false})" class="p-2 hover:bg-muted-bg rounded-full transition-transform hover:rotate-90 dark:text-white btn-bounce"><i data-lucide="x" class="w-8 h-8"></i></button>
                     </div>
-                    <div class="p-6 h-full overflow-y-auto pb-20">
+                    <div class="p-6 h-full overflow-y-auto pb-20 no-scrollbar">
                         <div class="mb-8 space-y-4">
                             ${user
                     ? `
@@ -1416,7 +1159,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                              ${menuItems.map((item) => `
                                 <li class="border-b border-gray-100 dark:border-gray-800/50 pb-2 last:border-0">
                                     <a href="?category=${item.id}" class="w-full text-left py-4 flex justify-between items-center hover:text-bbcRed hover:pl-3 transition-all duration-300 group">
-                                        <span class="flex items-center gap-3"><i data-lucide="${getIconName(item.icon)}" class="w-4 h-4"></i> ${item.label}</span>
+                                        <span>${item.label}</span>
                                         <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-bbcRed transition-colors"></i>
                                     </a>
                                 </li>
@@ -1427,27 +1170,17 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             `;
         }
 
-        function getIconName(reactIconName) {
-            const map = {
-                Layout: "layout",
-                Newspaper: "newspaper",
-                TrophyIcon: "trophy",
-                BarChart2: "bar-chart-2",
-                Zap: "zap",
-                Globe: "globe",
-                PenTool: "pen-tool",
-                MapPin: "map-pin",
-                Headset: "headset",
-                Tv: "tv",
-                Bookmark: "bookmark",
-            };
-            return map[reactIconName] || "circle";
+        function renderBackToTop() {
+            return `
+                <button id="back-to-top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="fixed bottom-8 right-8 p-3 rounded-full shadow-xl z-50 transition-all duration-300 bg-black/80 backdrop-blur text-white hover:bg-black dark:bg-white/90 dark:text-black dark:hover:bg-white hover:scale-110 opacity-0 translate-y-10 pointer-events-none">
+                    <i data-lucide="chevron-up" class="w-5 h-5"></i>
+                </button>
+            `;
         }
-
         function renderSearchOverlay() {
             const { isSearchOpen, searchQuery, searchResults, darkMode } = state;
             return `
-                <div class="fixed inset-0 z-[70] bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-md overflow-y-auto transition-all duration-300 ${isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"}">
+                <div class="fixed inset-0 z-[70] bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-md overflow-y-auto transition-all duration-300 no-scrollbar ${isSearchOpen ? "opacity-100 visible" : "opacity-0 invisible"}">
                     <div class="max-w-[1000px] mx-auto p-6 pt-12">
                         <div class="flex justify-end mb-12">
                             <button onclick="setState({isSearchOpen: false})" class="p-3 bg-muted-bg rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-black dark:text-white transition-all hover:rotate-90">
@@ -1473,7 +1206,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             if (query.length < 2) {
                 state.searchResults = [];
             } else {
-                const allArticles = state.bbcData.sections.flatMap((s) => s.articles);
+                const allArticles = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
                 state.searchResults = allArticles.filter((a) =>
                     a.title.toLowerCase().includes(query.toLowerCase()),
                 );
@@ -1486,7 +1219,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         }
 
         function renderDetailView() {
-            const all = state.bbcData.sections.flatMap((s) => s.articles);
+            const all = state.bbcData?.sections?.flatMap((s) => s.articles) || [];
             const article =
                 all.find((a) => a.id === state.selectedArticleId) || all[0];
             if (!article) return "";

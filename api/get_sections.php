@@ -15,9 +15,11 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 
 try {
     $lang = $_GET["lang"] ?? "bn";
-    $lang = ($lang === "en") ? "en" : "bn";
+    $lang = $lang === "en" ? "en" : "bn";
 
-    $stmt = $pdo->prepare("SELECT * FROM sections WHERE lang = ? ORDER BY sort_order ASC");
+    $stmt = $pdo->prepare(
+        "SELECT * FROM sections WHERE lang = ? ORDER BY sort_order ASC",
+    );
     $stmt->execute([$lang]);
     $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

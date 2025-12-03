@@ -8,9 +8,8 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 }
 
 // Fetch data using the existing get_data.php API
-$lang = isset($_GET['lang']) && $_GET['lang'] === 'en' ? 'en' : 'bn';
+$lang = isset($_GET["lang"]) && $_GET["lang"] === "en" ? "en" : "bn";
 $data = get_data($lang);
-
 ?>
 <!doctype html>
 <html lang="<?php echo $lang; ?>">
@@ -21,79 +20,14 @@ $data = get_data($lang);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <style>
-    @import url('https://banglawebfonts.pages.dev/css/hind-siliguri.css');
-    </style> 
-    <link href="https://banglawebfonts.pages.dev/css/hind-siliguri.css" rel="stylesheet">
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+    </style>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style type="text/tailwindcss">
-        @theme {
-        --color-bbcRed: #b80000;
-        --color-bbcDark: #1a1a1a;
-        --color-page: var(--bg-page);
-        --color-page-text: var(--text-page);
-        --color-card: var(--bg-card);
-        --color-card-elevated: var(--bg-card-elevated);
-        --color-card-text: var(--text-card);
-        --color-border-color: var(--border-color);
-        --color-muted-bg: var(--bg-muted);
-        --color-muted-text: var(--text-muted);
-      }
-      @layer base {
-        :root {
-          --bg-page: #f6f6f6;
-          --text-page: #1a1a1a;
-          --bg-card: #ffffff;
-          --bg-card-elevated: #ffffff;
-          --text-card: #1a1a1a;
-          --border-color: #e5e7eb;
-          --bg-muted: #f3f4f6;
-          --text-muted: #6b7280;
-        }
-        :root.dark {
-          --bg-page: #0a0a0a;
-          --text-page: #ededed;
-          --bg-card: #1a1a1a;
-          --bg-card-elevated: #1e1e1e;
-          --text-card: #ffffff;
-          --border-color: #1f2937;
-          --bg-muted: #1f2937;
-          --text-muted: #9ca3af;
-        }
-      }
-      body { font-family: "Hind Siliguri", sans-serif; }
-      .responsive-table td { vertical-align: middle; }
-
-      /* Quill Editor Theme Support */
-      .ql-toolbar {
-        background: var(--bg-muted);
-        border-color: var(--border-color);
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
-      }
-      .ql-container {
-        background: var(--bg-card);
-        border-color: var(--border-color);
-        border-bottom-left-radius: 0.5rem;
-        border-bottom-right-radius: 0.5rem;
-        font-family: "Hind Siliguri", sans-serif;
-      }
-      .ql-editor {
-        min-height: 200px;
-        font-size: 1rem;
-        color: var(--text-card);
-      }
-      .ql-toolbar .ql-stroke {
-        stroke: var(--text-muted);
-      }
-      .ql-toolbar .ql-fill {
-        fill: var(--text-muted);
-      }
-      .ql-editor.ql-blank::before {
-        color: var(--text-muted);
-      }
+        <?php include "../tailwind.config.css"; ?>
     </style>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">
@@ -116,26 +50,30 @@ $data = get_data($lang);
                 <nav class="flex -mb-px gap-6 flex-wrap" aria-label="Tabs">
                     <button onclick="switchTab('articles')" id="tab-articles" class="articles-tab border-bbcRed text-bbcRed whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer">সংবাদ (Articles)</button>
                     <button onclick="switchTab('categories')" id="tab-categories" class="categories-tab border-transparent text-muted-text hover:text-card-text hover:border-border-color whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer">বিভাগ (Categories)</button>
-                    <a href="?lang=bn" class="ml-auto <?php echo $lang === 'bn' ? 'border-bbcRed text-bbcRed' : 'border-transparent text-muted-text hover:text-card-text hover:border-border-color'; ?> whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">বাংলা</a>
-                    <a href="?lang=en" class="<?php echo $lang === 'en' ? 'border-bbcRed text-bbcRed' : 'border-transparent text-muted-text hover:text-card-text hover:border-border-color'; ?> whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">English</a>
+                    <a href="?lang=bn" class="ml-auto <?php echo $lang === "bn"
+                        ? "border-bbcRed text-bbcRed"
+                        : "border-transparent text-muted-text hover:text-card-text hover:border-border-color"; ?> whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">বাংলা</a>
+                    <a href="?lang=en" class="<?php echo $lang === "en"
+                        ? "border-bbcRed text-bbcRed"
+                        : "border-transparent text-muted-text hover:text-card-text hover:border-border-color"; ?> whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">English</a>
                 </nav>
             </div>
 
-            <div id="articles-section" class="rounded-3xl shadow-soft overflow-hidden" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <div id="articles-section" class="rounded-3xl shadow-soft overflow-hidden bg-card border border-border-color">
                 <table class="w-full text-left border-collapse responsive-table">
                     <thead class="hidden md:table-header-group">
-                        <tr class="text-xs uppercase" style="background-color: var(--bg-muted); color: var(--text-muted);">
+                        <tr class="text-xs uppercase bg-muted text-muted-text">
                             <th class="p-6" data-translate="title">শিরোনাম</th>
                             <th class="p-6" data-translate="category">বিভাগ</th>
                             <th class="p-6 text-right" data-translate="actions">অ্যাকশন</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y" style="color: var(--text-card);">
+                    <tbody class="divide-y divide-border-color text-card-text">
                         <?php
                         $allArticles = [];
                         if (isset($data["sections"])) {
                             foreach ($data["sections"] as $section) {
-                                if(isset($section["articles"])) {
+                                if (isset($section["articles"])) {
                                     foreach ($section["articles"] as $article) {
                                         $article["sectionId"] = $section["id"];
                                         $allArticles[] = $article;
@@ -144,34 +82,34 @@ $data = get_data($lang);
                             }
                         }
                         foreach ($allArticles as $a): ?>
-                        <tr class="flex flex-col md:table-row transition-colors border-b md:border-none last:border-none hover:bg-muted-bg" style="border-color: var(--border-color);">
+                        <tr class="flex flex-col md:table-row transition-colors border-b md:border-none last:border-none hover:bg-muted-bg border-border-color">
                             <td class="p-4 md:w-1/2">
                                 <div class="flex items-center gap-4">
                                     <img src="<?php echo htmlspecialchars(
                                         $a["image"] ?? "",
                                     ); ?>" onerror="this.src='https://placehold.co/600x400/1a1a1a/FFF?text=BreachTimes'" class="w-16 h-10 rounded object-cover shrink-0">
-                                    <div class="font-bold text-sm line-clamp-2" style="color: var(--text-card);"><?php echo htmlspecialchars(
+                                    <div class="font-bold text-sm line-clamp-2 text-card-text"><?php echo htmlspecialchars(
                                         $a["title"],
                                     ); ?></div>
                                 </div>
                             </td>
                             <td class="px-4 pb-2 md:py-4 md:w-1/4 flex md:table-cell items-center justify-between">
-                                <span class="md:hidden text-xs font-bold uppercase" style="color: var(--text-muted);" data-translate="category">বিভাগ</span>
-                                <span class="px-2 py-1 rounded text-xs" style="background-color: var(--bg-muted); color: var(--text-muted);"><?php echo htmlspecialchars(
+                                <span class="md:hidden text-xs font-bold uppercase text-muted-text" data-translate="category">বিভাগ</span>
+                                <span class="px-2 py-1 rounded text-xs bg-muted text-muted-text"><?php echo htmlspecialchars(
                                     $a["category"] ?? "N/A",
                                 ); ?></span>
                             </td>
                             <td class="px-4 pb-4 md:py-4 md:w-1/4 text-right flex md:table-cell items-center justify-between md:justify-end">
-                                <span class="md:hidden text-xs font-bold uppercase" style="color: var(--text-muted);" data-translate="actions">অ্যাকশন</span>
+                                <span class="md:hidden text-xs font-bold uppercase text-muted-text" data-translate="actions">অ্যাকশন</span>
                                 <div class="flex justify-end gap-2">
                                     <button onclick='openEditor(<?php echo htmlspecialchars(
                                         json_encode($a),
                                         ENT_QUOTES,
                                         "UTF-8",
-                                    ); ?>)' class="p-2 rounded transition-colors" style="color: #2563eb;"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    ); ?>)' class="p-2 rounded transition-colors text-blue-600 hover:bg-blue-50"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
                                     <button onclick="deleteArticle('<?php echo $a[
                                         "id"
-                                    ]; ?>')" class="p-2 rounded transition-colors" style="color: #dc2626;"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    ]; ?>')" class="p-2 rounded transition-colors text-red-600 hover:bg-red-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -182,10 +120,10 @@ $data = get_data($lang);
             </div>
 
             <!-- Categories Section -->
-            <div id="categories-section" class="hidden rounded-3xl shadow-soft overflow-hidden" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <div id="categories-section" class="hidden rounded-3xl shadow-soft overflow-hidden bg-card border border-border-color">
                 <table class="w-full text-left border-collapse responsive-table">
                     <thead class="hidden md:table-header-group">
-                        <tr class="text-xs uppercase" style="background-color: var(--bg-muted); color: var(--text-muted);">
+                        <tr class="text-xs uppercase bg-muted text-muted-text">
                             <th class="p-6">ID</th>
                             <th class="p-6">বাংলা নাম</th>
                             <th class="p-6">English Name</th>
@@ -193,7 +131,7 @@ $data = get_data($lang);
                             <th class="p-6 text-right">অ্যাকশন</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y" style="color: var(--text-card);" id="categories-table-body">
+                    <tbody class="divide-y divide-border-color text-card-text" id="categories-table-body">
                     </tbody>
                 </table>
             </div>
@@ -237,7 +175,7 @@ $data = get_data($lang);
 
     <!-- Editor Modal -->
     <div id="editor-modal" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-card w-full max-w-4xl rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-card w-[95%] max-w-[95%] rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="sticky top-0 bg-card p-6 border-b border-border-color flex justify-between items-center z-10">
                 <h2 class="text-xl font-bold text-card-text" id="modal-title" data-translate="add_new_article">নতুন সংবাদ যোগ করুন</h2>
                 <button onclick="closeEditor()" class="p-2 hover:bg-muted-bg rounded-full transition-colors text-card-text"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -290,7 +228,7 @@ $data = get_data($lang);
 
                 <div>
                     <label class="block text-sm font-bold mb-2 text-card-text" data-translate="main_content">বিস্তারিত বিবরণ (Main Content)</label>
-                    <div id="quill-editor" class="bg-card text-card-text rounded-lg border border-border-color h-64 overflow-y-auto"></div>
+                    <div id="quill-editor" class="bg-card text-card-text rounded-lg border border-border-color h-64 overflow-y-auto no-scrollbar"></div>
                 </div>
                 
                 <div class="pt-4 flex justify-end gap-3 border-t border-border-color">
@@ -418,20 +356,20 @@ $data = get_data($lang);
         function renderCategoriesTable() {
             const tbody = document.getElementById('categories-table-body');
             tbody.innerHTML = categoriesList.map(cat => `
-                <tr class="flex flex-col md:table-row transition-colors border-b md:border-none last:border-none hover:bg-muted-bg" style="border-color: var(--border-color);">
-                    <td class="p-4 md:w-1/5 font-bold text-sm" style="color: var(--text-card);">${cat.id}</td>
-                    <td class="px-4 pb-2 md:py-4 md:w-1/5" style="color: var(--text-card);">${cat.title_bn}</td>
-                    <td class="px-4 pb-2 md:py-4 md:w-1/5" style="color: var(--text-card);">${cat.title_en}</td>
+                <tr class="flex flex-col md:table-row transition-colors border-b md:border-none last:border-none hover:bg-muted-bg border-border-color">
+                    <td class="p-4 md:w-1/5 font-bold text-sm text-card-text">${cat.id}</td>
+                    <td class="px-4 pb-2 md:py-4 md:w-1/5 text-card-text">${cat.title_bn}</td>
+                    <td class="px-4 pb-2 md:py-4 md:w-1/5 text-card-text">${cat.title_en}</td>
                     <td class="px-4 pb-2 md:py-4 md:w-1/5">
                         <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-lg border-2" style="background-color: ${cat.color}; border-color: var(--border-color);"></div>
-                            <span class="text-xs" style="color: var(--text-card);">${cat.color}</span>
+                            <div class="w-8 h-8 rounded-lg border-2 border-border-color" style="background-color: ${cat.color};"></div>
+                            <span class="text-xs text-card-text">${cat.color}</span>
                         </div>
                     </td>
                     <td class="px-4 pb-4 md:py-4 md:w-1/5 text-right flex md:table-cell items-center justify-between md:justify-end">
                         <div class="flex justify-end gap-2">
-                            <button onclick='openCategoryEditor(${JSON.stringify(cat)})' class="p-2 rounded transition-colors" style="color: #2563eb;"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                            <button onclick="deleteCategory('${cat.id}')" class="p-2 rounded transition-colors" style="color: #dc2626;"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            <button onclick='openCategoryEditor(${JSON.stringify(cat)})' class="p-2 rounded transition-colors text-blue-600 hover:bg-blue-50"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="deleteCategory('${cat.id}')" class="p-2 rounded transition-colors text-red-600 hover:bg-red-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     </td>
                 </tr>

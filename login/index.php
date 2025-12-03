@@ -7,47 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <style>
-    @import url('https://banglawebfonts.pages.dev/css/hind-siliguri.css');
-    </style> 
-    <link href="https://banglawebfonts.pages.dev/css/hind-siliguri.css" rel="stylesheet">
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style type="text/tailwindcss">
-        @theme {
-        --color-bbcRed: #b80000;
-        --color-bbcDark: #1a1a1a;
-        --color-page: var(--bg-page);
-        --color-page-text: var(--text-page);
-        --color-card: var(--bg-card);
-        --color-card-elevated: var(--bg-card-elevated);
-        --color-card-text: var(--text-card);
-        --color-border-color: var(--border-color);
-        --color-muted-bg: var(--bg-muted);
-        --color-muted-text: var(--text-muted);
-      }
-      @layer base {
-        :root {
-          --bg-page: #f6f6f6;
-          --text-page: #1a1a1a;
-          --bg-card: #ffffff;
-          --bg-card-elevated: #ffffff;
-          --text-card: #1a1a1a;
-          --border-color: #e5e7eb;
-          --bg-muted: #f3f4f6;
-          --text-muted: #6b7280;
-        }
-        :root.dark {
-          --bg-page: #0a0a0a;
-          --text-page: #ededed;
-          --bg-card: #1a1a1a;
-          --bg-card-elevated: #1e1e1e;
-          --text-card: #ffffff;
-          --border-color: #1f2937;
-          --bg-muted: #1f2937;
-          --text-muted: #9ca3af;
-        }
-      }
-      body { font-family: "Hind Siliguri", sans-serif; }
+        <?php include "../tailwind.config.css"; ?>
     </style>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">

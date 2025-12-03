@@ -15,15 +15,11 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 
 try {
     $lang = $_GET["lang"] ?? "bn";
-    $lang = ($lang === "en") ? "en" : "bn";
+    $lang = $lang === "en" ? "en" : "bn";
 
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (
-        empty($data["id"]) ||
-        empty($data["title"]) ||
-        empty($data["type"])
-    ) {
+    if (empty($data["id"]) || empty($data["title"]) || empty($data["type"])) {
         throw new Exception("Missing required fields");
     }
 
@@ -43,7 +39,7 @@ try {
     if ($exists) {
         // Update
         $stmt = $pdo->prepare(
-            "UPDATE sections SET title = ?, type = ?, highlight_color = ?, associated_category = ?, style = ?, sort_order = ? WHERE id = ? AND lang = ?"
+            "UPDATE sections SET title = ?, type = ?, highlight_color = ?, associated_category = ?, style = ?, sort_order = ? WHERE id = ? AND lang = ?",
         );
         $stmt->execute([
             $title,
@@ -58,7 +54,7 @@ try {
     } else {
         // Insert
         $stmt = $pdo->prepare(
-            "INSERT INTO sections (id, lang, title, type, highlight_color, associated_category, style, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO sections (id, lang, title, type, highlight_color, associated_category, style, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         );
         $stmt->execute([
             $id,

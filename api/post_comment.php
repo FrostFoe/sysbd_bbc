@@ -17,7 +17,7 @@ if (!$articleId || !$text) {
 $time = "Just now";
 
 $stmt = $pdo->prepare(
-    "INSERT INTO comments (article_id, user_name, text, time) VALUES (?, ?, ?, ?)"
+    "INSERT INTO comments (article_id, user_name, text, time) VALUES (?, ?, ?, ?)",
 );
 $stmt->execute([$articleId, $user, $text, $time]);
 

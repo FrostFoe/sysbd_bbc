@@ -8,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 $data = json_decode(file_get_contents("php://input"), true);
 $id = $data["id"] ?? null;
 $lang = $data["lang"] ?? "bn";
-$lang = ($lang === "en") ? "en" : "bn"; // Validate language
+$lang = $lang === "en" ? "en" : "bn"; // Validate language
 
 if (!$id) {
     send_response(["error" => "ID required"], 400);

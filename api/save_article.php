@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 $lang = $_POST["lang"] ?? "bn";
-$lang = ($lang === "en") ? "en" : "bn"; // Validate language
+$lang = $lang === "en" ? "en" : "bn"; // Validate language
 
 $id = !empty($_POST["id"]) ? $_POST["id"] : uniqid();
 $title = $_POST["title"] ?? "";
@@ -23,7 +23,7 @@ $exists = $stmt->fetch();
 if ($exists) {
     // Update article
     $stmt = $pdo->prepare(
-        "UPDATE articles SET title=?, summary=?, image=?, category_id=?, content=?, section_id=? WHERE id=? AND lang=?"
+        "UPDATE articles SET title=?, summary=?, image=?, category_id=?, content=?, section_id=? WHERE id=? AND lang=?",
     );
     $stmt->execute([
         $title,
@@ -39,9 +39,9 @@ if ($exists) {
     // Create new article for this language
     $timestamp = $lang === "bn" ? "সদ্য" : "Just now";
     $read_time = $lang === "bn" ? "৩ মিনিট" : "3 min";
-    
+
     $stmt = $pdo->prepare(
-        "INSERT INTO articles (id, lang, section_id, title, summary, image, category_id, content, timestamp, read_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO articles (id, lang, section_id, title, summary, image, category_id, content, timestamp, read_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     );
     $stmt->execute([
         $id,
