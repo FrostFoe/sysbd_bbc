@@ -289,6 +289,11 @@ $data = get_data($lang);
                             <label class="block text-sm font-bold mb-2 text-card-text" data-translate="summary">সারাংশ</label>
                             <textarea name="summary" id="article-summary" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed"></textarea>
                         </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2 text-card-text">ফাঁস হওয়া নথি (JSON)</label>
+                            <textarea name="leaked_documents" id="article-leaked-documents" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed font-mono text-xs" placeholder='[{"title": "Doc 1", "type": "PDF"}, ...]'></textarea>
+                            <p class="text-xs text-muted-text mt-1">Format: [{"title": "Doc Name", "type": "PDF/DOCX"}]</p>
+                        </div>
                     </div>
                 </div>
 
@@ -519,6 +524,7 @@ $data = get_data($lang);
             document.getElementById('article-sectionId').value = article ? article.sectionId : '';
             document.getElementById('article-image').value = article ? article.image : '';
             document.getElementById('article-summary').value = article ? article.summary : '';
+            document.getElementById('article-leaked-documents').value = article && article.leaked_documents ? article.leaked_documents : '';
             document.getElementById('article-lang').value = currentLang;
             
             if (!quillEditor) {

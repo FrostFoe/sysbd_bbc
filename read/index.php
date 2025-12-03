@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "../get_data.php";
+require_once "../includes/db.php";
 
 $user = isset($_SESSION["user_email"]) ? $_SESSION["user_email"] : null;
 $isAdmin = isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin";
@@ -12,28 +12,37 @@ if (!$articleId) {
     exit();
 }
 
-// Fetch all data to find the article
-$data = get_data($lang);
-$article = null;
-
-// Search for article by ID
-if (isset($data["sections"])) {
-    foreach ($data["sections"] as $section) {
-        if (isset($section["articles"])) {
-            foreach ($section["articles"] as $a) {
-                if ($a["id"] === $articleId) {
-                    $article = $a;
-                    $article["sectionId"] = $section["id"];
-                    break 2;
-                }
-            }
-        }
-    }
-}
+// Fetch article directly from DB
+$stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ? AND lang = ?");
+$stmt->execute([$articleId, $lang]);
+$article = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$article) {
     header("Location: ../index.php");
     exit();
+}
+
+// Fetch Category Name
+$categoryName = "News";
+if ($article['category_id']) {
+    $catStmt = $pdo->prepare("SELECT title_bn, title_en FROM categories WHERE id = ?");
+    $catStmt->execute([$article['category_id']]);
+    $cat = $catStmt->fetch(PDO::FETCH_ASSOC);
+    if ($cat) {
+        $categoryName = $lang === 'en' ? $cat['title_en'] : $cat['title_bn'];
+    }
+}
+$article['category'] = $categoryName;
+
+// Fetch Comments
+$commentStmt = $pdo->prepare("SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC");
+$commentStmt->execute([$articleId]);
+$article['comments'] = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Decode leaked documents if any
+$leakedDocuments = [];
+if (!empty($article['leaked_documents'])) {
+    $leakedDocuments = json_decode($article['leaked_documents'], true);
 }
 ?>
 <!doctype html>
@@ -157,63 +166,106 @@ if (!$article) {
                         </div>
                     </article>
 
-                    <!-- Comments Section -->
-                    <div class="mt-8 bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
-                        <h3 class="text-2xl font-bold mb-6 text-card-text flex items-center gap-2">
-                            <i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> মন্তব্য
-                        </h3>
-
-                        <div class="mb-8">
-                            <div class="relative">
-                                <textarea id="comment-input" placeholder="আপনার মতামত জানান..." class="w-full p-4 rounded-xl border border-border-color bg-muted-bg text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-none shadow-inner" rows="3"></textarea>
-                            </div>
-                            <div class="flex justify-end mt-3">
-                                <button onclick="postComment('<?php echo $article["id"]; ?>')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">মন্তব্য প্রকাশ করুন</button>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <?php if ($article["comments"] && count($article["comments"]) > 0): ?>
-                                <?php foreach ($article["comments"] as $comment): ?>
-                                    <div class="bg-muted-bg p-4 rounded-xl">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md"><?php echo strtoupper($comment["user"][0]); ?></div>
-                                            <div>
-                                                <span class="font-bold text-sm text-card-text block"><?php echo htmlspecialchars($comment["user"]); ?></span>
-                                                <span class="text-xs text-muted-text"><?php echo htmlspecialchars($comment["time"]); ?></span>
-                                            </div>
-                                        </div>
-                                        <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color"><?php echo htmlspecialchars($comment["text"]); ?></p>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="text-center py-8 text-muted-text">এখনও কোনো মন্তব্য নেই।</div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Sidebar -->
-                <div class="lg:col-span-4">
-                    <!-- Quick Info Card -->
-                    <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color mb-8 sticky top-24">
-                        <h4 class="text-lg font-bold mb-4 text-card-text">নিবন্ধ তথ্য</h4>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center pb-3 border-b border-border-color">
-                                <span class="text-muted-text">বিভাগ:</span>
-                                <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["category"] ?? "N/A"); ?></span>
-                            </div>
-                            <div class="flex justify-between items-center pb-3 border-b border-border-color">
-                                <span class="text-muted-text">প্রকাশনা:</span>
-                                <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["timestamp"] ?? "N/A"); ?></span>
-                            </div>
-                            <?php if (isset($article["readTime"])): ?>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-muted-text">পড়ার সময়:</span>
-                                    <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["readTime"]); ?></span>
-                                </div>
-                            <?php endif; ?>
+                <div class="lg:col-span-4 relative">
+                    <div class="w-full lg:fixed lg:top-28 lg:right-4 lg:w-[calc(33.33vw-4rem)] lg:max-w-[400px] lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto no-scrollbar space-y-6 z-40 lg:pr-2">
+                        
+                        <!-- Table of Contents -->
+                        <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
+                            <h4 class="text-lg font-bold mb-4 text-card-text border-b border-border-color pb-2">
+                                <?php echo $lang === 'bn' ? 'সূচিপত্র' : 'Table of Contents'; ?>
+                            </h4>
+                            <nav id="toc-container" class="text-sm space-y-2 text-muted-text">
+                                <!-- JS will populate this -->
+                            </nav>
                         </div>
+
+                        <!-- Leaked Documents -->
+                        <?php if (!empty($leakedDocuments)): ?>
+                        <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
+                            <h4 class="text-lg font-bold mb-4 text-card-text border-b border-border-color pb-2 flex items-center gap-2">
+                                <i data-lucide="file-warning" class="w-5 h-5 text-bbcRed"></i>
+                                <?php echo $lang === 'bn' ? 'ফাঁস হওয়া নথি' : 'Leaked Documents'; ?>
+                            </h4>
+                            <ul class="space-y-3">
+                                <?php foreach ($leakedDocuments as $doc): ?>
+                                <li class="group flex items-center gap-3 p-2 rounded-lg hover:bg-muted-bg transition-colors cursor-pointer">
+                                    <div class="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0 text-bbcRed font-bold text-xs border border-bbcRed/20">
+                                        <?php echo htmlspecialchars($doc['type'] ?? 'DOC'); ?>
+                                    </div>
+                                    <div class="flex-grow min-w-0">
+                                        <p class="text-sm font-bold text-card-text truncate group-hover:text-bbcRed transition-colors">
+                                            <?php echo htmlspecialchars($doc['title']); ?>
+                                        </p>
+                                        <span class="text-[10px] text-muted-text uppercase tracking-wider">Download</span>
+                                    </div>
+                                    <i data-lucide="download" class="w-4 h-4 text-muted-text group-hover:text-bbcRed transition-colors"></i>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Quick Info Card -->
+                        <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
+                            <h4 class="text-lg font-bold mb-4 text-card-text">
+                                <?php echo $lang === 'bn' ? 'নিবন্ধ তথ্য' : 'Article Info'; ?>
+                            </h4>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between items-center pb-3 border-b border-border-color">
+                                    <span class="text-muted-text"><?php echo $lang === 'bn' ? 'বিভাগ:' : 'Category:'; ?></span>
+                                    <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["category"] ?? "N/A"); ?></span>
+                                </div>
+                                <div class="flex justify-between items-center pb-3 border-b border-border-color">
+                                    <span class="text-muted-text"><?php echo $lang === 'bn' ? 'প্রকাশনা:' : 'Published:'; ?></span>
+                                    <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["timestamp"] ?? "N/A"); ?></span>
+                                </div>
+                                <?php if (isset($article["readTime"])): ?>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-muted-text"><?php echo $lang === 'bn' ? 'পড়ার সময়:' : 'Read Time:'; ?></span>
+                                        <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["readTime"]); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="lg:col-span-8 bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
+                    <h3 class="text-2xl font-bold mb-6 text-card-text flex items-center gap-2">
+                        <i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> মন্তব্য
+                    </h3>
+
+                    <div class="mb-8">
+                        <div class="relative">
+                            <textarea id="comment-input" placeholder="আপনার মতামত জানান..." class="w-full p-4 rounded-xl border border-border-color bg-muted-bg text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-none shadow-inner" rows="3"></textarea>
+                        </div>
+                        <div class="flex justify-end mt-3">
+                            <button onclick="postComment('<?php echo $article["id"]; ?>')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">মন্তব্য প্রকাশ করুন</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <?php if ($article["comments"] && count($article["comments"]) > 0): ?>
+                            <?php foreach ($article["comments"] as $comment): ?>
+                                <div class="bg-muted-bg p-4 rounded-xl">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md"><?php echo strtoupper($comment["user"][0]); ?></div>
+                                        <div>
+                                            <span class="font-bold text-sm text-card-text block"><?php echo htmlspecialchars($comment["user"]); ?></span>
+                                            <span class="text-xs text-muted-text"><?php echo htmlspecialchars($comment["time"]); ?></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color"><?php echo htmlspecialchars($comment["text"]); ?></p>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-center py-8 text-muted-text">এখনও কোনো মন্তব্য নেই।</div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -328,6 +380,47 @@ if (!$article) {
             const newLang = lang === "bn" ? "en" : "bn";
             window.location.href = `?id=${articleId}&lang=${newLang}`;
         }
+
+        // Generate Table of Contents
+        document.addEventListener('DOMContentLoaded', () => {
+            const prose = document.querySelector('.prose');
+            const tocContainer = document.getElementById('toc-container');
+            
+            if (prose && tocContainer) {
+                const headers = prose.querySelectorAll('h2, h3');
+                if (headers.length === 0) {
+                    tocContainer.innerHTML = '<p class="italic opacity-50"><?php echo $lang === "bn" ? "কোনো সূচিপত্র নেই" : "No table of contents available"; ?></p>';
+                    return;
+                }
+
+                const ul = document.createElement('ul');
+                ul.className = 'space-y-2 border-l border-border-color pl-4';
+
+                headers.forEach((header, index) => {
+                    // Create ID if not exists
+                    if (!header.id) {
+                        header.id = `section-${index}`;
+                    }
+
+                    const li = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = `#${header.id}`;
+                    link.textContent = header.textContent;
+                    link.className = `block hover:text-bbcRed transition-colors ${header.tagName === 'H3' ? 'pl-4 text-xs' : 'font-bold'}`;
+                    
+                    // Smooth scroll
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        header.scrollIntoView({ behavior: 'smooth' });
+                    });
+
+                    li.appendChild(link);
+                    ul.appendChild(li);
+                });
+                
+                tocContainer.appendChild(ul);
+            }
+        });
 
         async function handleLogout() {
             try {

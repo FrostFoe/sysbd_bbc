@@ -35,6 +35,16 @@ $initialData = [
                         '<p class="font-bold text-xl md:text-2xl leading-relaxed opacity-90 border-l-4 border-bbcRed pl-4">প্রেসিডেন্ট ট্রাম্প \'তৃতীয় বিশ্বের দেশগুলো\' থেকে অভিবাসন বন্ধ করার ঘোষণা দেওয়ার কয়েক ঘণ্টা পরই এই নির্দেশনা আসে।</p><p>লরেম ইপসাম ডলর সিট আমেট, কনসেক্টেচার এডিপিসিং এলিট। সেড ডু আইউসমড টেম্পোর ইনসিডিন্ট ইউট ল্যাবোর এট ডলোর ম্যাগনা আলিকুয়া। এই প্রতিবেদনটি বিশদভাবে বিশ্লেষণ করে যে কীভাবে বর্তমান পরিস্থিতি আমাদের সমাজ ও অর্থনীতির ওপর প্রভাব ফেলছে।</p><h2>নতুন নির্দেশনা</h2><p>ব্রিচটাইমসের অনুসন্ধানে বেরিয়ে এসেছে নতুন সব তথ্য। আমাদের প্রতিনিধিরা সরেজমিনে গিয়ে এই ঘটনার পেছনের কারণগুলো খতিয়ে দেখেছেন। বিস্তারিত তথ্যের জন্য আমাদের সাথেই থাকুন।</p>',
                     "content_en" =>
                         '<p class="font-bold text-xl md:text-2xl leading-relaxed opacity-90 border-l-4 border-bbcRed pl-4">The directive comes hours after President Trump announced a halt to immigration from \'third world countries\'.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. This report analyzes in detail how the current situation is affecting our society and economy.</p><h2>New Directive</h2><p>BreachTimes\' investigation has revealed new information. Our correspondents have gone to the scene to investigate the reasons behind this incident. Stay with us for more details.</p>',
+                    "leaked_documents_bn" => json_encode([
+                        ["title" => "ঝুঁকি মূল্যায়ন প্রতিবেদন", "type" => "PDF"],
+                        ["title" => "কেপ কট ফিনান্সিয়াল সার্ভিসেস ডকস", "type" => "DOCX"],
+                        ["title" => "ডিএনবি ব্যাংক মেইল করেসপন্ডেন্স", "type" => "MSG"]
+                    ]),
+                    "leaked_documents_en" => json_encode([
+                        ["title" => "C-Risk-assessment-JPG-Shipmanagement_Cyprus_Ltd", "type" => "PDF"],
+                        ["title" => "B-Cape_Cot_FS_Ltd-Docs", "type" => "DOCX"],
+                        ["title" => "A-DNB-Bank-Asa-Mail-re-JPCD-DNB_selected", "type" => "MSG"]
+                    ]),
                 ],
                 [
                     "id" => "2",
@@ -288,8 +298,8 @@ function seedData($pdo, $data)
                 $article["category_bn"] ?? null,
             );
             $stmt = $pdo->prepare(
-                "INSERT INTO $articlesTable (id, lang, section_id, title, summary, image, timestamp, category_id, read_time, content, is_video) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO $articlesTable (id, lang, section_id, title, summary, image, timestamp, category_id, read_time, content, leaked_documents, is_video) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             );
             $stmt->execute([
                 $article["id"],
@@ -302,6 +312,7 @@ function seedData($pdo, $data)
                 $articleCategoryId_bn,
                 $article["readTime_bn"] ?? null,
                 $article["content_bn"] ?? null,
+                $article["leaked_documents_bn"] ?? null,
                 0,
             ]);
 
@@ -322,6 +333,7 @@ function seedData($pdo, $data)
                 $articleCategoryId_en,
                 $article["readTime_en"] ?? null,
                 $article["content_en"] ?? null,
+                $article["leaked_documents_en"] ?? null,
                 0,
             ]);
         }
@@ -386,6 +398,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS `articles` (
   `category_id` varchar(50) DEFAULT NULL,
   `read_time` varchar(50) DEFAULT NULL,
   `content` longtext,
+  `leaked_documents` longtext DEFAULT NULL,
   `is_video` tinyint(1) DEFAULT 0,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`, `lang`),

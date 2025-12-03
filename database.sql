@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `users` (`email`, `password`, `role`) VALUES
-('admin@breachtimes.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin'); -- password: password
+('admin@breachtimes.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` varchar(50) NOT NULL,
@@ -47,10 +47,11 @@ CREATE TABLE IF NOT EXISTS `articles` (
   `title` varchar(255) NOT NULL,
   `summary` text,
   `image` longtext,
-  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Changed to TIMESTAMP
+  `timestamp` varchar(100) DEFAULT NULL,   -- FIXED: accepts human-readable text
   `category_id` varchar(50) DEFAULT NULL,
-  `read_time` varchar(50) DEFAULT NULL, -- Kept as VARCHAR for dynamic string like "3 min"
+  `read_time` varchar(50) DEFAULT NULL,
   `content` longtext,
+  `leaked_documents` longtext DEFAULT NULL,
   `is_video` tinyint(1) DEFAULT 0,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`, `lang`),
@@ -63,11 +64,10 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `article_id` varchar(50) NOT NULL,
   `user_name` varchar(255) NOT NULL,
   `text` text NOT NULL,
-  `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Changed to TIMESTAMP
+  `time` varchar(100) DEFAULT NULL,     -- FIXED: must accept "২ ঘণ্টা আগে"
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `article_id` (`article_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 COMMIT;
