@@ -14,9 +14,6 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 }
 
 try {
-    $lang = $_GET["lang"] ?? "bn";
-    $lang = $lang === "en" ? "en" : "bn";
-
     $data = json_decode(file_get_contents("php://input"), true);
 
     if (empty($data["id"])) {
@@ -24,6 +21,8 @@ try {
     }
 
     $id = $data["id"];
+    $lang = $data["lang"] ?? "bn";
+    $lang = $lang === "en" ? "en" : "bn";
 
     // Delete section for this language
     $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ? AND lang = ?");
@@ -31,7 +30,7 @@ try {
 
     echo json_encode([
         "success" => true,
-        "message" => "Section deleted",
+        "message" => "সেকশন মুছে ফেলা হয়েছে",
     ]);
 } catch (Exception $e) {
     http_response_code(500);

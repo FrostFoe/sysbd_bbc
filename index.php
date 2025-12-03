@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once "includes/functions.php";
 $user = isset($_SESSION["user_email"]) ? $_SESSION["user_email"] : null;
 $isAdmin = isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin";
 $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";

@@ -14,22 +14,28 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 }
 
 try {
-    $lang = $_GET["lang"] ?? "bn";
-    $lang = $lang === "en" ? "en" : "bn";
-
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (empty($data["id"]) || empty($data["title"]) || empty($data["type"])) {
-        throw new Exception("Missing required fields");
+    if (empty($data["id"]) || empty($data["type"])) {
+        throw new Exception("Missing required fields: id and type");
     }
 
     $id = $data["id"];
-    $title = $data["title"];
+    $title_bn = $data["title_bn"] ?? null;
+    $title_en = $data["title_en"] ?? null;
     $type = $data["type"];
     $highlight_color = $data["highlight_color"] ?? null;
     $associated_category = $data["associated_category"] ?? null;
     $style = $data["style"] ?? null;
     $sort_order = $data["sort_order"] ?? 0;
+    $lang = $data["lang"] ?? "bn";
+    $lang = $lang === "en" ? "en" : "bn";
+
+    // Get the title for the current language
+    $title = $lang === "en" ? $title_en : $title_bn;
+    if (empty($title)) {
+        throw new Exception("Title is required for the selected language");
+    }
 
     // Check if section exists for this language
     $stmt = $pdo->prepare("SELECT id FROM sections WHERE id = ? AND lang = ?");
@@ -51,6 +57,7 @@ try {
             $id,
             $lang,
         ]);
+        $message = "সেকশন আপডেট হয়েছে";
     } else {
         // Insert
         $stmt = $pdo->prepare(
@@ -66,11 +73,12 @@ try {
             $style,
             $sort_order,
         ]);
+        $message = "সেকশন তৈরি হয়েছে";
     }
 
     echo json_encode([
         "success" => true,
-        "message" => $exists ? "Section updated" : "Section created",
+        "message" => $message,
     ]);
 } catch (Exception $e) {
     http_response_code(500);

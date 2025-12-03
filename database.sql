@@ -26,17 +26,6 @@ CREATE TABLE IF NOT EXISTS `categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `categories` (`id`, `title_bn`, `title_en`, `color`) VALUES
-('news', 'খবর', 'News', '#b80000'),
-('sport', 'খেলা', 'Sport', '#ff6b35'),
-('business', 'ব্যবসা', 'Business', '#00a8e8'),
-('innovation', 'উদ্ভাবন', 'Innovation', '#00c9a7'),
-('culture', 'সংস্কৃতি', 'Culture', '#9c27b0'),
-('arts', 'শিল্প', 'Arts', '#f57c00'),
-('travel', 'ভ্রমণ', 'Travel', '#1976d2'),
-('audio', 'অডিও', 'Audio', '#7b1fa2'),
-('video', 'ভিডিও', 'Video', '#d32f2f');
-
 CREATE TABLE IF NOT EXISTS `sections` (
   `id` varchar(50) NOT NULL,
   `lang` enum('bn','en') NOT NULL DEFAULT 'bn',

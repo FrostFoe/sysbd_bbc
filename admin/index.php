@@ -42,6 +42,7 @@ $data = get_data($lang);
                 </div>
                 <div class="flex gap-2">
                     <button onclick="openEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all" id="add-article-btn"><i data-lucide="plus-circle" class="w-5 h-5"></i> <span data-translate="new_article">নতুন সংবাদ</span></button>
+                    <button onclick="openSectionEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all hidden" id="add-section-btn"><i data-lucide="plus-circle" class="w-5 h-5"></i> নতুন সেকশন</button>
                     <button onclick="openCategoryEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all hidden" id="add-category-btn"><i data-lucide="plus-circle" class="w-5 h-5"></i> নতুন বিভাগ</button>
                 </div>
             </div>
@@ -49,6 +50,7 @@ $data = get_data($lang);
             <div class="mb-4 border-b border-border-color">
                 <nav class="flex -mb-px gap-6 flex-wrap" aria-label="Tabs">
                     <button onclick="switchTab('articles')" id="tab-articles" class="articles-tab border-bbcRed text-bbcRed whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer">সংবাদ (Articles)</button>
+                    <button onclick="switchTab('sections')" id="tab-sections" class="sections-tab border-transparent text-muted-text hover:text-card-text hover:border-border-color whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer">সেকশন (Sections)</button>
                     <button onclick="switchTab('categories')" id="tab-categories" class="categories-tab border-transparent text-muted-text hover:text-card-text hover:border-border-color whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer">বিভাগ (Categories)</button>
                     <a href="?lang=bn" class="ml-auto <?php echo $lang === "bn"
                         ? "border-bbcRed text-bbcRed"
@@ -135,6 +137,23 @@ $data = get_data($lang);
                     </tbody>
                 </table>
             </div>
+
+            <!-- Sections Section -->
+            <div id="sections-section" class="hidden rounded-3xl shadow-soft overflow-hidden bg-card border border-border-color">
+                <table class="w-full text-left border-collapse responsive-table">
+                    <thead class="hidden md:table-header-group">
+                        <tr class="text-xs uppercase bg-muted text-muted-text">
+                            <th class="p-6">ID</th>
+                            <th class="p-6">শিরোনাম</th>
+                            <th class="p-6">ধরন</th>
+                            <th class="p-6">বিভাগ</th>
+                            <th class="p-6 text-right">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border-color text-card-text" id="sections-table-body">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -167,6 +186,56 @@ $data = get_data($lang);
                 
                 <div class="pt-4 flex justify-end gap-3 border-t border-border-color">
                     <button type="button" onclick="closeCategoryEditor()" class="px-6 py-2.5 rounded-lg font-bold text-muted-text hover:bg-muted-bg transition-colors">বাতিল</button>
+                    <button type="submit" class="bg-bbcRed text-white px-8 py-2.5 rounded-lg font-bold shadow-lg hover:opacity-90 transition-all">সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Section Modal -->
+    <div id="section-modal" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-card w-full max-w-2xl rounded-2xl shadow-2xl">
+            <div class="sticky top-0 bg-card p-6 border-b border-border-color flex justify-between items-center z-10">
+                <h2 class="text-xl font-bold text-card-text" id="section-modal-title">নতুন সেকশন যোগ করুন</h2>
+                <button onclick="closeSectionEditor()" class="p-2 hover:bg-muted-bg rounded-full transition-colors text-card-text"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="sectionForm" onsubmit="saveSection(event)" class="p-6 space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-card-text">Section ID</label>
+                        <input name="id" id="section-id" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed" placeholder="e.g., vermont, indiana">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-card-text">বাংলা শিরোনাম</label>
+                        <input name="title_bn" id="section-title-bn" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-card-text">English Title</label>
+                        <input name="title_en" id="section-title-en" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-card-text">ধরন</label>
+                        <select name="type" id="section-type" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
+                            <option value="">ধরন নির্বাচন করুন</option>
+                            <option value="hero-grid">Hero Grid</option>
+                            <option value="grid">Grid</option>
+                            <option value="list">List</option>
+                            <option value="reel">Reel</option>
+                            <option value="audio">Audio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-card-text">Highlight Color</label>
+                        <input type="color" name="highlight_color" id="section-highlight-color" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed" value="#b80000">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-card-text">বিভাগ (Associated Category)</label>
+                        <input name="associated_category" id="section-associated-category" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed" placeholder="যেমন: News, Sport">
+                    </div>
+                </div>
+                
+                <div class="pt-4 flex justify-end gap-3 border-t border-border-color">
+                    <button type="button" onclick="closeSectionEditor()" class="px-6 py-2.5 rounded-lg font-bold text-muted-text hover:bg-muted-bg transition-colors">বাতিল</button>
                     <button type="submit" class="bg-bbcRed text-white px-8 py-2.5 rounded-lg font-bold shadow-lg hover:opacity-90 transition-all">সংরক্ষণ করুন</button>
                 </div>
             </form>
@@ -379,29 +448,44 @@ $data = get_data($lang);
 
         function switchTab(tab) {
             const articlesSection = document.getElementById('articles-section');
+            const sectionsSection = document.getElementById('sections-section');
             const categoriesSection = document.getElementById('categories-section');
             const tabArticles = document.getElementById('tab-articles');
+            const tabSections = document.getElementById('tab-sections');
             const tabCategories = document.getElementById('tab-categories');
             const addArticleBtn = document.getElementById('add-article-btn');
+            const addSectionBtn = document.getElementById('add-section-btn');
             const addCategoryBtn = document.getElementById('add-category-btn');
 
+            // Reset all
+            articlesSection.classList.add('hidden');
+            sectionsSection.classList.add('hidden');
+            categoriesSection.classList.add('hidden');
+            tabArticles.classList.add('border-transparent', 'text-muted-text');
+            tabArticles.classList.remove('border-bbcRed', 'text-bbcRed');
+            tabSections.classList.add('border-transparent', 'text-muted-text');
+            tabSections.classList.remove('border-bbcRed', 'text-bbcRed');
+            tabCategories.classList.add('border-transparent', 'text-muted-text');
+            tabCategories.classList.remove('border-bbcRed', 'text-bbcRed');
+            addArticleBtn.classList.add('hidden');
+            addSectionBtn.classList.add('hidden');
+            addCategoryBtn.classList.add('hidden');
+
+            // Show selected tab
             if (tab === 'articles') {
                 articlesSection.classList.remove('hidden');
-                categoriesSection.classList.add('hidden');
                 tabArticles.classList.remove('border-transparent', 'text-muted-text');
                 tabArticles.classList.add('border-bbcRed', 'text-bbcRed');
-                tabCategories.classList.add('border-transparent', 'text-muted-text');
-                tabCategories.classList.remove('border-bbcRed', 'text-bbcRed');
                 addArticleBtn.classList.remove('hidden');
-                addCategoryBtn.classList.add('hidden');
-            } else {
-                articlesSection.classList.add('hidden');
+            } else if (tab === 'sections') {
+                sectionsSection.classList.remove('hidden');
+                tabSections.classList.remove('border-transparent', 'text-muted-text');
+                tabSections.classList.add('border-bbcRed', 'text-bbcRed');
+                addSectionBtn.classList.remove('hidden');
+            } else if (tab === 'categories') {
                 categoriesSection.classList.remove('hidden');
-                tabArticles.classList.add('border-transparent', 'text-muted-text');
-                tabArticles.classList.remove('border-bbcRed', 'text-bbcRed');
                 tabCategories.classList.remove('border-transparent', 'text-muted-text');
                 tabCategories.classList.add('border-bbcRed', 'text-bbcRed');
-                addArticleBtn.classList.add('hidden');
                 addCategoryBtn.classList.remove('hidden');
             }
         }
@@ -467,6 +551,115 @@ $data = get_data($lang);
             const modal = document.getElementById('editor-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        }
+
+        // Section management functions
+        let sectionsData = [];
+
+        async function loadSections() {
+            try {
+                const res = await fetch('../api/get_sections.php?lang=' + currentLang);
+                const result = await res.json();
+                if (result.success) {
+                    sectionsData = result.data;
+                    renderSectionsTable();
+                }
+            } catch (e) {
+                console.error('Failed to load sections:', e);
+            }
+        }
+
+        function renderSectionsTable() {
+            const tbody = document.getElementById('sections-table-body');
+            tbody.innerHTML = sectionsData.map(sec => `
+                <tr class="flex flex-col md:table-row transition-colors border-b md:border-none last:border-none hover:bg-muted-bg border-border-color">
+                    <td class="p-4 md:w-1/6 font-bold text-sm text-card-text">${sec.id}</td>
+                    <td class="px-4 pb-2 md:py-4 md:w-1/4 text-card-text">${sec.title}</td>
+                    <td class="px-4 pb-2 md:py-4 md:w-1/4 text-xs bg-muted rounded px-2 py-1 w-fit text-muted-text">${sec.type}</td>
+                    <td class="px-4 pb-2 md:py-4 md:w-1/4 text-card-text text-sm">${sec.associated_category || '-'}</td>
+                    <td class="px-4 pb-4 md:py-4 md:w-1/6 text-right flex md:table-cell items-center justify-between md:justify-end">
+                        <div class="flex justify-end gap-2">
+                            <button onclick='openSectionEditor(${JSON.stringify(sec)})' class="p-2 rounded transition-colors text-blue-600 hover:bg-blue-50"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="deleteSection('${sec.id}')" class="p-2 rounded transition-colors text-red-600 hover:bg-red-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function openSectionEditor(section) {
+            const modal = document.getElementById('section-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            document.getElementById('section-modal-title').innerText = section ? 'সেকশন এডিট করুন' : 'নতুন সেকশন যোগ করুন';
+            document.getElementById('section-id').value = section ? section.id : '';
+            document.getElementById('section-id').disabled = section ? true : false;
+            document.getElementById('section-title-bn').value = section ? section.title_bn || section.title : '';
+            document.getElementById('section-title-en').value = section ? section.title_en || section.title : '';
+            document.getElementById('section-type').value = section ? section.type : '';
+            document.getElementById('section-highlight-color').value = section ? section.highlight_color : '#b80000';
+            document.getElementById('section-associated-category').value = section ? section.associated_category : '';
+        }
+
+        function closeSectionEditor() {
+            const modal = document.getElementById('section-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('sectionForm').reset();
+        }
+
+        async function saveSection(event) {
+            event.preventDefault();
+            const id = document.getElementById('section-id').value;
+            const title_bn = document.getElementById('section-title-bn').value;
+            const title_en = document.getElementById('section-title-en').value;
+            const type = document.getElementById('section-type').value;
+            const highlight_color = document.getElementById('section-highlight-color').value;
+            const associated_category = document.getElementById('section-associated-category').value;
+            const lang = currentLang;
+
+            try {
+                const res = await fetch('../api/save_section.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, title_bn, title_en, type, highlight_color, associated_category, lang })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToastMsg(result.message || 'সেকশন সংরক্ষিত হয়েছে');
+                    closeSectionEditor();
+                    loadSections();
+                } else {
+                    showToastMsg(result.message || 'ত্রুটি হয়েছে');
+                }
+            } catch (e) {
+                console.error(e);
+                showToastMsg('সার্ভার ত্রুটি');
+            }
+        }
+
+        async function deleteSection(id) {
+            if (!confirm('এই সেকশন মুছে ফেলবেন?')) return;
+            
+            try {
+                const res = await fetch('../api/delete_section.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, lang: currentLang })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToastMsg(result.message || 'সেকশন মুছে ফেলা হয়েছে');
+                    loadSections();
+                } else {
+                    showToastMsg(result.message || 'ত্রুটি হয়েছে');
+                }
+            } catch (e) {
+                console.error(e);
+                showToastMsg('সার্ভার ত্রুটি');
+            }
         }
 
         async function saveArticle(event) {
@@ -592,6 +785,7 @@ $data = get_data($lang);
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadCategories();
+            loadSections();
         });
     </script>
 </body>
