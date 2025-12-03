@@ -52,7 +52,7 @@
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">
     <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        <a href="index.php" class="absolute top-6 right-6 text-muted-text hover:text-card-text p-2 rounded-full hover:bg-muted-bg transition-all">
+        <a href="../index.php" class="absolute top-6 right-6 text-muted-text hover:text-card-text p-2 rounded-full hover:bg-muted-bg transition-all">
             <i data-lucide="x" class="w-8 h-8"></i>
         </a>
         <div class="bg-card p-8 md:p-12 w-full max-w-[480px] shadow-2xl rounded-2xl border border-border-color text-center relative overflow-hidden">
@@ -73,7 +73,7 @@
             </form>
             
             <div class="mt-6 text-sm text-card-text">
-                অ্যাকাউন্ট নেই? <a href="register.php" class="text-bbcRed font-bold hover:underline">নিবন্ধন করুন</a>
+                অ্যাকাউন্ট নেই? <a href="../register.php" class="text-bbcRed font-bold hover:underline">নিবন্ধন করুন</a>
             </div>
         </div>
     </div>
@@ -95,7 +95,7 @@
             const data = Object.fromEntries(formData.entries());
             
             try {
-                const res = await fetch('api/login.php', {
+                const res = await fetch('../api/login.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)

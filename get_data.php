@@ -5,9 +5,13 @@ function get_data($lang = "bn")
 {
     global $pdo;
 
-    $suffix = $lang === "en" ? "_en" : "";
+    // Validate language
+    $lang = ($lang === "en") ? "en" : "bn";
 
-    $stmt = $pdo->query("SELECT * FROM sections{$suffix} ORDER BY sort_order ASC");
+    $stmt = $pdo->prepare(
+        "SELECT * FROM sections WHERE lang = ? ORDER BY sort_order ASC"
+    );
+    $stmt->execute([$lang]);
     $sections = $stmt->fetchAll();
 
     $data = ["sections" => []];
@@ -24,19 +28,36 @@ function get_data($lang = "bn")
         ];
 
         $stmt = $pdo->prepare(
-            "SELECT * FROM articles{$suffix} WHERE section_id = ? ORDER BY created_at DESC",
+            "SELECT * FROM articles WHERE section_id = ? AND lang = ? ORDER BY created_at DESC"
         );
-        $stmt->execute([$section["id"]]);
+        $stmt->execute([$section["id"], $lang]);
         $articles = $stmt->fetchAll();
 
         foreach ($articles as $article) {
+            // Fetch category name
+            $categoryName = null;
+            if (!empty($article["category_id"])) {
+                $stmt = $pdo->prepare(
+                    "SELECT title_bn, title_en FROM categories WHERE id = ?"
+                );
+                $stmt->execute([$article["category_id"]]);
+                $categoryData = $stmt->fetch();
+                $categoryName = $categoryData
+                    ? ($lang === "en"
+                        ? $categoryData["title_en"]
+                        : $categoryData["title_bn"])
+                    : null;
+            }
+
             $articleData = [
                 "id" => $article["id"],
                 "title" => $article["title"],
                 "summary" => $article["summary"],
                 "image" => $article["image"],
                 "timestamp" => $article["timestamp"],
-                "category" => $article["category"],
+                "category" =>
+                    $categoryName ?? ($lang === "bn" ? "অন্যান্য" : "Other"),
+                "category_id" => $article["category_id"] ?? null,
                 "readTime" => $article["read_time"],
                 "content" => $article["content"],
                 "isVideo" => (bool) $article["is_video"],
@@ -44,7 +65,7 @@ function get_data($lang = "bn")
             ];
 
             $stmt = $pdo->prepare(
-                "SELECT user_name as user, text, time FROM comments{$suffix} WHERE article_id = ? ORDER BY created_at DESC",
+                "SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC"
             );
             $stmt->execute([$article["id"]]);
             $articleData["comments"] = $stmt->fetchAll();
@@ -58,9 +79,11 @@ function get_data($lang = "bn")
     return $data;
 }
 
-$lang = isset($_GET["lang"]) ? $_GET["lang"] : "bn";
-$data = get_data($lang);
+if (count(debug_backtrace()) == 0) {
+    $lang = isset($_GET["lang"]) ? $_GET["lang"] : "bn";
+    $data = get_data($lang);
 
-header("Content-Type: application/json");
-echo json_encode($data);
+    header("Content-Type: application/json");
+    echo json_encode($data);
+}
 ?>

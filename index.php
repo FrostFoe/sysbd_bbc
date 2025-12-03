@@ -11,7 +11,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BreachTimes | অনুসন্ধানী সাংবাদিকতা</title>
+    <title>BreachTimes | Investigating Journalism</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -301,51 +301,166 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     <input type="file" id="import-input" class="hidden" accept=".json" onchange="importData(this)" />
 
     <script>
-        const PLACEHOLDER_IMAGE =
-            "https://placehold.co/600x400/1a1a1a/FFF?text=BreachTimes";
+        const PLACEHOLDER_IMAGE = "https://placehold.co/600x400/1a1a1a/FFF?text=BreachTimes";
         let quillEditor = null;
 
-        const initialConfig = {
-            breakingNews:
-                "ডিসি ঘটনার পর সব আশ্রয় প্রার্থনার সিদ্ধান্ত স্থগিত করেছে যুক্তরাষ্ট্র",
-            adText: "স্পেস উপলব্ধ",
-            menuItems: [
-                { label: "হোম", id: "home", icon: "layout" },
-                { label: "খবর", id: "news", icon: "newspaper" },
-                { label: "খেলা", id: "sport", icon: "trophy" },
-                { label: "ব্যবসা", id: "business", icon: "bar-chart-2" },
-                { label: "উদ্ভাবন", id: "innovation", icon: "zap" },
-                { label: "সংস্কৃতি", id: "culture", icon: "globe" },
-                { label: "শিল্পকলা", id: "arts", icon: "pen-tool" },
-                { label: "ভ্রমণ", id: "travel", icon: "map-pin" },
-                { label: "অডিও", id: "audio", icon: "headset" },
-                { label: "ভিডিও", id: "video", icon: "tv" },
-                { label: "সংরক্ষিত", id: "saved", icon: "bookmark" },
-            ],
+        const translations = {
+            en: {
+                breaking: "Breaking",
+                breaking_news: "US suspends all asylum applications after DC incident",
+                ad_text: "Space available",
+                advertisement: "Advertisement",
+                home: "Home",
+                news: "News",
+                sport: "Sport",
+                business: "Business",
+                innovation: "Innovation",
+                culture: "Culture",
+                arts: "Arts",
+                travel: "Travel",
+                audio: "Audio",
+                video: "Video",
+                saved: "Saved",
+                weather_in: "Weather in",
+                dhaka: "Dhaka",
+                weather: "Weather",
+                removed: "Removed",
+                saved_successfully: "Saved successfully!",
+                bengali_digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                admin_access_denied: "Access denied! Please login as an admin.",
+                link_copied: "Link copied to clipboard",
+                please_write_something: "Please write something!",
+                unknown_user: "Unknown User",
+                comment_posted: "Comment posted! Reloading...",
+                error_occurred: "An error occurred!",
+                server_error: "Server error!",
+                all: "All",
+                no_saved_articles: "No saved articles",
+                bookmark_your_favorites: "Bookmark your favorite stories.",
+                no_news_in_this_category: "No news in this category",
+                more_world_news: "More World News",
+                business_news: "Business",
+                menu: "Menu",
+                search_placeholder: "What are you looking for?...",
+                share: "Share",
+                read_more: "Read More",
+                comments: "Comments",
+                post_comment: "Post Comment",
+                post_comment_placeholder: "Share your thoughts...",
+                no_comments_yet: "No comments yet.",
+                subscribe_newsletter: "Subscribe to our newsletter for breaking news and analysis first.",
+                your_email: "Your email address",
+                subscribe: "Subscribe",
+                subscribed_successfully: "Subscribed successfully!",
+                copyright: "© 2025 BreachTimes. All rights reserved.",
+                welcome: "Welcome",
+                admin_panel: "Admin Panel",
+                sign_out: "Sign Out",
+                sign_in: "Sign In",
+                register: "Register",
+                image_upload_success: "Image uploaded successfully!",
+                data_restored: "Data restored successfully!",
+                invalid_file_format: "Invalid file format!",
+                file_read_error: "Error reading file!",
+                data_downloaded: "Data downloaded!",
+            },
+            bn: {
+                breaking: "ব্রেকিং",
+                breaking_news: "ডিসি ঘটনার পর সব আশ্রয় প্রার্থনার সিদ্ধান্ত স্থগিত করেছে যুক্তরাষ্ট্র",
+                ad_text: "স্পেস উপলব্ধ",
+                advertisement: "বিজ্ঞাপন",
+                home: "হোম",
+                news: "খবর",
+                sport: "খেলা",
+                business: "ব্যবসা",
+                innovation: "উদ্ভাবন",
+                culture: "সংস্কৃতি",
+                arts: "শিল্পকলা",
+                travel: "ভ্রমণ",
+                audio: "অডিও",
+                video: "ভিডিও",
+                saved: "সংরক্ষিত",
+                weather_in: "আবহাওয়া",
+                dhaka: "ঢাকা",
+                weather: "আবহাওয়া",
+                removed: "সরানো হয়েছে",
+                saved_successfully: "সংরক্ষিত হয়েছে!",
+                bengali_digits: ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"],
+                admin_access_denied: "অ্যাক্সেস নেই! অ্যাডমিন হিসেবে লগইন করুন।",
+                link_copied: "লিঙ্ক ক্লিপবোর্ডে কপি করা হয়েছে",
+                please_write_something: "অনুগ্রহ করে কিছু লিখুন!",
+                unknown_user: "অজ্ঞাত ব্যবহারকারী",
+                comment_posted: "মন্তব্য প্রকাশিত হয়েছে! পেজ রিলোড হচ্ছে...",
+                error_occurred: "সমস্যা হয়েছে!",
+                server_error: "সার্ভার এরর!",
+                all: "সব দেখুন",
+                no_saved_articles: "কোনো সংরক্ষিত নিবন্ধ নেই",
+                bookmark_your_favorites: "আপনার পছন্দের খবরগুলো বুকমার্ক করে রাখুন।",
+                no_news_in_this_category: "এই বিভাগে কোনো খবর নেই",
+                more_world_news: "আরও বিশ্ব সংবাদ",
+                business_news: "ব্যবসা",
+                menu: "মেনু",
+                search_placeholder: "কি খুঁজতে চান?...",
+                share: "শেয়ার",
+                read_more: "আরও পড়ুন",
+                comments: "মন্তব্যসমূহ",
+                post_comment: "মন্তব্য প্রকাশ করুন",
+                post_comment_placeholder: "আপনার মতামত জানান...",
+                no_comments_yet: "এখনও কোনো মন্তব্য নেই।",
+                subscribe_newsletter: "সবার আগে ব্রেকিং নিউজ এবং বিশ্লেষণ পেতে আপনার ইমেইল দিয়ে সাবস্ক্রাইব করুন।",
+                your_email: "আপনার ইমেইল ঠিকানা",
+                subscribe: "সাবস্ক্রাইব",
+                subscribed_successfully: "সাবস্ক্রাইব করা হয়েছে!",
+                copyright: "© ২০২৫ ব্রিচটাইমস। সর্বস্বত্ব সংরক্ষিত।",
+                welcome: "স্বাগতম",
+                admin_panel: "অ্যাডমিন প্যানেল",
+                sign_out: "সাইন আউট",
+                sign_in: "সাইন ইন",
+                register: "নিবন্ধন",
+                image_upload_success: "ছবি আপলোড সম্পন্ন!",
+                data_restored: "ডাটা রিস্টোর সফল হয়েছে!",
+                invalid_file_format: "ভুল ফরম্যাটের ফাইল!",
+                file_read_error: "ফাইল রিড করতে সমস্যা হয়েছে!",
+                data_downloaded: "ডাটা ডাউনলোড হয়েছে!",
+            },
         };
 
         const initialData = { sections: [] };
 
         const CATEGORY_MAP = {
-            news: "খবর",
-            sport: "খেলা",
-            business: "ব্যবসা",
-            innovation: "উদ্ভাবন",
-            culture: "সংস্কৃতি",
-            arts: "শিল্পকলা",
-            travel: "ভ্রমণ",
-            earth: "পৃথিবী",
-            audio: "অডিও",
-            video: "ভিডিও",
-            live: "লাইভ",
+            en: {
+                news: "News",
+                sport: "Sport",
+                business: "Business",
+                innovation: "Innovation",
+                culture: "Culture",
+                arts: "Arts",
+                travel: "Travel",
+                earth: "Earth",
+                audio: "Audio",
+                video: "Video",
+                live: "Live",
+            },
+            bn: {
+                news: "খবর",
+                sport: "খেলা",
+                business: "ব্যবসা",
+                innovation: "উদ্ভাবন",
+                culture: "সংস্কৃতি",
+                arts: "শিল্পকলা",
+                travel: "ভ্রমণ",
+                earth: "পৃথিবী",
+                audio: "অডিও",
+                video: "ভিডিও",
+                live: "লাইভ",
+            }
         };
 
-        function getCategoryKey(value) {
-            return Object.keys(CATEGORY_MAP).find(key => CATEGORY_MAP[key] === value) || value;
+        function getCategoryKey(value, lang) {
+            return Object.keys(CATEGORY_MAP[lang]).find(key => CATEGORY_MAP[lang][key] === value) || value;
         }
 
         const state = {
-            siteConfig: initialConfig,
             bbcData: initialData,
             view: "home",
             category: "<?php echo htmlspecialchars($initialCategory); ?>",
@@ -374,21 +489,25 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             tempAssociates: [],
             tempEvidence: [],
         };
+        
+        const t = (key) => translations[state.language][key] || key;
 
         function init() {
             loadStateFromStorage();
-            fetchBbcData();
-            fetchWeather(); // Call Weather API
 
             const savedTheme = localStorage.getItem("breachtimes-theme");
-            const systemDark = window.matchMedia(
-                "(prefers-color-scheme: dark)",
-            ).matches;
+            const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
             const savedLanguage = localStorage.getItem("breachtimes-language");
             if (savedLanguage) {
                 state.language = savedLanguage;
             }
+            
+            document.documentElement.lang = state.language;
+
+            fetchBbcData();
+            fetchWeather(); // Call Weather API
+
 
             if (savedTheme === "dark" || (!savedTheme && systemDark)) {
                 state.darkMode = true;
@@ -457,8 +576,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200">
                             <i data-lucide="${icon}" class="w-5 h-5 text-bbcRed"></i>
                             <div class="flex flex-col leading-none">
-                                <span class="font-bold text-xs">ঢাকা</span>
-                                <span class="text-xs text-muted-text mt-0.5 font-bold">${translateNumber(Math.round(temp))}° সে.</span>
+                                <span class="font-bold text-xs">${t('dhaka')}</span>
+                                <span class="text-xs text-muted-text mt-0.5 font-bold">${translateNumber(Math.round(temp))}° C</span>
                             </div>
                         </div>
                     `;
@@ -471,7 +590,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     weatherContainer.innerHTML = `
                         <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200 opacity-50">
                             <i data-lucide="cloud-off" class="w-4 h-4"></i>
-                            <span class="text-xs">আবহাওয়া</span>
+                            <span class="text-xs">${t('weather')}</span>
                         </div>
                     `;
                     lucide.createIcons();
@@ -488,7 +607,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 const urlInput = document.querySelector('input[name="image"]');
                 if (urlInput) {
                     urlInput.value = e.target.result;
-                    showToastMsg("ছবি আপলোড সম্পন্ন!");
+                    showToastMsg(t('image_upload_success'));
                 }
             };
             reader.readAsDataURL(file);
@@ -504,7 +623,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            showToastMsg("ডাটা ডাউনলোড হয়েছে!");
+            showToastMsg(t('data_downloaded'));
         }
 
         function triggerImport() {
@@ -522,14 +641,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     if (data.sections && Array.isArray(data.sections)) {
                         state.bbcData = data;
                         saveStateToStorage();
-                        showToastMsg("ডাটা রিস্টোর সফল হয়েছে!");
+                        showToastMsg(t('data_restored'));
                         render();
                     } else {
-                        showToastMsg("ভুল ফরম্যাটের ফাইল!");
+                        showToastMsg(t('invalid_file_format'));
                     }
                 } catch (err) {
                     console.error(err);
-                    showToastMsg("ফাইল রিড করতে সমস্যা হয়েছে!");
+                    showToastMsg(t('file_read_error'));
                 }
             };
             reader.readAsText(file);
@@ -541,16 +660,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
         function loadStateFromStorage() {
             const savedBookmarks = localStorage.getItem("breachtimes-bookmarks");
-
-            /*
-            if (savedData) {
-                try {
-                    state.bbcData = JSON.parse(savedData);
-                } catch (e) {
-                    console.error("Data load error", e);
-                }
-            }
-            */
             if (savedBookmarks) {
                 try {
                     state.bookmarks = JSON.parse(savedBookmarks);
@@ -632,22 +741,21 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             let newBookmarks;
             if (isSaved) {
                 newBookmarks = state.bookmarks.filter((b) => b !== id);
-                showToastMsg("সরানো হয়েছে");
+                showToastMsg(t('removed'));
             } else {
                 newBookmarks = [...state.bookmarks, id];
-                showToastMsg("সংরক্ষিত হয়েছে!");
+                showToastMsg(t('saved_successfully'));
             }
             setState({ bookmarks: newBookmarks });
             saveStateToStorage();
         }
 
         function translateNumber(num) {
-            const banglaDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-            return num
-                .toString()
-                .split("")
-                .map((d) => banglaDigits[parseInt(d)] || d)
-                .join("");
+            if (state.language === 'bn') {
+                const banglaDigits = t('bengali_digits');
+                return num.toString().split("").map((d) => banglaDigits[parseInt(d)] || d).join("");
+            }
+            return num.toString();
         }
 
         function toggleTheme() {
@@ -667,13 +775,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const newLang = state.language === "bn" ? "en" : "bn";
             setState({ language: newLang });
             localStorage.setItem("breachtimes-language", newLang);
+            document.documentElement.lang = newLang;
             fetchBbcData();
         }
 
         function navigate(id, pushState = true) {
             if (id === "admin") {
                 if (!state.isAdmin) {
-                    showToastMsg("অ্যাক্সেস নেই! অ্যাডমিন হিসেবে লগইন করুন।");
+                    showToastMsg(t('admin_access_denied'));
                     return;
                 }
                 setState({
@@ -719,7 +828,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 tempInput.select();
                 document.execCommand("copy");
                 document.body.removeChild(tempInput);
-                showToastMsg("লিঙ্ক ক্লিপবোর্ডে কপি করা হয়েছে");
+                showToastMsg(t('link_copied'));
             }
         }
 
@@ -728,30 +837,30 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const text = input ? input.value.trim() : "";
 
             if (!text) {
-                showToastMsg("অনুগ্রহ করে কিছু লিখুন!");
+                showToastMsg(t('please_write_something'));
                 return;
             }
 
             const userName = state.user
                 ? state.user.split("@")[0]
-                : "অজ্ঞাত ব্যবহারকারী";
+                : t('unknown_user');
 
             try {
                 const res = await fetch('api/post_comment.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ articleId, user: userName, text })
+                    body: JSON.stringify({ articleId, user: userName, text, lang: state.language })
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToastMsg("মন্তব্য প্রকাশিত হয়েছে! পেজ রিলোড হচ্ছে...");
+                    showToastMsg(t('comment_posted'));
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToastMsg("সমস্যা হয়েছে!");
+                    showToastMsg(t('error_occurred'));
                 }
             } catch (e) {
                 console.error(e);
-                showToastMsg("সার্ভার এরর!");
+                showToastMsg(t('server_error'));
             }
         }
 
@@ -846,18 +955,18 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             ${bookmarkBtn}
                         </div>
-                        ${article.isVideo ? `<div class="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded-full backdrop-blur-sm text-xs flex items-center gap-1"><i data-lucide="play" class="w-3 h-3 fill-white"></i> ভিডিও</div>` : ""}
+                        ${article.isVideo ? `<div class="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded-full backdrop-blur-sm text-xs flex items-center gap-1"><i data-lucide="play" class="w-3 h-3 fill-white"></i> ${t('video')}</div>` : ""}
                         <div class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
                     </div>
                     <div class="flex flex-col flex-grow p-5">
                         <div class="mb-2 flex items-center gap-2">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-bbcRed bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded">${article.category}</span>
-                            <span class="text-[10px] text-muted-text">• ${article.timestamp || "সদ্য"}</span>
+                            <span class="text-[10px] text-muted-text">• ${article.timestamp || (state.language === 'bn' ? "সদ্য" : "Just now")}</span>
                         </div>
                         <h3 class="text-lg md:text-xl font-bold mb-3 leading-tight group-hover:text-bbcRed transition-colors ${textColor}">${article.title}</h3>
                         ${type === "hero-grid" && article.summary ? `<p class="${subTextColor} text-sm leading-relaxed mb-4 line-clamp-3">${article.summary}</p>` : ""}
                         <div class="mt-auto pt-3 border-t ${borderClass} flex items-center justify-between text-xs ${metaColor}">
-                            <span class="flex items-center gap-1 group-hover:translate-x-1 transition-transform">আরও পড়ুন <i data-lucide="chevron-right" class="w-3 h-3"></i></span>
+                            <span class="flex items-center gap-1 group-hover:translate-x-1 transition-transform">${t('read_more')} <i data-lucide="chevron-right" class="w-3 h-3"></i></span>
                             ${readTimeBadge}
                         </div>
                     </div>
@@ -939,7 +1048,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                             <span class="w-2 h-8 rounded-full" style="background-color: ${borderColor}"></span>
                             ${section.title}
                         </h2>
-                        ${section.type !== "hero-grid" ? `<a href="?category=${getCategoryKey(section.associatedCategory)}" class="text-sm font-bold hover:text-bbcRed transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 ${titleColor}">সব দেখুন <i data-lucide="chevron-right" class="w-4 h-4"></i></a>` : ""}
+                        ${section.type !== "hero-grid" ? `<a href="?category=${getCategoryKey(section.associatedCategory, state.language)}" class="text-sm font-bold hover:text-bbcRed transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 ${titleColor}">${t('all')} <i data-lucide="chevron-right" class="w-4 h-4"></i></a>` : ""}
                     </div>
                     ${content}
                     ${section.style === "dark" ? `<div class="absolute -right-20 -bottom-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>` : ""}
@@ -964,33 +1073,33 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                             <div class="bg-muted-bg p-6 rounded-full mb-4">
                                 <i data-lucide="bookmark" class="w-12 h-12 text-gray-400"></i>
                             </div>
-                            <h3 class="text-2xl font-bold mb-2 ${emptyStateColor}">কোনো সংরক্ষিত নিবন্ধ নেই</h3>
-                            <p class="text-muted-text">আপনার পছন্দের খবরগুলো বুকমার্ক করে রাখুন।</p>
+                            <h3 class="text-2xl font-bold mb-2 ${emptyStateColor}">${t('no_saved_articles')}</h3>
+                            <p class="text-muted-text">${t('bookmark_your_favorites')}</p>
                         </div>
                     `;
                 }
                 sectionsToRender = [
                     {
                         id: "saved",
-                        title: "সংরক্ষিত নিবন্ধ",
+                        title: t('saved'),
                         type: "grid",
                         articles: savedArticles,
                     },
                 ];
             } else if (state.category !== "home") {
-                const target = CATEGORY_MAP[state.category] || state.category;
+                const target = CATEGORY_MAP[state.language][state.category] || state.category;
                 sectionsToRender = state.bbcData.sections.filter(
                     (s) => s.associatedCategory === target || s.title.includes(target),
                 );
             }
 
-            if (sectionsToRender.length === 0) {
+            if (!sectionsToRender || sectionsToRender.length === 0) {
                 return `
                     <div class="flex flex-col items-center justify-center py-32 text-center animate-fade-in">
                         <div class="bg-muted-bg p-6 rounded-full mb-4">
                             <i data-lucide="newspaper" class="w-12 h-12 text-gray-400"></i>
                         </div>
-                        <h3 class="text-2xl font-bold mb-2 ${emptyStateColor}">এই বিভাগে কোনো খবর নেই</h3>
+                        <h3 class="text-2xl font-bold mb-2 ${emptyStateColor}">${t('no_news_in_this_category')}</h3>
                     </div>
                 `;
             }
@@ -1036,7 +1145,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                             <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color h-full">
                                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color">
                                     <div class="w-1.5 h-6 rounded-full bg-blue-500"></div>
-                                    <h3 class="text-xl font-bold ${titleColor}">আরও বিশ্ব সংবাদ</h3>
+                                    <h3 class="text-xl font-bold ${titleColor}">${t('more_world_news')}</h3>
                                 </div>
                                 ${worldNews ? renderMiniList(worldNews.articles.slice(0, 3), "text-blue-500") : ""}
                             </div>
@@ -1045,7 +1154,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                             <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color h-full">
                                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color">
                                     <div class="w-1.5 h-6 rounded-full bg-green-500"></div>
-                                    <h3 class="text-xl font-bold ${titleColor}">ব্যবসা</h3>
+                                    <h3 class="text-xl font-bold ${titleColor}">${t('business_news')}</h3>
                                 </div>
                                 ${businessNews ? renderMiniList(businessNews.articles.slice(2, 5), "text-green-500") : ""}
                             </div>
@@ -1087,7 +1196,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const {
                 view,
                 showBreaking,
-                siteConfig,
                 user,
                 darkMode,
                 isMobileMenuOpen,
@@ -1129,8 +1237,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             return `
                 <div class="fixed top-0 left-0 right-0 bg-bbcRed text-white text-xs md:text-sm font-medium py-2 px-4 flex justify-between items-center z-[100]">
                     <div class="flex items-center gap-3 max-w-[1380px] mx-auto w-full px-2">
-                        <span class="uppercase animate-pulse font-bold tracking-widest text-[10px] bg-white/20 px-2 py-0.5 rounded">ব্রেকিং</span>
-                        <span class="truncate opacity-95 hover:opacity-100 cursor-pointer">${state.siteConfig.breakingNews}</span>
+                        <span class="uppercase animate-pulse font-bold tracking-widest text-[10px] bg-white/20 px-2 py-0.5 rounded">${t('breaking')}</span>
+                        <span class="truncate opacity-95 hover:opacity-100 cursor-pointer">${t('breaking_news')}</span>
                     </div>
                     <button onclick="setState({showBreaking: false})" class="hover:bg-black/20 rounded-full p-1 transition-colors ml-2"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
@@ -1138,16 +1246,25 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         }
 
         function renderHeader() {
-            const { user, isAdmin, darkMode, siteConfig, category } = state;
-            const navItems = siteConfig.menuItems
-                .map(
-                    (item) => `
+            const { user, isAdmin, darkMode, category } = state;
+            const menuItems = [
+                { label: t("home"), id: "home", icon: "layout" },
+                { label: t("news"), id: "news", icon: "newspaper" },
+                { label: t("sport"), id: "sport", icon: "trophy" },
+                { label: t("business"), id: "business", icon: "bar-chart-2" },
+                { label: t("innovation"), id: "innovation", icon: "zap" },
+                { label: t("culture"), id: "culture", icon: "globe" },
+                { label: t("arts"), id: "arts", icon: "pen-tool" },
+                { label: t("travel"), id: "travel", icon: "map-pin" },
+                { label: t("audio"), id: "audio", icon: "headset" },
+                { label: t("video"), id: "video", icon: "tv" },
+                { label: t("saved"), id: "saved", icon: "bookmark" },
+            ];
+            const navItems = menuItems.map((item) => `
                 <a href="?category=${item.id}" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
                     ${item.label}
                 </a>
-            `,
-                )
-                .join("");
+            `).join("");
 
             return `
                 <header class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
@@ -1182,13 +1299,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 <div class="hidden md:flex gap-3 items-center">
                                     ${user
                     ? `
-                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> অ্যাডমিন</a>` : ""}
+                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : ""}
                                         <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 btn-bounce">
-                                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${user.charAt(0).toUpperCase()}</div> সাইন আউট
+                                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${user.charAt(0).toUpperCase()}</div> ${t('sign_out')}
                                         </button>
                                     `
                     : `
-                                        <a href="login.php" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all btn-bounce">সাইন ইন</a>
+                                        <a href="login/" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all btn-bounce">${t('sign_in')}</a>
                                     `
                 }
                                 </div>
@@ -1205,8 +1322,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     ? `
                 <div class="py-8 flex flex-col items-center justify-center bg-transparent transition-colors px-4">
                     <div class="w-full max-w-[320px] md:max-w-[728px] h-[90px] flex flex-col items-center justify-center text-xs bg-gray-100 dark:bg-[#1a1a1a] text-gray-400 dark:text-gray-600 rounded-xl border border-gray-200 dark:border-gray-800/50 shadow-sm transition-all hover:shadow-md overflow-hidden">
-                        <span class="text-[10px] uppercase tracking-widest mb-1 opacity-50">বিজ্ঞাপন</span>
-                        <span class="font-medium text-center px-2">${state.siteConfig.adText}</span>
+                        <span class="text-[10px] uppercase tracking-widest mb-1 opacity-50">${t('advertisement')}</span>
+                        <span class="font-medium text-center px-2">${t('ad_text')}</span>
                     </div>
                 </div>`
                     : ""
@@ -1231,16 +1348,16 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                             <div class="col-span-1 md:col-span-2">
-                                <h3 class="font-bold text-lg mb-6 flex items-center gap-2"><i data-lucide="mail" class="w-5 h-5 text-bbcRed"></i> নিউজলেটার</h3>
-                                <p class="text-muted-text text-sm mb-4 max-w-sm">সবার আগে ব্রেকিং নিউজ এবং বিশ্লেষণ পেতে আপনার ইমেইল দিয়ে সাবস্ক্রাইব করুন।</p>
+                                <h3 class="font-bold text-lg mb-6 flex items-center gap-2"><i data-lucide="mail" class="w-5 h-5 text-bbcRed"></i> ${t('newsletter')}</h3>
+                                <p class="text-muted-text text-sm mb-4 max-w-sm">${t('subscribe_newsletter')}</p>
                                 <div class="flex flex-col sm:flex-row gap-2 max-w-md">
-                                    <input type="email" placeholder="আপনার ইমেইল ঠিকানা" class="p-3 bg-muted-bg text-card-text rounded-lg border border-border-color focus:outline-none focus:border-bbcRed flex-grow">
-                                    <button class="bg-bbcDark text-white dark:bg-white dark:text-black font-bold px-6 py-3 rounded-lg hover:opacity-90 transition-colors" onclick="showToastMsg('সাবস্ক্রাইব করা হয়েছে!')">সাবস্ক্রাইব</button>
+                                    <input type="email" placeholder="${t('your_email')}" class="p-3 bg-muted-bg text-card-text rounded-lg border border-border-color focus:outline-none focus:border-bbcRed flex-grow">
+                                    <button class="bg-bbcDark text-white dark:bg-white dark:text-black font-bold px-6 py-3 rounded-lg hover:opacity-90 transition-colors" onclick="showToastMsg(t('subscribed_successfully'))">${t('subscribe')}</button>
                                 </div>
                             </div>
                         </div>
                         <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border-color text-xs text-muted-text">
-                            <p>&copy; ২০২৫ ব্রিচটাইমস। সর্বস্বত্ব সংরক্ষিত।</p>
+                            <p>${t('copyright')}</p>
                         </div>
                     </div>
                 </footer>
@@ -1253,13 +1370,25 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 user,
                 isAdmin,
                 darkMode,
-                siteConfig,
                 category,
             } = state;
+            const menuItems = [
+                { label: t("home"), id: "home", icon: "layout" },
+                { label: t("news"), id: "news", icon: "newspaper" },
+                { label: t("sport"), id: "sport", icon: "trophy" },
+                { label: t("business"), id: "business", icon: "bar-chart-2" },
+                { label: t("innovation"), id: "innovation", icon: "zap" },
+                { label: t("culture"), id: "culture", icon: "globe" },
+                { label: t("arts"), id: "arts", icon: "pen-tool" },
+                { label: t("travel"), id: "travel", icon: "map-pin" },
+                { label: t("audio"), id: "audio", icon: "headset" },
+                { label: t("video"), id: "video", icon: "tv" },
+                { label: t("saved"), id: "saved", icon: "bookmark" },
+            ];
             return `
                 <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}">
                     <div class="flex justify-between items-center p-6 border-b border-border-color">
-                        <div class="font-bold text-2xl dark:text-white tracking-tight">মেনু</div>
+                        <div class="font-bold text-2xl dark:text-white tracking-tight">${t('menu')}</div>
                         <button onclick="setState({isMobileMenuOpen: false})" class="p-2 hover:bg-muted-bg rounded-full transition-transform hover:rotate-90 dark:text-white btn-bounce"><i data-lucide="x" class="w-8 h-8"></i></button>
                     </div>
                     <div class="p-6 h-full overflow-y-auto pb-20">
@@ -1269,33 +1398,29 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 <div class="flex flex-col gap-3">
                                     <div class="flex items-center gap-3 px-2 mb-2">
                                         <div class="w-10 h-10 rounded-full bg-bbcRed text-white flex items-center justify-center font-bold text-lg">${user.charAt(0).toUpperCase()}</div>
-                                        <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">স্বাগতম</span><span class="text-xs text-muted-text truncate max-w-[200px]">${user}</span></div>
+                                        <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">${t('welcome')}</span><span class="text-xs text-muted-text truncate max-w-[200px]">${user}</span></div>
                                     </div>
-                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> অ্যাডমিন প্যানেল</a>` : ""}
-                                    <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors btn-bounce"><i data-lucide="log-out" class="w-5 h-5"></i> সাইন আউট</button>
+                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> ${t('admin_panel')}</a>` : ""}
+                                    <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors btn-bounce"><i data-lucide="log-out" class="w-5 h-5"></i> ${t('sign_out')}</button>
                                 </div>
                             `
                     : `
                                 <div class="grid grid-cols-2 gap-4">
-                                    <a href="login.php" class="w-full py-3 bg-bbcDark dark:bg-white text-white dark:text-black rounded-xl font-bold shadow-lg btn-bounce text-center">সাইন ইন</a>
-                                    <a href="register.php" class="w-full py-3 border border-bbcDark dark:border-white text-bbcDark dark:text-white rounded-xl font-bold hover:bg-muted-bg transition-colors btn-bounce text-center">নিবন্ধন</a>
+                                    <a href="login/" class="w-full py-3 bg-bbcDark dark:bg-white text-white dark:text-black rounded-xl font-bold shadow-lg btn-bounce text-center">${t('sign_in')}</a>
+                                    <a href="register.php" class="w-full py-3 border border-bbcDark dark:border-white text-bbcDark dark:text-white rounded-xl font-bold hover:bg-muted-bg transition-colors btn-bounce text-center">${t('register')}</a>
                                 </div>
                             `
                 }
                         </div>
                         <ul class="space-y-2 font-bold text-xl text-bbcDark dark:text-gray-200">
-                             ${siteConfig.menuItems
-                    .map(
-                        (item) => `
+                             ${menuItems.map((item) => `
                                 <li class="border-b border-gray-100 dark:border-gray-800/50 pb-2 last:border-0">
                                     <a href="?category=${item.id}" class="w-full text-left py-4 flex justify-between items-center hover:text-bbcRed hover:pl-3 transition-all duration-300 group">
                                         <span class="flex items-center gap-3"><i data-lucide="${getIconName(item.icon)}" class="w-4 h-4"></i> ${item.label}</span>
                                         <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-bbcRed transition-colors"></i>
                                     </a>
                                 </li>
-                            `,
-                    )
-                    .join("")}
+                            `).join("")}
                         </ul>
                     </div>
                 </div>
@@ -1331,7 +1456,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         </div>
                         <div class="relative mb-16 group">
                             <i data-lucide="search" class="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 w-10 h-10 group-focus-within:text-bbcRed transition-colors"></i>
-                            <input type="text" placeholder="কি খুঁজতে চান?..." value="${searchQuery}" 
+                            <input type="text" placeholder="${t('search_placeholder')}" value="${searchQuery}" 
                                 oninput="handleSearch(this.value)"
                                 class="w-full py-4 pl-14 text-4xl font-bold border-b-2 border-border-color focus:border-bbcRed dark:focus:border-bbcRed outline-none bg-transparent text-bbcDark dark:text-white placeholder-gray-300 dark:placeholder-gray-700 transition-colors">
                         </div>
@@ -1386,8 +1511,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                         <span class="bg-bbcRed text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block">${article.category}</span>
                                         <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4 ${titleColor}">${article.title}</h1>
                                         <div class="flex flex-wrap items-center gap-4 text-sm ${metaColor} font-medium">
-                                            <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> ${article.timestamp || "সদ্য"}</span>
-                                            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> ${article.readTime || "৩ মিনিট"}</span>
+                                            <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> ${article.timestamp || (state.language === 'bn' ? "সদ্য" : "Just now")}</span>
+                                            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> ${article.readTime || (state.language === 'bn' ? "৩ মিনিট" : "3 min")}</span>
                                         </div>
                                     </div>
                                     <div class="mb-10 relative aspect-video bg-muted-bg rounded-2xl overflow-hidden shadow-lg">
@@ -1404,25 +1529,25 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                         </div>
                                         <div class="flex gap-3">
                                              <button onclick="handleShare()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white transition-all text-sm font-bold text-card-text">
-                                                <i data-lucide="share-2" class="w-4 h-4"></i> শেয়ার
+                                                <i data-lucide="share-2" class="w-4 h-4"></i> ${t('share')}
                                              </button>
                                              <button onclick="toggleBookmark('${article.id}')" class="p-2.5 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white text-black dark:text-white transition-all shadow-sm flex items-center justify-center group"><i data-lucide="bookmark" class="w-5 h-5" fill="${bookmarkFill}"></i></button>
                                         </div>
                                     </div>
                                     <div class="prose max-w-none font-size-${state.fontSize} space-y-8 ${proseColor} transition-all duration-300">
-                                        ${article.content || `<p>বিস্তারিত আসছে...</p>`}
+                                        ${article.content || `<p>${t('details_coming_soon')}</p>`}
                                     </div>
 
                                 </div>
 
                                 <div class="mt-8 bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
-                                    <h3 class="text-2xl font-bold mb-6 text-card-text flex items-center gap-2"><i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> মন্তব্যসমূহ</h3>
+                                    <h3 class="text-2xl font-bold mb-6 text-card-text flex items-center gap-2"><i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> ${t('comments')}</h3>
                                     <div class="mb-8">
                                         <div class="relative">
-                                            <textarea id="comment-input" placeholder="আপনার মতামত জানান..." class="w-full p-4 rounded-xl border border-border-color bg-muted-bg text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-none shadow-inner" rows="3"></textarea>
+                                            <textarea id="comment-input" placeholder="${t('post_comment_placeholder')}" class="w-full p-4 rounded-xl border border-border-color bg-muted-bg text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-none shadow-inner" rows="3"></textarea>
                                         </div>
                                         <div class="flex justify-end mt-3">
-                                            <button onclick="postComment('${article.id}')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">মন্তব্য প্রকাশ করুন</button>
+                                            <button onclick="postComment('${article.id}')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">${t('post_comment')}</button>
                                         </div>
                                     </div>
                                     <div class="space-y-6">
@@ -1444,7 +1569,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                         `,
                         )
                         .join("")
-                    : '<div class="text-center py-8 text-muted-text">এখনও কোনো মন্তব্য নেই।</div>'
+                    : `<div class="text-center py-8 text-muted-text">${t('no_comments_yet')}</div>`
                 }
                                     </div>
                                 </div>
@@ -1475,10 +1600,6 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
 
         init();
-    </script>
-</body>
-
-</html>
     </script>
 </body>
 

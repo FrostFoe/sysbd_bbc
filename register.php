@@ -70,7 +70,7 @@
             </form>
             
             <div class="mt-6 text-sm text-card-text">
-                ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="login.php" class="text-bbcRed font-bold hover:underline">লগইন করুন</a>
+                ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="login/" class="text-bbcRed font-bold hover:underline">লগইন করুন</a>
             </div>
         </div>
     </div>
