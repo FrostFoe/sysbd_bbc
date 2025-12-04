@@ -48,12 +48,12 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold mb-2">Title (বাংলা)</label>
-                            <input name="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars($article['title_bn'] ?? ''); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
+                            <input name="title_bn" id="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars($article['title_bn'] ?? ''); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Summary (বাংলা)</label>
-                            <textarea name="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars($article['summary_bn'] ?? ''); ?></textarea>
+                            <textarea name="summary_bn" id="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars($article['summary_bn'] ?? ''); ?></textarea>
                         </div>
 
                         <div>
@@ -72,12 +72,12 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold mb-2">Title (English)</label>
-                            <input name="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" value="<?php echo htmlspecialchars($article['title_en'] ?? ''); ?>" placeholder="Enter article title...">
+                            <input name="title_en" id="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" value="<?php echo htmlspecialchars($article['title_en'] ?? ''); ?>" placeholder="Enter article title...">
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Summary (English)</label>
-                            <textarea name="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars($article['summary_en'] ?? ''); ?></textarea>
+                            <textarea name="summary_en" id="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars($article['summary_en'] ?? ''); ?></textarea>
                         </div>
 
                         <div>
@@ -92,6 +92,18 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- Sidebar Settings -->
             <div class="space-y-6">
+                <!-- Restore Autosave Alert -->
+                <div id="restore-alert" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="save" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-sm font-bold text-blue-800">Unsaved Draft Found</h4>
+                            <p class="text-xs text-blue-600 mt-1">A newer version of this article was found in your browser.</p>
+                            <button type="button" onclick="restoreDraft()" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition-colors font-bold">Restore Draft</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-card p-5 rounded-xl border border-border-color shadow-sm">
                     <h3 class="font-bold mb-4 text-sm uppercase text-muted-text">Publishing</h3>
                     
@@ -228,6 +240,9 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
             const result = await res.json();
 
             if (result.success) {
+                // Clear autosave on success
+                localStorage.removeItem(storageKey);
+                
                 showToastMsg('Article saved successfully!');
                 if (!window.location.search.includes('id=')) {
                     setTimeout(() => {
@@ -240,6 +255,27 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
         } catch (err) {
             console.error(err);
             showToastMsg('Server error', 'error');
+        }
+    }
+
+    function restoreDraft() {
+        const saved = localStorage.getItem(storageKey);
+        if (!saved) return;
+        
+        try {
+            const data = JSON.parse(saved);
+            document.getElementById('title_bn').value = data.title_bn || '';
+            document.getElementById('summary_bn').value = data.summary_bn || '';
+            document.getElementById('title_en').value = data.title_en || '';
+            document.getElementById('summary_en').value = data.summary_en || '';
+            
+            if (data.content_bn) quillBn.clipboard.dangerouslyPasteHTML(0, data.content_bn);
+            if (data.content_en) quillEn.clipboard.dangerouslyPasteHTML(0, data.content_en);
+            
+            document.getElementById('restore-alert').classList.add('hidden');
+            showToastMsg('Draft restored successfully!');
+        } catch (e) {
+            console.error('Failed to restore draft', e);
         }
     }
 </script>
