@@ -21,9 +21,9 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     <!-- QuillJS CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
-    <link href="assets/styles.css" rel="stylesheet" />
+    <link href="public/assets/styles.css" rel="stylesheet" />
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="public/assets/js/lucide.js"></script>
     <!-- QuillJS Script -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
@@ -507,7 +507,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 const category = urlParams.get('category');
                 const lang = state.language;
                 
-                let apiUrl = `get_data.php?lang=${lang}`;
+                let apiUrl = `lib/get_data.php?lang=${lang}`;
                 if (category) {
                     apiUrl += `&category=${encodeURIComponent(category)}`;
                 }
@@ -723,7 +723,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             `;
 
             // Format timestamp for display
-            const displayTimestamp = formatTimestamp(article.created_at || article.timestamp);
+            const displayTimestamp = formatTimestamp(article.published_at);
             const readTimeBadge = article.readTime
                 ? `
                 <span class="text-[10px] uppercase tracking-wider opacity-80 flex items-center gap-1 font-bold">

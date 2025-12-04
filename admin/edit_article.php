@@ -1,0 +1,247 @@
+<?php
+require_once "includes/header.php";
+require_once "../config/db.php";
+
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+
+$article = null;
+if ($id) {
+    $stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
+    $stmt->execute([$id]);
+    $article = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Fetch Categories for dropdown
+$categories = $pdo->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch Sections for dropdown
+$sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold"><?php echo $article ? 'Edit Article (Unified)' : 'Create New Article (Unified)'; ?></h1>
+        <?php if ($article): ?>
+            <div class="flex gap-2">
+                <a href="../read/index.php?id=<?php echo $article['id']; ?>&lang=bn" target="_blank" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                    View (BN) <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+                <a href="../read/index.php?id=<?php echo $article['id']; ?>&lang=en" target="_blank" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                    View (EN) <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <form id="articleForm" onsubmit="saveArticle(event)" class="space-y-8">
+        <input type="hidden" name="id" value="<?php echo $article['id'] ?? uniqid('art_'); ?>">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-10">
+                
+                <!-- Bangla Section -->
+                <div class="bg-card p-6 rounded-xl border border-border-color shadow-sm relative">
+                    <div class="absolute top-0 right-0 bg-bbcRed text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">Bangla</div>
+                    <h3 class="font-bold text-lg mb-4 border-b border-border-color pb-2">Bangla Content</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Title (বাংলা)</label>
+                            <input name="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars($article['title_bn'] ?? ''); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Summary (বাংলা)</label>
+                            <textarea name="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars($article['summary_bn'] ?? ''); ?></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Content (বাংলা)</label>
+                            <div id="quill-bn" class="bg-card h-96 rounded-lg border border-border-color font-hind"></div>
+                            <input type="hidden" name="content_bn" id="content-bn-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- English Section -->
+                <div class="bg-card p-6 rounded-xl border border-border-color shadow-sm relative">
+                    <div class="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">English</div>
+                    <h3 class="font-bold text-lg mb-4 border-b border-border-color pb-2">English Content</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Title (English)</label>
+                            <input name="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" value="<?php echo htmlspecialchars($article['title_en'] ?? ''); ?>" placeholder="Enter article title...">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Summary (English)</label>
+                            <textarea name="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars($article['summary_en'] ?? ''); ?></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Content (English)</label>
+                            <div id="quill-en" class="bg-card h-96 rounded-lg border border-border-color"></div>
+                            <input type="hidden" name="content_en" id="content-en-input">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sidebar Settings -->
+            <div class="space-y-6">
+                <div class="bg-card p-5 rounded-xl border border-border-color shadow-sm">
+                    <h3 class="font-bold mb-4 text-sm uppercase text-muted-text">Publishing</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1">Status</label>
+                        <select name="status" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                            <option value="draft" <?php echo ($article['status'] ?? '') === 'draft' ? 'selected' : ''; ?>>Draft</option>
+                            <option value="published" <?php echo ($article['status'] ?? '') === 'published' ? 'selected' : ''; ?>>Published</option>
+                            <option value="archived" <?php echo ($article['status'] ?? '') === 'archived' ? 'selected' : ''; ?>>Archived</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-bbcRed text-white py-3 rounded-lg font-bold hover:opacity-90 transition-opacity text-sm uppercase tracking-wide">
+                        <?php echo $article ? 'Update All Versions' : 'Publish Article'; ?>
+                    </button>
+                </div>
+
+                <div class="bg-card p-5 rounded-xl border border-border-color shadow-sm">
+                    <h3 class="font-bold mb-4 text-sm uppercase text-muted-text">Organization</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1">Category</label>
+                        <select name="category_id" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                            <option value="">Select Category</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?php echo $cat['id']; ?>" <?php echo ($article['category_id'] ?? '') === $cat['id'] ? 'selected' : ''; ?>>
+                                    <?php echo $cat['title_bn'] . ' / ' . $cat['title_en']; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1">Section (Homepage)</label>
+                        <select name="sectionId" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                            <option value="">None</option>
+                            <?php foreach ($sections as $sec): ?>
+                                <option value="<?php echo $sec['id']; ?>" <?php echo ($article['section_id'] ?? '') === $sec['id'] ? 'selected' : ''; ?>>
+                                    <?php echo $sec['title_en']; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-card p-5 rounded-xl border border-border-color shadow-sm">
+                    <h3 class="font-bold mb-4 text-sm uppercase text-muted-text">Media</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1">Featured Image URL</label>
+                        <input name="image" id="image-url" class="w-full p-2 rounded border border-border-color bg-muted-bg text-sm" value="<?php echo htmlspecialchars($article['image'] ?? ''); ?>">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold mb-1">Or Upload</label>
+                        <input type="file" onchange="handleImageUpload(this)" class="w-full text-xs">
+                    </div>
+
+                    <div class="aspect-video bg-muted-bg rounded overflow-hidden">
+                        <img id="image-preview" src="<?php echo htmlspecialchars($article['image'] ?? ''); ?>" class="w-full h-full object-cover opacity-50">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const toolbarOptions = [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['link', 'image', 'video'],
+        ['clean']
+    ];
+
+    // Initialize Quill for Bangla
+    var quillBn = new Quill('#quill-bn', {
+        theme: 'snow',
+        modules: { toolbar: toolbarOptions },
+        placeholder: 'Write in Bangla...'
+    });
+
+    // Initialize Quill for English
+    var quillEn = new Quill('#quill-en', {
+        theme: 'snow',
+        modules: { toolbar: toolbarOptions },
+        placeholder: 'Write in English...'
+    });
+
+    // Load Content
+    <?php if ($article): ?>
+        <?php if (!empty($article['content_bn'])): ?>
+            quillBn.clipboard.dangerouslyPasteHTML(0, <?php echo json_encode($article['content_bn']); ?>);
+        <?php endif; ?>
+        <?php if (!empty($article['content_en'])): ?>
+            quillEn.clipboard.dangerouslyPasteHTML(0, <?php echo json_encode($article['content_en']); ?>);
+        <?php endif; ?>
+    <?php endif; ?>
+
+    function handleImageUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        if (file.size > 2 * 1024 * 1024) {
+            alert("File too large (max 2MB)");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('image-url').value = e.target.result;
+            document.getElementById('image-preview').src = e.target.result;
+            document.getElementById('image-preview').classList.remove('opacity-50');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function saveArticle(e) {
+        e.preventDefault();
+        
+        // Sync Quill content
+        document.getElementById('content-bn-input').value = quillBn.root.innerHTML;
+        document.getElementById('content-en-input').value = quillEn.root.innerHTML;
+
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await fetch('../api/save_article.php', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                showToastMsg('Article saved successfully!');
+                if (!window.location.search.includes('id=')) {
+                    setTimeout(() => {
+                        window.location.href = `edit_article.php?id=${result.id}`;
+                    }, 1000);
+                }
+            } else {
+                showToastMsg('Error saving article', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToastMsg('Server error', 'error');
+        }
+    }
+</script>
+
+<?php require_once "includes/footer.php"; ?>

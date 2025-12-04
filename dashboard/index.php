@@ -64,9 +64,9 @@ $dashboard_content = "
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     
-    <link href="../assets/styles.css" rel="stylesheet" />
+    <link href="../public/assets/styles.css" rel="stylesheet" />
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="../public/assets/js/lucide.js"></script>
 </head>
 
 <body

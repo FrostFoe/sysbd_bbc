@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/check_auth.php";
 
 // Check admin role
@@ -21,12 +21,10 @@ try {
     }
 
     $id = $data["id"];
-    $lang = $data["lang"] ?? "bn";
-    $lang = $lang === "en" ? "en" : "bn";
 
-    // Delete section for this language
-    $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ? AND lang = ?");
-    $stmt->execute([$id, $lang]);
+    // Delete section (unified)
+    $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ?");
+    $stmt->execute([$id]);
 
     echo json_encode([
         "success" => true,

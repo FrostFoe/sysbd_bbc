@@ -36,61 +36,73 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$lang = $_POST["lang"] ?? "bn";
-$lang = $lang === "en" ? "en" : "bn"; // Validate language
-
 $id = !empty($_POST["id"]) ? $_POST["id"] : uniqid();
-$title = $_POST["title"] ?? "";
+
+// Unified Fields
+$title_bn = $_POST["title_bn"] ?? "";
+$title_en = $_POST["title_en"] ?? "";
+$summary_bn = $_POST["summary_bn"] ?? "";
+$summary_en = $_POST["summary_en"] ?? "";
+$content_bn = $_POST["content_bn"] ?? "";
+$content_en = $_POST["content_en"] ?? "";
+
+// Common Fields
 $category_id = $_POST["category_id"] ?? "";
-$summary = $_POST["summary"] ?? "";
-$content = $_POST["content"] ?? "";
 $sectionId = $_POST["sectionId"] ?? "news";
 $image = $_POST["image"] ?? "";
 $leaked_documents = $_POST["leaked_documents"] ?? null;
 $status = $_POST["status"] ?? "draft"; // Default to draft
 
 // Dynamically calculate read_time
-$read_time = calculate_read_time_from_text($content, $lang);
+$read_time_bn = calculate_read_time_from_text($content_bn, 'bn');
+$read_time_en = calculate_read_time_from_text($content_en, 'en');
 
-$stmt = $pdo->prepare("SELECT id FROM articles WHERE id = ? AND lang = ?");
-$stmt->execute([$id, $lang]);
+$stmt = $pdo->prepare("SELECT id FROM articles WHERE id = ?");
+$stmt->execute([$id]);
 $exists = $stmt->fetch();
 
 if ($exists) {
     // Update article
     $stmt = $pdo->prepare(
-        "UPDATE articles SET title=?, summary=?, image=?, category_id=?, content=?, section_id=?, read_time=?, leaked_documents=?, status=? WHERE id=? AND lang=?",
+        "UPDATE articles SET 
+            title_bn=?, title_en=?, 
+            summary_bn=?, summary_en=?, 
+            content_bn=?, content_en=?, 
+            read_time_bn=?, read_time_en=?,
+            category_id=?, section_id=?, 
+            image=?, leaked_documents=?, status=? 
+        WHERE id=?",
     );
     $stmt->execute([
-        $title,
-        $summary,
-        $image,
-        $category_id,
-        $content,
-        $sectionId,
-        $read_time,
-        $leaked_documents,
-        $status,
+        $title_bn, $title_en,
+        $summary_bn, $summary_en,
+        $content_bn, $content_en,
+        $read_time_bn, $read_time_en,
+        $category_id, $sectionId,
+        $image, $leaked_documents, $status,
         $id,
-        $lang,
     ]);
 } else {
     // Create new article
     $stmt = $pdo->prepare(
-        "INSERT INTO articles (id, lang, section_id, title, summary, image, category_id, content, read_time, leaked_documents, status, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+        "INSERT INTO articles (
+            id, 
+            title_bn, title_en, 
+            summary_bn, summary_en, 
+            content_bn, content_en, 
+            read_time_bn, read_time_en,
+            category_id, section_id, 
+            image, leaked_documents, status, published_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
     );
     $stmt->execute([
         $id,
-        $lang,
-        $sectionId,
-        $title,
-        $summary,
-        $image,
-        $category_id,
-        $content,
-        $read_time,
-        $leaked_documents,
-        $status,
+        $title_bn, $title_en,
+        $summary_bn, $summary_en,
+        $content_bn, $content_en,
+        $read_time_bn, $read_time_en,
+        $category_id, $sectionId,
+        $image, $leaked_documents, $status,
     ]);
 }
 

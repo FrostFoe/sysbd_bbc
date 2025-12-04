@@ -9,8 +9,8 @@
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
-    <link href="assets/styles.css" rel="stylesheet" />
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="public/assets/styles.css" rel="stylesheet" />
+    <script src="public/assets/js/lucide.js"></script>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>

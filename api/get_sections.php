@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/check_auth.php";
 
 // Check admin role
@@ -14,13 +14,9 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 }
 
 try {
-    $lang = $_GET["lang"] ?? "bn";
-    $lang = $lang === "en" ? "en" : "bn";
-
-    $stmt = $pdo->prepare(
-        "SELECT * FROM sections WHERE lang = ? ORDER BY sort_order ASC",
+    $stmt = $pdo->query(
+        "SELECT * FROM sections ORDER BY sort_order ASC",
     );
-    $stmt->execute([$lang]);
     $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

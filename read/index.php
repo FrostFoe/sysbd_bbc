@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once "../includes/db.php";
-require_once "../includes/security.php";
-require_once "../includes/functions.php";
+require_once "../config/db.php";
+require_once "../lib/security.php";
+require_once "../lib/functions.php";
 
 $user = isset($_SESSION["user_email"]) ? $_SESSION["user_email"] : null;
 $isAdmin = isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin";
@@ -14,20 +14,30 @@ if (!$articleId) {
     exit();
 }
 
-// Fetch article directly from DB
-$stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ? AND lang = ?");
-$stmt->execute([$articleId, $lang]);
-$article = $stmt->fetch(PDO::FETCH_ASSOC);
+// Fetch article directly from DB (Unified Schema)
+$stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
+$stmt->execute([$articleId]);
+$articleRaw = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$article) {
+if (!$articleRaw) {
     header("Location: ../index.php");
     exit();
 }
 
+// Map localized fields to generic keys
+$article = $articleRaw;
+$article['title'] = $lang === 'en' ? $articleRaw['title_en'] : $articleRaw['title_bn'];
+$article['summary'] = $lang === 'en' ? $articleRaw['summary_en'] : $articleRaw['summary_bn'];
+$article['content'] = $lang === 'en' ? $articleRaw['content_en'] : $articleRaw['content_bn'];
+$article['readTime'] = $lang === 'en' ? ($articleRaw['read_time_en'] ?? '') : ($articleRaw['read_time_bn'] ?? '');
+
+// Fallback for title if empty (optional, but good UX)
+if (empty($article['title'])) {
+    $article['title'] = $lang === 'en' ? $articleRaw['title_bn'] : $articleRaw['title_en'];
+    $article['content'] = "<em>Content not available in this language.</em><br>" . ($lang === 'en' ? $articleRaw['content_bn'] : $articleRaw['content_en']);
+}
+
 // Check status
-// If status column doesn't exist yet (in case migration failed silently), this might throw a notice, but we assume migration ran.
-// Default to published if not set to be safe, OR default to draft. 
-// Given we just added the column, let's be careful.
 $status = $article['status'] ?? 'published'; 
 if ($status !== 'published' && !$isAdmin) {
     header("Location: ../index.php");
@@ -118,8 +128,8 @@ if (!empty($article['leaked_documents'])) {
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     
-    <link href="../assets/styles.css" rel="stylesheet" />
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="../public/assets/styles.css" rel="stylesheet" />
+    <script src="../public/assets/js/lucide.js"></script>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
