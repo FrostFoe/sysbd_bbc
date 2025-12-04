@@ -47,6 +47,7 @@ $content = $_POST["content"] ?? "";
 $sectionId = $_POST["sectionId"] ?? "news";
 $image = $_POST["image"] ?? "";
 $leaked_documents = $_POST["leaked_documents"] ?? null;
+$status = $_POST["status"] ?? "draft"; // Default to draft
 
 // Dynamically calculate read_time
 $read_time = calculate_read_time_from_text($content, $lang);
@@ -57,9 +58,8 @@ $exists = $stmt->fetch();
 
 if ($exists) {
     // Update article
-    // 'timestamp' column is handled by ON UPDATE CURRENT_TIMESTAMP in the DB
     $stmt = $pdo->prepare(
-        "UPDATE articles SET title=?, summary=?, image=?, category_id=?, content=?, section_id=?, read_time=?, leaked_documents=? WHERE id=? AND lang=?",
+        "UPDATE articles SET title=?, summary=?, image=?, category_id=?, content=?, section_id=?, read_time=?, leaked_documents=?, status=? WHERE id=? AND lang=?",
     );
     $stmt->execute([
         $title,
@@ -70,14 +70,14 @@ if ($exists) {
         $sectionId,
         $read_time,
         $leaked_documents,
+        $status,
         $id,
         $lang,
     ]);
 } else {
-    // Create new article for this language
-    // 'timestamp' column will be set by DB default CURRENT_TIMESTAMP
+    // Create new article
     $stmt = $pdo->prepare(
-        "INSERT INTO articles (id, lang, section_id, title, summary, image, category_id, content, read_time, leaked_documents) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO articles (id, lang, section_id, title, summary, image, category_id, content, read_time, leaked_documents, status, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
     );
     $stmt->execute([
         $id,
@@ -90,6 +90,7 @@ if ($exists) {
         $content,
         $read_time,
         $leaked_documents,
+        $status,
     ]);
 }
 

@@ -43,11 +43,13 @@ CREATE TABLE IF NOT EXISTS `sections` (
 CREATE TABLE IF NOT EXISTS `articles` (
   `id` varchar(50) NOT NULL,
   `lang` enum('bn','en') NOT NULL DEFAULT 'bn',
-  `section_id` varchar(50) NOT NULL,
+  `section_id` varchar(50) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `summary` text,
   `image` longtext,
-  `timestamp` varchar(100) DEFAULT NULL,   -- FIXED: accepts human-readable text
+  `timestamp` varchar(100) DEFAULT NULL, -- Deprecated in favor of published_at
+  `published_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `status` ENUM('published', 'draft', 'archived') DEFAULT 'draft',
   `category_id` varchar(50) DEFAULT NULL,
   `read_time` varchar(50) DEFAULT NULL,
   `content` longtext,
@@ -56,18 +58,22 @@ CREATE TABLE IF NOT EXISTS `articles` (
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`, `lang`),
   KEY `section_id` (`section_id`),
-  KEY `lang` (`lang`)
+  KEY `lang` (`lang`),
+  CONSTRAINT `fk_articles_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_articles_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `article_id` varchar(50) NOT NULL,
-  `user_name` varchar(255) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `user_name` varchar(255) NOT NULL, -- Kept for guest comments
   `text` text NOT NULL,
-  `time` varchar(100) DEFAULT NULL,     -- FIXED: must accept "২ ঘণ্টা আগে"
+  `time` varchar(100) DEFAULT NULL, -- Deprecated
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `article_id` (`article_id`)
+  KEY `article_id` (`article_id`),
+  CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 COMMIT;

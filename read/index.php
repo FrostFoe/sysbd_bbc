@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once "../includes/db.php";
+require_once "../includes/security.php";
+require_once "../includes/functions.php";
 
 $user = isset($_SESSION["user_email"]) ? $_SESSION["user_email"] : null;
 $isAdmin = isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin";
@@ -22,6 +24,19 @@ if (!$article) {
     exit();
 }
 
+// Check status
+// If status column doesn't exist yet (in case migration failed silently), this might throw a notice, but we assume migration ran.
+// Default to published if not set to be safe, OR default to draft. 
+// Given we just added the column, let's be careful.
+$status = $article['status'] ?? 'published'; 
+if ($status !== 'published' && !$isAdmin) {
+    header("Location: ../index.php");
+    exit();
+}
+
+// Sanitize Content
+$article['content'] = sanitize_html($article['content']);
+
 // Fetch Category Name
 $categoryName = "News";
 if ($article['category_id']) {
@@ -35,9 +50,34 @@ if ($article['category_id']) {
 $article['category'] = $categoryName;
 
 // Fetch Comments
-$commentStmt = $pdo->prepare("SELECT user_name as user, text, time FROM comments WHERE article_id = ? ORDER BY created_at DESC");
+// Join with users table to get verified names if available
+$commentStmt = $pdo->prepare("
+    SELECT c.text, c.created_at, c.user_name, u.email 
+    FROM comments c 
+    LEFT JOIN users u ON c.user_id = u.id 
+    WHERE c.article_id = ? 
+    ORDER BY c.created_at DESC
+");
 $commentStmt->execute([$articleId]);
-$article['comments'] = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
+$rawComments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$processedComments = [];
+foreach ($rawComments as $c) {
+    // Determine display name
+    $displayName = $c['user_name'];
+    if (!empty($c['email'])) {
+        // Use part of email or a generic name if you prefer not to show emails
+        $parts = explode('@', $c['email']);
+        $displayName = $parts[0]; 
+    }
+    
+    $processedComments[] = [
+        'user' => $displayName,
+        'text' => htmlspecialchars($c['text']), // Text is safe
+        'time' => time_ago($c['created_at'], $lang)
+    ];
+}
+$article['comments'] = $processedComments;
 
 // Decode leaked documents if any
 $leakedDocuments = [];
@@ -69,7 +109,7 @@ if (!empty($article['leaked_documents'])) {
     <!-- Article Meta Tags -->
     <meta name="description" content="<?php echo htmlspecialchars($article["summary"] ?? ""); ?>" />
     <meta name="author" content="BreachTimes" />
-    <meta name="publish_date" content="<?php echo htmlspecialchars($article["timestamp"] ?? date("Y-m-d")); ?>" />
+    <meta name="publish_date" content="<?php echo htmlspecialchars($article["published_at"] ?? date("Y-m-d")); ?>" />
     <meta name="category" content="<?php echo htmlspecialchars($article["category"] ?? "News"); ?>" />
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -131,7 +171,7 @@ if (!empty($article['leaked_documents'])) {
                             <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4 text-card-text"><?php echo htmlspecialchars($article["title"]); ?></h1>
                             
                             <div class="flex flex-wrap items-center gap-4 text-sm text-muted-text font-medium">
-                                <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> <?php echo htmlspecialchars($article["timestamp"] ?? "Just now"); ?></span>
+                                <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> <?php echo time_ago($article["published_at"] ?? "now", $lang); ?></span>
                                 <?php if (isset($article["readTime"])): ?>
                                     <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> <?php echo htmlspecialchars($article["readTime"]); ?></span>
                                 <?php endif; ?>
@@ -162,7 +202,7 @@ if (!empty($article['leaked_documents'])) {
 
                         <!-- Article Content -->
                         <div class="prose max-w-none font-size-md space-y-8 text-card-text transition-all duration-300">
-                            <?php echo $article["content"] ?? "<p>" . htmlspecialchars($article["summary"] ?? "") . "</p>"; ?>
+                            <?php echo $article["content"]; // Sanitized above ?>
                         </div>
                     </article>
 
@@ -220,7 +260,7 @@ if (!empty($article['leaked_documents'])) {
                                 </div>
                                 <div class="flex justify-between items-center pb-3 border-b border-border-color">
                                     <span class="text-muted-text"><?php echo $lang === 'bn' ? 'প্রকাশনা:' : 'Published:'; ?></span>
-                                    <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["timestamp"] ?? "N/A"); ?></span>
+                                    <span class="font-bold text-card-text"><?php echo time_ago($article["published_at"] ?? "now", $lang); ?></span>
                                 </div>
                                 <?php if (isset($article["readTime"])): ?>
                                     <div class="flex justify-between items-center">
@@ -250,17 +290,17 @@ if (!empty($article['leaked_documents'])) {
                     </div>
 
                     <div class="space-y-6">
-                        <?php if ($article["comments"] && count($article["comments"]) > 0): ?>
-                            <?php foreach ($article["comments"] as $comment): ?>
+                        <?php if (count($article['comments']) > 0): ?>
+                            <?php foreach ($article['comments'] as $comment): ?>
                                 <div class="bg-muted-bg p-4 rounded-xl">
                                     <div class="flex items-center gap-3 mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md"><?php echo strtoupper($comment["user"][0]); ?></div>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md"><?php echo strtoupper(substr($comment["user"], 0, 1)); ?></div>
                                         <div>
                                             <span class="font-bold text-sm text-card-text block"><?php echo htmlspecialchars($comment["user"]); ?></span>
-                                            <span class="text-xs text-muted-text"><?php echo htmlspecialchars($comment["time"]); ?></span>
+                                            <span class="text-xs text-muted-text"><?php echo $comment["time"]; ?></span>
                                         </div>
                                     </div>
-                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color"><?php echo htmlspecialchars($comment["text"]); ?></p>
+                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color"><?php echo $comment["text"]; ?></p>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>

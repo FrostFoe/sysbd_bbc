@@ -38,6 +38,7 @@ $data = get_data($lang);
                     <h1 class="text-3xl font-bold text-card-text mb-0" data-translate="admin_dashboard">অ্যাডমিন ড্যাশবোর্ড</h1>
                 </div>
                 <div class="flex gap-2">
+                    <a href="comments.php" class="bg-gray-800 text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all"><i data-lucide="message-square" class="w-5 h-5"></i> Comments</a>
                     <button onclick="openEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all" id="add-article-btn"><i data-lucide="plus-circle" class="w-5 h-5"></i> <span data-translate="new_article">নতুন সংবাদ</span></button>
                     <button onclick="openSectionEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all hidden" id="add-section-btn"><i data-lucide="plus-circle" class="w-5 h-5"></i> নতুন সেকশন</button>
                     <button onclick="openCategoryEditor(null)" class="bg-bbcRed text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:opacity-90 transition-all hidden" id="add-category-btn"><i data-lucide="plus-circle" class="w-5 h-5"></i> নতুন বিভাগ</button>
@@ -257,15 +258,22 @@ $data = get_data($lang);
                             <input name="title" id="article-title" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold mb-2 text-card-text" data-translate="category">বিভাগ</label>
-                                <select name="category_id" id="article-category" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
-                                    <option value="">বিভাগ নির্বাচন করুন</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold mb-2 text-card-text" data-translate="section">সেকশন</label>
-                                <select name="sectionId" id="article-sectionId" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
+                                                    <div>
+                                                        <label class="block text-sm font-bold mb-2 text-card-text" data-translate="category">বিভাগ</label>
+                                                        <select name="category_id" id="article-category" required class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
+                                                            <option value="">বিভাগ নির্বাচন করুন</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-bold mb-2 text-card-text">Status</label>
+                                                        <select name="status" id="article-status" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
+                                                            <option value="draft">Draft</option>
+                                                            <option value="published">Published</option>
+                                                            <option value="archived">Archived</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-bold mb-2 text-card-text" data-translate="section">সেকশন</label>                                <select name="sectionId" id="article-sectionId" class="w-full p-3 rounded-lg border border-border-color bg-muted-bg text-card-text focus:outline-none focus:border-bbcRed">
                                     <?php if (isset($data["sections"])) {
                                         foreach ($data["sections"] as $s): ?>
                                             <option value="<?php echo $s[
@@ -521,6 +529,7 @@ $data = get_data($lang);
             // Update to use category_id if article has it, otherwise use category as fallback
             const categoryId = article && article.category_id ? article.category_id : (article ? article.category : '');
             document.getElementById('article-category').value = categoryId;
+            document.getElementById('article-status').value = article && article.status ? article.status : 'draft';
             document.getElementById('article-sectionId').value = article ? article.sectionId : '';
             document.getElementById('article-image').value = article ? article.image : '';
             document.getElementById('article-summary').value = article ? article.summary : '';
