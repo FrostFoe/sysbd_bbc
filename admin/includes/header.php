@@ -14,6 +14,7 @@ $menu_items = [
     ['name' => 'Dashboard', 'link' => 'index.php', 'icon' => 'layout-dashboard'],
     ['name' => 'Articles', 'link' => 'articles.php', 'match' => ['articles.php', 'edit_article.php'], 'icon' => 'file-text'],
     ['name' => 'Comments', 'link' => 'comments.php', 'icon' => 'message-circle'],
+    ['name' => 'Messages', 'link' => 'inbox.php', 'icon' => 'mail'],
     ['name' => 'Categories', 'link' => 'categories.php', 'icon' => 'folder'],
     ['name' => 'Sections', 'link' => 'sections.php', 'icon' => 'layers'],
 ];

@@ -51,7 +51,11 @@ $comments = $pdo->query("
                     </td>
                     <td class="p-4 text-xs text-muted-text"><?php echo date('M d, H:i', strtotime($c['created_at'])); ?></td>
                     <td class="p-4 text-right">
-                        <button onclick="deleteComment(<?php echo $c['id']; ?>)" class="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="deleteComment(<?php echo $c['id']; ?>)" class="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>

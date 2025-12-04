@@ -33,10 +33,10 @@ $dashboard_content = "
                 <div class='mt-8 grid grid-cols-1 md:grid-cols-2 gap-6'>
                     <div class='bg-muted-bg p-6 rounded-xl shadow-sm border border-border-color'>
                         <h3 class='font-bold text-xl mb-3 text-card-text'>Quick Links</h3>
-                        <ul>
+                        <ul class='space-y-2'>
                             <li><a href='../read?id=some-article-id&lang=bn' class='text-bbcRed hover:underline'>Example Article</a></li>
                             <li><a href='../saved' class='text-bbcRed hover:underline'>Saved Articles</a></li>
-                            <!-- Add more links as needed -->
+                            <li><a href='inbox.php' class='text-bbcRed hover:underline'>📬 Messages</a></li>
                         </ul>
                     </div>
                     <div class='bg-muted-bg p-6 rounded-xl shadow-sm border border-border-color'>

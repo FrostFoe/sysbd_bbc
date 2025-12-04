@@ -58,8 +58,8 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Content (বাংলা)</label>
-                            <div id="quill-bn" class="bg-card h-96 rounded-lg border border-border-color font-hind"></div>
-                            <input type="hidden" name="content_bn" id="content-bn-input">
+                            <div id="quill-bn" class="bg-card h-96 rounded-lg border border-border-color"></div>
+                            <input type="hidden" name="content_bn" id="content-bn-input" value="<?php echo htmlspecialchars($article['content_bn'] ?? ''); ?>">
                         </div>
                     </div>
                 </div>
@@ -83,7 +83,7 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                         <div>
                             <label class="block text-sm font-bold mb-2">Content (English)</label>
                             <div id="quill-en" class="bg-card h-96 rounded-lg border border-border-color"></div>
-                            <input type="hidden" name="content_en" id="content-en-input">
+                            <input type="hidden" name="content_en" id="content-en-input" value="<?php echo htmlspecialchars($article['content_en'] ?? ''); ?>">
                         </div>
                     </div>
                 </div>
@@ -172,38 +172,68 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-    const toolbarOptions = [
-        [{ 'header': [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        ['blockquote', 'code-block'],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        ['link', 'image', 'video'],
-        ['clean']
-    ];
+    let quillBn, quillEn;
+    const storageKey = 'article-draft-' + (new URLSearchParams(window.location.search).get('id') || 'new');
 
-    // Initialize Quill for Bangla
-    var quillBn = new Quill('#quill-bn', {
-        theme: 'snow',
-        modules: { toolbar: toolbarOptions },
-        placeholder: 'Write in Bangla...'
+    // Initialize Quill editors
+    document.addEventListener('DOMContentLoaded', () => {
+        quillBn = new Quill('#quill-bn', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'বাংলায় লিখুন...'
+        });
+
+        quillEn = new Quill('#quill-en', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Write in English...'
+        });
+
+        // Load existing content if editing
+        const contentBnInput = document.getElementById('content-bn-input');
+        const contentEnInput = document.getElementById('content-en-input');
+        
+        if (contentBnInput.value) {
+            quillBn.root.innerHTML = contentBnInput.value;
+        }
+        if (contentEnInput.value) {
+            quillEn.root.innerHTML = contentEnInput.value;
+        }
+        
+        // Check for autosave
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            document.getElementById('restore-alert').classList.remove('hidden');
+        }
+        
+        // Autosave
+        const form = document.getElementById('articleForm');
+        if (form) {
+            form.addEventListener('change', () => autosaveArticle());
+            
+            // Auto-save Quill editors
+            quillBn.on('text-change', () => autosaveArticle());
+            quillEn.on('text-change', () => autosaveArticle());
+        }
     });
-
-    // Initialize Quill for English
-    var quillEn = new Quill('#quill-en', {
-        theme: 'snow',
-        modules: { toolbar: toolbarOptions },
-        placeholder: 'Write in English...'
-    });
-
-    // Load Content
-    <?php if ($article): ?>
-        <?php if (!empty($article['content_bn'])): ?>
-            quillBn.clipboard.dangerouslyPasteHTML(0, <?php echo json_encode($article['content_bn']); ?>);
-        <?php endif; ?>
-        <?php if (!empty($article['content_en'])): ?>
-            quillEn.clipboard.dangerouslyPasteHTML(0, <?php echo json_encode($article['content_en']); ?>);
-        <?php endif; ?>
-    <?php endif; ?>
 
     function handleImageUpload(input) {
         const file = input.files[0];
@@ -226,9 +256,12 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
     async function saveArticle(e) {
         e.preventDefault();
         
-        // Sync Quill content
-        document.getElementById('content-bn-input').value = quillBn.root.innerHTML;
-        document.getElementById('content-en-input').value = quillEn.root.innerHTML;
+        // Get content from Quill editors
+        const contentBn = quillBn.root.innerHTML;
+        const contentEn = quillEn.root.innerHTML;
+        
+        document.getElementById('content-bn-input').value = contentBn;
+        document.getElementById('content-en-input').value = contentEn;
 
         const formData = new FormData(e.target);
 
@@ -258,6 +291,19 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
         }
     }
 
+    function autosaveArticle() {
+        const formData = {
+            title_bn: document.getElementById('title_bn')?.value,
+            summary_bn: document.getElementById('summary_bn')?.value,
+            content_bn: quillBn.root.innerHTML,
+            title_en: document.getElementById('title_en')?.value,
+            summary_en: document.getElementById('summary_en')?.value,
+            content_en: quillEn.root.innerHTML,
+        };
+        
+        localStorage.setItem(storageKey, JSON.stringify(formData));
+    }
+
     function restoreDraft() {
         const saved = localStorage.getItem(storageKey);
         if (!saved) return;
@@ -269,8 +315,12 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('title_en').value = data.title_en || '';
             document.getElementById('summary_en').value = data.summary_en || '';
             
-            if (data.content_bn) quillBn.clipboard.dangerouslyPasteHTML(0, data.content_bn);
-            if (data.content_en) quillEn.clipboard.dangerouslyPasteHTML(0, data.content_en);
+            if (data.content_bn) {
+                quillBn.root.innerHTML = data.content_bn;
+            }
+            if (data.content_en) {
+                quillEn.root.innerHTML = data.content_en;
+            }
             
             document.getElementById('restore-alert').classList.add('hidden');
             showToastMsg('Draft restored successfully!');

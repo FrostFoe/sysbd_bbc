@@ -235,3 +235,409 @@
     padding-top: 1rem;
   }
 }
+
+/* ========================================
+   MOBILE OPTIMIZATION & ENHANCEMENTS
+   ======================================== */
+
+/* ========== COMMENT SECTION MOBILE ========== */
+
+@media (max-width: 768px) {
+  /* Make vote buttons larger on mobile */
+  .vote-btn-up,
+  .vote-btn-down {
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Full-width comment box on mobile */
+  #comment-input {
+    min-height: 120px;
+    font-size: 16px; /* Prevents auto-zoom on focus */
+  }
+
+  /* Sort dropdown responsive */
+  #sort-comments {
+    min-width: 100%;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Comments section on mobile - cleaner spacing */
+  .space-y-6 > div {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Larger touch targets for admin buttons */
+  .ml-12 > .flex > button {
+    min-height: 40px;
+    min-width: 40px;
+    padding: 0.5rem !important;
+  }
+
+  /* Make reply form full width */
+  #reply-form-1,
+  [id^="reply-form-"] {
+    margin-left: 0 !important;
+    margin-top: 1rem;
+  }
+
+  /* Vote section stacking */
+  .ml-12 > .flex {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* Comment text area padding for mobile keyboard */
+  textarea {
+    padding: 1rem;
+  }
+
+  /* Char count visibility on mobile */
+  #char-count,
+  .text-right.text-xs {
+    font-size: 12px;
+    margin-top: 0.5rem;
+  }
+
+  /* Error message styling */
+  #error-message {
+    margin-bottom: 0.5rem;
+    display: block;
+    word-wrap: break-word;
+  }
+
+  /* Post button full width on mobile */
+  #post-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  /* User avatar sizing */
+  .w-10.h-10 {
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Comment padding adjustments */
+  .bg-muted-bg.p-4 {
+    padding: 1rem;
+  }
+
+  .ml-12 {
+    margin-left: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small phones */
+
+  /* Stack elements vertically */
+  .flex.items-center.justify-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  h3.text-2xl {
+    font-size: 1.25rem;
+  }
+
+  /* Make textarea even larger on tiny screens */
+  #comment-input {
+    min-height: 150px;
+    font-size: 18px;
+  }
+
+  /* Single column sort dropdown */
+  #sort-comments {
+    width: 100%;
+  }
+
+  /* Comment container adjustments */
+  .bg-card.p-6 {
+    padding: 1rem;
+  }
+
+  /* Remove left margin on nested elements */
+  .ml-12 {
+    margin-left: 0 !important;
+  }
+
+  /* Pill styling for vote count */
+  .flex.items-center.gap-1.bg-card {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Full width reply area */
+  #reply-form-1,
+  [id^="reply-form-"] {
+    width: 100%;
+  }
+
+  /* Button sizing for small screens */
+  button[onclick*="postComment"],
+  button[onclick*="postReply"] {
+    font-size: 14px;
+    padding: 0.75rem 1.5rem;
+  }
+
+  /* Reduce padding on pinned badge */
+  .flex.items-center.gap-2.mb-3 {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* ========== LOADING STATES & ANIMATIONS ========== */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pulse-pop {
+  animation: pulse-pop 0.4s ease-out;
+}
+
+/* Vote buttons feedback */
+.vote-btn-up.active {
+  color: #22c55e;
+  font-weight: bold;
+  animation: pulse-pop 0.3s ease-out;
+}
+
+.vote-btn-down.active {
+  color: #ef4444;
+  font-weight: bold;
+  animation: pulse-pop 0.3s ease-out;
+}
+
+/* Toast animation */
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.toast-enter {
+  animation: toast-enter 0.3s ease-out;
+}
+
+/* Button hover states */
+button {
+  transition: all 0.2s ease-out;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+/* ========== VOTE HIGHLIGHT STATES ========== */
+
+.vote-count-animate {
+  animation: count-change 0.5s ease-out;
+}
+
+@keyframes count-change {
+  0% {
+    transform: scale(1.2);
+    color: #22c55e;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ========== TEXTAREA IMPROVEMENTS ========== */
+
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0.75rem;
+}
+
+textarea:focus {
+  outline: none;
+}
+
+/* Character counter styling */
+#char-count {
+  font-weight: bold;
+  color: inherit;
+}
+
+/* Show warning at 80% capacity */
+#char-count.near-limit {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+/* Show danger at 95% capacity */
+#char-count.over-limit {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* ========== SORT DROPDOWN ENHANCEMENT ========== */
+
+#sort-comments {
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M3 4l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2rem;
+  background-size: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  #sort-comments {
+    color: inherit;
+  }
+}
+
+/* ========== ERROR MESSAGE STYLING ========== */
+
+#error-message {
+  animation: shake 0.4s ease-out;
+  padding: 0.5rem;
+  border-left: 3px solid #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 0.375rem;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* ========== POST BUTTON STATES ========== */
+
+#post-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#post-btn:disabled:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+/* ========== THEME INDICATOR ========== */
+
+.theme-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.theme-indicator.light {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.theme-indicator.dark {
+  background-color: #1f2937;
+  color: #fbbf24;
+}
+
+/* ========== PINNED COMMENT STYLING ========== */
+
+.is-pinned {
+  border-left: 4px solid #f59e0b;
+  background-color: rgba(245, 158, 11, 0.05);
+}
+
+/* ========== RESPONSIVE TABLES ========== */
+
+@media (max-width: 640px) {
+  table {
+    width: 100%;
+    font-size: 0.875rem;
+  }
+
+  td, th {
+    padding: 0.5rem;
+  }
+}
+
+/* ========== ACCESSIBILITY IMPROVEMENTS ========== */
+
+/* Focus visible for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #b80000;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  button,
+  select,
+  textarea,
+  input {
+    border-width: 2px;
+  }
+
+  .vote-btn-up.active,
+  .vote-btn-down.active {
+    font-weight: bold;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

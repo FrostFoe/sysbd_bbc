@@ -11,10 +11,27 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 $data = json_decode(file_get_contents("php://input"), true);
 $articleId = $data["articleId"] ?? null;
-$text = htmlspecialchars($data["text"] ?? "", ENT_QUOTES, 'UTF-8');
+$rawText = $data["text"] ?? "";
+$text = htmlspecialchars($rawText, ENT_QUOTES, 'UTF-8');
 
-if (!$articleId || !$text) {
-    send_response(["error" => "Missing required fields (articleId, text)"], 400);
+// Validation with specific error messages
+if (!$articleId) {
+    send_response(["error" => "নিবন্ধ খুঁজে পাওয়া যায়নি। (Article not found)"], 400);
+    exit;
+}
+
+if (!$rawText || trim($rawText) === "") {
+    send_response(["error" => "আপনার মন্তব্য খালি। (Comment cannot be empty)"], 400);
+    exit;
+}
+
+if (strlen($rawText) < 3) {
+    send_response(["error" => "মন্তব্য খুব ছোট! ন্যূনতম ৩ অক্ষর প্রয়োজন। (Minimum 3 characters required)"], 400);
+    exit;
+}
+
+if (strlen($rawText) > 5000) {
+    send_response(["error" => "মন্তব্য খুব দীর্ঘ! সর্বোচ্চ ৫০০০ অক্ষর। (Maximum 5000 characters allowed)"], 400);
     exit;
 }
 

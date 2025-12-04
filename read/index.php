@@ -59,14 +59,14 @@ if ($article['category_id']) {
 }
 $article['category'] = $categoryName;
 
-// Fetch Comments
-// Join with users table to get verified names if available
+// Fetch Comments (with votes and replies)
+// Get pinned comments first, then regular comments
 $commentStmt = $pdo->prepare("
-    SELECT c.text, c.created_at, c.user_name, u.email 
+    SELECT c.id, c.text, c.created_at, c.user_name, c.user_id, c.is_pinned, c.pin_order, u.email 
     FROM comments c 
     LEFT JOIN users u ON c.user_id = u.id 
-    WHERE c.article_id = ? 
-    ORDER BY c.created_at DESC
+    WHERE c.article_id = ? AND c.parent_comment_id IS NULL
+    ORDER BY c.is_pinned DESC, c.pin_order ASC, c.created_at DESC
 ");
 $commentStmt->execute([$articleId]);
 $rawComments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -76,15 +76,60 @@ foreach ($rawComments as $c) {
     // Determine display name
     $displayName = $c['user_name'];
     if (!empty($c['email'])) {
-        // Use part of email or a generic name if you prefer not to show emails
         $parts = explode('@', $c['email']);
         $displayName = $parts[0]; 
     }
     
+    // Get votes for this comment
+    $voteStmt = $pdo->prepare(
+        "SELECT 
+            SUM(CASE WHEN vote_type = 'upvote' THEN 1 ELSE 0 END) as upvotes,
+            SUM(CASE WHEN vote_type = 'downvote' THEN 1 ELSE 0 END) as downvotes
+        FROM comment_votes WHERE comment_id = ?"
+    );
+    $voteStmt->execute([$c['id']]);
+    $votes = $voteStmt->fetch(PDO::FETCH_ASSOC);
+    $upvotes = (int)($votes['upvotes'] ?? 0);
+    $downvotes = (int)($votes['downvotes'] ?? 0);
+    
+    // Get replies for this comment
+    $replyStmt = $pdo->prepare("
+        SELECT c.id, c.text, c.created_at, c.user_name, c.user_id, u.email 
+        FROM comments c 
+        LEFT JOIN users u ON c.user_id = u.id 
+        WHERE c.parent_comment_id = ? 
+        ORDER BY c.created_at ASC
+    ");
+    $replyStmt->execute([$c['id']]);
+    $rawReplies = $replyStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $replies = [];
+    foreach ($rawReplies as $r) {
+        $replyDisplayName = $r['user_name'];
+        if (!empty($r['email'])) {
+            $parts = explode('@', $r['email']);
+            $replyDisplayName = $parts[0];
+        }
+        
+        $replies[] = [
+            'id' => $r['id'],
+            'user' => $replyDisplayName,
+            'text' => htmlspecialchars($r['text']),
+            'time' => time_ago($r['created_at'], $lang),
+            'isAdmin' => !empty($r['email']) && strpos($r['email'], 'admin') !== false
+        ];
+    }
+    
     $processedComments[] = [
+        'id' => $c['id'],
         'user' => $displayName,
-        'text' => htmlspecialchars($c['text']), // Text is safe
-        'time' => time_ago($c['created_at'], $lang)
+        'text' => htmlspecialchars($c['text']),
+        'time' => time_ago($c['created_at'], $lang),
+        'upvotes' => $upvotes,
+        'downvotes' => $downvotes,
+        'isPinned' => (bool)$c['is_pinned'],
+        'replies' => $replies,
+        'userId' => $c['user_id']
     ];
 }
 $article['comments'] = $processedComments;
@@ -129,7 +174,9 @@ if (!empty($article['leaked_documents'])) {
     </style>
     
     <link href="../public/assets/styles.css" rel="stylesheet" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <script src="../public/assets/js/lucide.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
@@ -286,35 +333,121 @@ if (!empty($article['leaked_documents'])) {
 
                 <!-- Comments Section -->
                 <div class="lg:col-span-8 bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
-                    <h3 class="text-2xl font-bold mb-6 text-card-text flex items-center gap-2">
-                        <i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> মন্তব্য
-                    </h3>
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-card-text flex items-center gap-2">
+                            <i data-lucide="message-circle" class="w-6 h-6 text-bbcRed"></i> মন্তব্য
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-muted-text">সাজান:</label>
+                            <select id="sort-comments" onchange="sortComments()" class="px-3 py-1.5 rounded-lg bg-muted-bg border border-border-color text-card-text text-xs font-bold hover:bg-border-color transition-colors">
+                                <option value="newest">সর্বশেষ</option>
+                                <option value="oldest">সবচেয়ে পুরানো</option>
+                                <option value="helpful">সবচেয়ে সহায়ক</option>
+                                <option value="discussed">সবচেয়ে আলোচিত</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="mb-8">
-                        <div class="relative">
-                            <textarea id="comment-input" placeholder="আপনার মতামত জানান..." class="w-full p-4 rounded-xl border border-border-color bg-muted-bg text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-none shadow-inner" rows="3"></textarea>
-                        </div>
-                        <div class="flex justify-end mt-3">
-                            <button onclick="postComment('<?php echo $article["id"]; ?>')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">মন্তব্য প্রকাশ করুন</button>
+                        <!-- Quill Editor -->
+                        <div id="quill-editor" class="bg-card rounded-xl border border-border-color overflow-hidden" style="height: 300px;"></div>
+                        
+                        <!-- Character Counter -->
+                        <div class="flex justify-between items-center mt-3 gap-4">
+                            <div id="char-counter" class="text-xs text-muted-text">0/5000</div>
+                            <div id="error-message" class="text-xs text-red-500 font-bold hidden"></div>
+                            <button onclick="postComment('<?php echo $article["id"]; ?>')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm" id="post-btn">মন্তব্য প্রকাশ করুন</button>
                         </div>
                     </div>
 
                     <div class="space-y-6">
                         <?php if (count($article['comments']) > 0): ?>
                             <?php foreach ($article['comments'] as $comment): ?>
-                                <div class="bg-muted-bg p-4 rounded-xl">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md"><?php echo strtoupper(substr($comment["user"], 0, 1)); ?></div>
-                                        <div>
-                                            <span class="font-bold text-sm text-card-text block"><?php echo htmlspecialchars($comment["user"]); ?></span>
+                                <div class="bg-muted-bg p-4 rounded-xl border border-border-color" id="comment-<?php echo $comment['id']; ?>">
+                                    <!-- Pinned Badge -->
+                                    <?php if ($comment['isPinned']): ?>
+                                        <div class="flex items-center gap-2 mb-3 text-xs font-bold text-bbcRed bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg w-fit">
+                                            <i data-lucide="pin" class="w-3 h-3"></i> <?php echo $lang === 'bn' ? 'অ্যাডমিন মতামত' : 'Admin Comment'; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Main Comment -->
+                                    <div class="flex items-start gap-3 mb-2">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md flex-shrink-0"><?php echo strtoupper(substr($comment["user"], 0, 1)); ?></div>
+                                        <div class="flex-grow min-w-0">
+                                            <span onclick="showUserProfile('<?php echo htmlspecialchars($comment['user']); ?>')" class="font-bold text-sm text-card-text block hover:text-bbcRed cursor-pointer transition-colors"><?php echo htmlspecialchars($comment["user"]); ?></span>
                                             <span class="text-xs text-muted-text"><?php echo $comment["time"]; ?></span>
                                         </div>
+                                        <!-- Admin Pin Button -->
+                                        <?php if ($isAdmin): ?>
+                                            <button onclick="togglePin(<?php echo $comment['id']; ?>, <?php echo $comment['isPinned'] ? 'true' : 'false'; ?>)" class="p-2 rounded hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors text-yellow-600 dark:text-yellow-400" title="<?php echo $comment['isPinned'] ? 'Unpin' : 'Pin'; ?>">
+                                                <i data-lucide="pin" class="w-4 h-4"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
-                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color"><?php echo $comment["text"]; ?></p>
+                                    
+                                    <!-- Comment Text -->
+                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color mb-3"><?php echo $comment["text"]; ?></p>
+                                    
+                                    <!-- Vote Section & Reply Button -->
+                                    <div class="ml-12 flex items-center gap-3 text-xs">
+                                        <div class="flex items-center gap-1 bg-card px-2 py-1 rounded-lg border border-border-color">
+                                            <button onclick="voteComment(<?php echo $comment['id']; ?>, 'upvote')" class="p-1 hover:text-green-500 transition-colors text-muted-text vote-btn-up" data-comment-id="<?php echo $comment['id']; ?>" title="Upvote">
+                                                <i data-lucide="thumbs-up" class="w-3 h-3"></i>
+                                            </button>
+                                            <span id="vote-count-<?php echo $comment['id']; ?>" class="text-xs font-bold text-muted-text min-w-[20px] text-center"><?php echo $comment['upvotes'] - $comment['downvotes']; ?></span>
+                                            <button onclick="voteComment(<?php echo $comment['id']; ?>, 'downvote')" class="p-1 hover:text-red-500 transition-colors text-muted-text vote-btn-down" data-comment-id="<?php echo $comment['id']; ?>" title="Downvote">
+                                                <i data-lucide="thumbs-down" class="w-3 h-3"></i>
+                                            </button>
+                                        </div>
+                                        <?php if ($isAdmin): ?>
+                                            <button onclick="toggleReplyForm(<?php echo $comment['id']; ?>)" class="px-3 py-1 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded transition-colors font-bold">
+                                                <?php echo $lang === 'bn' ? 'উত্তর' : 'Reply'; ?>
+                                            </button>
+                                        <?php endif; ?>
+                                        <?php if ($isAdmin): ?>
+                                            <button onclick="deleteComment(<?php echo $comment['id']; ?>)" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <!-- Replies Section -->
+                                    <?php if (!empty($comment['replies'])): ?>
+                                        <div class="ml-12 mt-4 space-y-3 border-l-2 border-border-color pl-4">
+                                            <?php foreach ($comment['replies'] as $reply): ?>
+                                                <div class="bg-card p-3 rounded-lg">
+                                                    <div class="flex items-start gap-2 mb-1">
+                                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center font-bold text-white text-xs shadow-md flex-shrink-0"><?php echo strtoupper(substr($reply["user"], 0, 1)); ?></div>
+                                                        <div class="flex-grow min-w-0">
+                                                            <span class="font-bold text-xs text-card-text block"><?php echo htmlspecialchars($reply["user"]); ?></span>
+                                                            <span class="text-xs text-muted-text"><?php echo $reply["time"]; ?></span>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-xs text-card-text ml-9 leading-relaxed"><?php echo $reply["text"]; ?></p>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Reply Form (Hidden by default) -->
+                                    <?php if ($isAdmin): ?>
+                                        <div id="reply-form-<?php echo $comment['id']; ?>" class="ml-12 mt-4 hidden">
+                                            <textarea id="reply-input-<?php echo $comment['id']; ?>" placeholder="<?php echo $lang === 'bn' ? 'আপনার উত্তর লিখুন...' : 'Write your reply...'; ?>" class="w-full p-3 rounded-lg border border-border-color bg-card text-card-text focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none text-sm" rows="2"></textarea>
+                                            <div class="flex justify-end gap-2 mt-2">
+                                                <button onclick="toggleReplyForm(<?php echo $comment['id']; ?>)" class="px-3 py-1.5 rounded-lg bg-muted-bg hover:bg-border-color transition-colors text-sm font-bold text-card-text">
+                                                    <?php echo $lang === 'bn' ? 'বাতিল' : 'Cancel'; ?>
+                                                </button>
+                                                <button onclick="postReply(<?php echo $comment['id']; ?>)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors text-sm font-bold">
+                                                    <?php echo $lang === 'bn' ? 'উত্তর পাঠান' : 'Send Reply'; ?>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="text-center py-8 text-muted-text">এখনও কোনো মন্তব্য নেই।</div>
+                            <div class="text-center py-8 text-muted-text"><?php echo $lang === 'bn' ? 'এখনও কোনো মন্তব্য নেই।' : 'No comments yet.'; ?></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -322,11 +455,32 @@ if (!empty($article['leaked_documents'])) {
         </div>
     </main>
 
+    <!-- User Profile Modal -->
+    <div id="profile-modal" class="hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-[200] flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeProfileModal()">
+        <div class="bg-card rounded-2xl shadow-2xl border border-border-color max-w-md w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="sticky top-0 bg-card border-b border-border-color p-4 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-card-text">👤 ব্যবহারকারী প্রোফাইল</h3>
+                <button onclick="closeProfileModal()" class="p-2 hover:bg-muted-bg rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div id="profile-content" class="p-6 space-y-4">
+                <!-- Loading state -->
+                <div class="flex items-center justify-center py-8">
+                    <i data-lucide="loader" class="w-6 h-6 animate-spin text-bbcRed"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const articleId = '<?php echo htmlspecialchars($articleId); ?>';
         const lang = '<?php echo $lang; ?>';
         let bookmarks = JSON.parse(localStorage.getItem("breachtimes-bookmarks") || "[]");
         let fontSize = "md";
+        let userVotes = JSON.parse(localStorage.getItem(`votes-${articleId}`) || "{}");
+        let commentSort = localStorage.getItem(`sort-${articleId}`) || "newest";
 
         const savedTheme = localStorage.getItem("breachtimes-theme");
         const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -342,6 +496,72 @@ if (!empty($article['leaked_documents'])) {
             const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             const scrolled = (winScroll / height) * 100;
             document.getElementById("progress-bar").style.width = scrolled + "%";
+        });
+
+        // Character counter
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Quill editor for comments
+            window.quillEditor = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'আপনার মতামত জানান...'
+            });
+
+            // Character counter
+            window.quillEditor.on('text-change', () => {
+                const text = window.quillEditor.getText().trim();
+                const count = text.length;
+                const charCountEl = document.getElementById('char-counter');
+                charCountEl.textContent = count + '/5000';
+                
+                // Show warning at 80%
+                if (count >= 4000) {
+                    charCountEl.classList.add('text-orange-500');
+                    charCountEl.classList.remove('text-red-500');
+                }
+                // Show danger at 95%
+                else if (count >= 4750) {
+                    charCountEl.classList.add('text-red-500');
+                    charCountEl.classList.remove('text-orange-500');
+                } else {
+                    charCountEl.classList.remove('text-orange-500', 'text-red-500');
+                }
+            });
+
+            const charInput = document.getElementById('comment-input');
+            if (charInput) {
+                charInput.addEventListener('input', () => {
+                    const count = charInput.value.length;
+                    const charCountEl = document.getElementById('char-count');
+                    charCountEl.textContent = count;
+                    
+                    // Show warning at 80%
+                    if (count >= 4000) {
+                        charCountEl.classList.add('near-limit');
+                        charCountEl.classList.remove('over-limit');
+                    }
+                    // Show danger at 95%
+                    else if (count >= 4750) {
+                        charCountEl.classList.add('over-limit');
+                        charCountEl.classList.remove('near-limit');
+                    } else {
+                        charCountEl.classList.remove('near-limit', 'over-limit');
+                    }
+                });
+            }
+            // Restore sort preference
+            const select = document.getElementById('sort-comments');
+            if (select) select.value = commentSort;
+            highlightUserVotes();
         });
 
         function setFontSize(size) {
@@ -394,36 +614,68 @@ if (!empty($article['leaked_documents'])) {
         }
 
         async function postComment(articleId) {
-            const input = document.getElementById("comment-input");
-            const text = input.value.trim();
+            const text = window.quillEditor?.getText?.()?.trim() || '';
+            const trimmedText = text.trim();
+            const errorMsg = document.getElementById("error-message");
+            const postBtn = document.getElementById("post-btn");
 
-            if (!text) {
-                showToastMsg("অনুগ্রহ করে কিছু লিখুন!", 'error');
+            errorMsg.classList.add('hidden');
+
+            if (!trimmedText) {
+                errorMsg.textContent = "অনুগ্রহ করে কিছু লিখুন! (ন্যূনতম ৩ অক্ষর)";
+                errorMsg.classList.remove('hidden');
                 return;
             }
+
+            if (trimmedText.length < 3) {
+                errorMsg.textContent = "আপনার মন্তব্য খুব ছোট! (ন্যূনতম ৩ অক্ষর প্রয়োজন)";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            postBtn.disabled = true;
+            postBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 inline-block animate-spin"></i> পাঠাচ্ছে...';
+            lucide.createIcons();
 
             try {
                 const res = await fetch("../api/post_comment.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ articleId, user: "Anonymous", text, lang })
+                    body: JSON.stringify({ articleId, user: "Anonymous", text: window.quillEditor.root.innerHTML, lang })
                 });
                 const result = await res.json();
                 if (result.success) {
                     showToastMsg("মন্তব্য প্রকাশিত হয়েছে! পেজ রিলোড হচ্ছে...");
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToastMsg("সমস্যা হয়েছে!", 'error');
+                    errorMsg.textContent = result.error || "সমস্যা হয়েছে!";
+                    errorMsg.classList.remove('hidden');
+                    postBtn.disabled = false;
+                    postBtn.textContent = "মন্তব্য প্রকাশ করুন";
                 }
             } catch (e) {
                 console.error(e);
-                showToastMsg("সার্ভার ত্রুটি!", 'error');
+                errorMsg.textContent = "সার্ভার ত্রুটি!";
+                errorMsg.classList.remove('hidden');
+                postBtn.disabled = false;
+                postBtn.textContent = "মন্তব্য প্রকাশ করুন";
             }
         }
 
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle("dark");
-            localStorage.setItem("breachtimes-theme", isDark ? "dark" : "light");
+            const theme = isDark ? "dark" : "light";
+            localStorage.setItem("breachtimes-theme", theme);
+            
+            // Save to backend if logged in
+            fetch("../api/save_theme.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ theme })
+            }).catch(console.error);
+            
+            // Show visual feedback
+            showToastMsg(isDark ? "🌙 গাঢ় মোড সক্রিয় হয়েছে" : "☀️ হালকা মোড সক্রিয় হয়েছে");
         }
 
         function toggleLanguage() {
@@ -432,7 +684,7 @@ if (!empty($article['leaked_documents'])) {
         }
 
         // Generate Table of Contents
-        document.addEventListener('DOMContentLoaded', () => {
+        const tocInitialize = () => {
             const prose = document.querySelector('.prose');
             const tocContainer = document.getElementById('toc-container');
             
@@ -447,7 +699,6 @@ if (!empty($article['leaked_documents'])) {
                 ul.className = 'space-y-2 border-l border-border-color pl-4';
 
                 headers.forEach((header, index) => {
-                    // Create ID if not exists
                     if (!header.id) {
                         header.id = `section-${index}`;
                     }
@@ -458,7 +709,6 @@ if (!empty($article['leaked_documents'])) {
                     link.textContent = header.textContent;
                     link.className = `block hover:text-bbcRed transition-colors ${header.tagName === 'H3' ? 'pl-4 text-xs' : 'font-bold'}`;
                     
-                    // Smooth scroll
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
                         header.scrollIntoView({ behavior: 'smooth' });
@@ -470,7 +720,8 @@ if (!empty($article['leaked_documents'])) {
                 
                 tocContainer.appendChild(ul);
             }
-        });
+        };
+        document.addEventListener('DOMContentLoaded', tocInitialize);
 
         async function handleLogout() {
             try {
@@ -480,6 +731,315 @@ if (!empty($article['leaked_documents'])) {
                 console.error(e);
             }
         }
+
+        // Comment Features
+        function toggleReplyForm(commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                document.getElementById(`reply-input-${commentId}`).focus();
+            }
+        }
+
+        async function postReply(parentCommentId) {
+            const textarea = document.getElementById(`reply-input-${parentCommentId}`);
+            const text = textarea.value.trim();
+            const form = document.getElementById(`reply-form-${parentCommentId}`);
+            const buttons = form.querySelectorAll('button');
+
+            if (!text) {
+                showToastMsg("<?php echo $lang === 'bn' ? 'অনুগ্রহ করে কিছু লিখুন!' : 'Please write something!'; ?>", 'error');
+                return;
+            }
+
+            // Disable buttons and show loading
+            buttons.forEach(btn => btn.disabled = true);
+            const sendBtn = Array.from(buttons).find(b => b.textContent.includes('পাঠান'));
+            if (sendBtn) sendBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 inline animate-spin"></i> পাঠাচ্ছে...';
+            lucide.createIcons();
+
+            try {
+                const res = await fetch("../api/post_reply.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ parentCommentId, text })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToastMsg("<?php echo $lang === 'bn' ? 'উত্তর পাঠানো হয়েছে! পেজ রিলোড হচ্ছে...' : 'Reply posted! Reloading...'; ?>");
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToastMsg(result.error || "<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error occurred!'; ?>", 'error');
+                    buttons.forEach(btn => btn.disabled = false);
+                    if (sendBtn) sendBtn.textContent = "<?php echo $lang === 'bn' ? 'উত্তর পাঠান' : 'Send Reply'; ?>";
+                }
+            } catch (e) {
+                console.error(e);
+                showToastMsg("<?php echo $lang === 'bn' ? 'সার্ভার ত্রুটি!' : 'Server error!'; ?>", 'error');
+                buttons.forEach(btn => btn.disabled = false);
+                if (sendBtn) sendBtn.textContent = "<?php echo $lang === 'bn' ? 'উত্তর পাঠান' : 'Send Reply'; ?>";
+            }
+        }
+
+        async function voteComment(commentId, voteType) {
+            const upBtn = document.querySelector(`.vote-btn-up[data-comment-id="${commentId}"]`);
+            const downBtn = document.querySelector(`.vote-btn-down[data-comment-id="${commentId}"]`);
+            const countEl = document.getElementById(`vote-count-${commentId}`);
+            
+            // Add loading state
+            upBtn.classList.add('opacity-50');
+            downBtn.classList.add('opacity-50');
+            
+            try {
+                const res = await fetch("../api/vote_comment.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ commentId, voteType })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById(`vote-count-${commentId}`).textContent = result.score;
+                    
+                    // Animate count change
+                    countEl.classList.add('animate-pulse-pop');
+                    setTimeout(() => countEl.classList.remove('animate-pulse-pop'), 400);
+                    
+                    // Store user vote
+                    userVotes[commentId] = voteType;
+                    localStorage.setItem(`votes-${articleId}`, JSON.stringify(userVotes));
+                    
+                    // Highlight votes with animation
+                    highlightUserVotes();
+                    
+                    showToastMsg("<?php echo $lang === 'bn' ? 'ভোট রেকর্ড হয়েছে!' : 'Vote recorded!'; ?>");
+                } else {
+                    showToastMsg(result.error || "<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error occurred!'; ?>", 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToastMsg("<?php echo $lang === 'bn' ? 'সার্ভার ত্রুটি!' : 'Server error!'; ?>", 'error');
+            } finally {
+                // Remove loading state
+                upBtn.classList.remove('opacity-50');
+                downBtn.classList.remove('opacity-50');
+            }
+        }
+
+        function highlightUserVotes() {
+            Object.keys(userVotes).forEach(commentId => {
+                const voteType = userVotes[commentId];
+                const upBtn = document.querySelector(`.vote-btn-up[data-comment-id="${commentId}"]`);
+                const downBtn = document.querySelector(`.vote-btn-down[data-comment-id="${commentId}"]`);
+                
+                if (upBtn && downBtn) {
+                    upBtn.classList.remove('text-green-500', 'font-bold');
+                    downBtn.classList.remove('text-red-500', 'font-bold');
+                    
+                    if (voteType === 'upvote') {
+                        upBtn.classList.add('text-green-500', 'font-bold');
+                    } else if (voteType === 'downvote') {
+                        downBtn.classList.add('text-red-500', 'font-bold');
+                    }
+                }
+            });
+        }
+
+        async function togglePin(commentId, isPinned) {
+            try {
+                const res = await fetch("../api/pin_comment.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ commentId, isPinned: !isPinned })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToastMsg(result.message);
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showToastMsg(result.error || "<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error occurred!'; ?>", 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToastMsg("<?php echo $lang === 'bn' ? 'সার্ভার ত্রুটি!' : 'Server error!'; ?>", 'error');
+            }
+        }
+
+        async function deleteComment(id) {
+            if (!confirm("<?php echo $lang === 'bn' ? 'এই মন্তব্য মুছে দিতে চান?' : 'Delete this comment?'; ?>")) return;
+            
+            try {
+                const res = await fetch('../api/delete_comment.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id})
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToastMsg("<?php echo $lang === 'bn' ? 'মন্তব্য মুছে দেওয়া হয়েছে!' : 'Comment deleted!'; ?>");
+                    setTimeout(() => location.reload(), 800);
+                } else alert("<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error!'; ?>");
+            } catch(e) { console.error(e); }
+        }
+
+        // Comment Sorting
+        function sortComments() {
+            const select = document.getElementById('sort-comments');
+            commentSort = select.value;
+            localStorage.setItem(`sort-${articleId}`, commentSort);
+            
+            const comments = Array.from(document.querySelectorAll('[id^="comment-"]'));
+            const container = document.querySelector('.space-y-6');
+            
+            comments.sort((a, b) => {
+                const aId = parseInt(a.id.split('-')[1]);
+                const bId = parseInt(b.id.split('-')[1]);
+                
+                switch(commentSort) {
+                    case 'newest':
+                        return bId - aId;
+                    case 'oldest':
+                        return aId - bId;
+                    case 'helpful': {
+                        const aScore = parseInt(a.querySelector('[id^="vote-count-"]')?.textContent || 0);
+                        const bScore = parseInt(b.querySelector('[id^="vote-count-"]')?.textContent || 0);
+                        return bScore - aScore;
+                    }
+                    case 'discussed': {
+                        const aReplies = a.querySelectorAll('.ml-12 .ml-9').length;
+                        const bReplies = b.querySelectorAll('.ml-12 .ml-9').length;
+                        return bReplies - aReplies;
+                    }
+                    default:
+                        return 0;
+                }
+            });
+            
+            comments.forEach(comment => container.appendChild(comment));
+            showToastMsg("মন্তব্য সাজানো হয়েছে!");
+        }
+
+        // User Profile Modal
+        async function showUserProfile(userName) {
+            const modal = document.getElementById('profile-modal');
+            const content = document.getElementById('profile-content');
+            
+            modal.classList.remove('hidden');
+            content.innerHTML = '<div class="flex items-center justify-center py-8"><i data-lucide="loader" class="w-6 h-6 animate-spin text-bbcRed"></i></div>';
+            lucide.createIcons();
+
+            try {
+                const res = await fetch("../api/get_user_profile.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userName })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    const profile = result.profile;
+                    const starRating = '⭐'.repeat(Math.min(Math.ceil(profile.helpfulPercent / 20), 5));
+                    
+                    content.innerHTML = `
+                        <div class="space-y-4">
+                            <!-- User Header -->
+                            <div class="flex items-center gap-4 pb-4 border-b border-border-color">
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-2xl shadow-lg">
+                                    ${profile.displayName[0].toUpperCase()}
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-card-text">${profile.displayName}</h4>
+                                    <p class="text-xs text-muted-text">${profile.email}</p>
+                                </div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
+                                    <div class="text-2xl font-bold text-bbcRed">${profile.commentCount}</div>
+                                    <div class="text-xs text-muted-text">মন্তব্য</div>
+                                </div>
+                                <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
+                                    <div class="text-2xl font-bold text-green-500">${profile.upvotes}</div>
+                                    <div class="text-xs text-muted-text">ঊর্ধ্বমূলক ভোট</div>
+                                </div>
+                                <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
+                                    <div class="text-2xl font-bold text-blue-500">${profile.score}</div>
+                                    <div class="text-xs text-muted-text">মোট স্কোর</div>
+                                </div>
+                                <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
+                                    <div class="text-lg font-bold">${profile.helpfulPercent}%</div>
+                                    <div class="text-xs text-muted-text">সহায়ক রেটিং</div>
+                                </div>
+                            </div>
+
+                            <!-- Helpful Rating -->
+                            <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
+                                <div class="text-sm font-bold text-card-text mb-2">সহায়কতা রেটিং</div>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-lg">${starRating}</div>
+                                    <div class="text-sm text-muted-text">${profile.helpfulPercent}% সহায়ক</div>
+                                </div>
+                            </div>
+
+                            <!-- Badges -->
+                            <div>
+                                <div class="text-sm font-bold text-card-text mb-2">🏆 ব্যাজ</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${profile.badges.map(badge => `
+                                        <span class="bg-bbcRed/20 text-bbcRed text-xs font-bold px-3 py-1 rounded-full border border-bbcRed/30">
+                                            ${badge}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Recent Comments -->
+                            ${profile.recentComments.length > 0 ? `
+                                <div>
+                                    <div class="text-sm font-bold text-card-text mb-2">সাম্প্রতিক মন্তব্য</div>
+                                    <div class="space-y-2">
+                                        ${profile.recentComments.map(comment => `
+                                            <div class="bg-muted-bg p-2 rounded-lg text-xs text-card-text border border-border-color">
+                                                <p class="mb-1">"${comment.text}"</p>
+                                                <div class="flex items-center justify-between text-muted-text text-xs">
+                                                    <span>${comment.time}</span>
+                                                    <span>👍 ${comment.upvotes}</span>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center py-8">
+                            <p class="text-muted-text">ব্যবহারকারী তথ্য পাওয়া যায়নি</p>
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
+            } catch (error) {
+                console.error(error);
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-500">সার্ভার ত্রুটি</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeProfileModal();
+            }
+        });
     </script>
 </body>
 </html>

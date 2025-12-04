@@ -80,10 +80,75 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `user_id` int(11) DEFAULT NULL,
   `user_name` varchar(255) NOT NULL,
   `text` text NOT NULL,
+  `parent_comment_id` int(11) DEFAULT NULL,
+  `is_pinned` tinyint(1) DEFAULT 0,
+  `pin_order` int(11) DEFAULT 0,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `article_id` (`article_id`),
-  CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  KEY `parent_comment_id` (`parent_comment_id`),
+  CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_comments_parent` FOREIGN KEY (`parent_comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Comment Votes Table
+CREATE TABLE IF NOT EXISTS `comment_votes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `user_ip` varchar(45) DEFAULT NULL,
+  `vote_type` enum('upvote','downvote') NOT NULL,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_vote` (`comment_id`, `user_id`, `user_ip`),
+  KEY `comment_id` (`comment_id`),
+  CONSTRAINT `fk_votes_comment` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_votes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Muted Users Table
+CREATE TABLE IF NOT EXISTS `muted_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `muted_by_admin_id` int(11) NOT NULL,
+  `reason` text,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  CONSTRAINT `fk_muted_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_muted_by_admin` FOREIGN KEY (`muted_by_admin_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Messaging System Table
+CREATE TABLE IF NOT EXISTS `messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `sender_id` int(11) NOT NULL,
+  `sender_type` enum('user','admin') NOT NULL DEFAULT 'user',
+  `recipient_id` int(11) NOT NULL,
+  `recipient_type` enum('user','admin') NOT NULL DEFAULT 'admin',
+  `content` longtext NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `read_at` timestamp NULL,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_sender` (`sender_id`, `sender_type`),
+  KEY `idx_recipient` (`recipient_id`, `recipient_type`),
+  KEY `idx_conversation` (`sender_id`, `recipient_id`),
+  KEY `idx_created_at` (`created_at` DESC),
+  KEY `idx_is_read` (`is_read`),
+  CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Messaging Preferences Table
+CREATE TABLE IF NOT EXISTS `messaging_preferences` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL UNIQUE,
+  `notifications_enabled` tinyint(1) DEFAULT 1,
+  `email_notifications` tinyint(1) DEFAULT 0,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_messaging_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 COMMIT;
