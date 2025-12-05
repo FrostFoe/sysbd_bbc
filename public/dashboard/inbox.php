@@ -29,34 +29,17 @@ $adminId = $adminUser['id'] ?? 1;
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     <link href="../assets/css/styles.css" rel="stylesheet">
+    <link href="../assets/css/custom.css" rel="stylesheet">
     <script src="../assets/js/lucide.js"></script>
 </head>
-<body class="bg-page text-page-text transition-colors duration-500 antialiased">
-    <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-[100]"></div>
+<body class="bg-page text-page-text transition-colors duration-500 antialiased flex flex-col h-screen overflow-hidden font-sans">
+    <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[120] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
 
-    <!-- Header -->
-    <header class="border-b border-border-color bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 sticky top-0">
-        <div class="container mx-auto px-4 lg:px-8 max-w-7xl">
-            <div class="h-[70px] flex items-center justify-between">
-                <a href="../index.php" class="flex items-center gap-2 group">
-                    <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md">B</span>
-                    <span class="font-bold text-xl text-bbcRed">BreachTimes</span>
-                </a>
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleTheme()" class="p-2 hover:bg-muted-bg rounded-lg text-muted-text transition-colors">
-                        <i data-lucide="sun" class="w-5 h-5"></i>
-                    </button>
-                    <a href="../api/logout.php" class="text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg transition-colors">
-                        Sign Out
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+    <?php include 'includes/header.php'; ?>
 
     <!-- Main Chat Interface (Facebook Messenger Style) -->
-    <main class="container mx-auto px-4 lg:px-8 max-w-7xl py-6">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-200px)]">
+    <main class="flex-1 container mx-auto px-4 lg:px-8 max-w-7xl py-6 overflow-y-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full">
             <!-- Sidebar -->
             <aside class="lg:col-span-1 bg-card rounded-lg border border-border-color shadow-sm flex flex-col overflow-hidden">
                 <div class="p-4 border-b border-border-color">
@@ -289,5 +272,5 @@ $adminId = $adminUser['id'] ?? 1;
             return div.innerHTML;
         }
     </script>
-</body>
-</html>
+
+    <?php include 'includes/footer.php'; ?>

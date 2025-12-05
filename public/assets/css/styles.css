@@ -696,10 +696,6 @@ html {
   bottom: 0.75rem;
 }
 
-.bottom-4 {
-  bottom: 1rem;
-}
-
 .bottom-5 {
   bottom: 1.25rem;
 }
@@ -1056,10 +1052,6 @@ html {
 
 .h-\[70px\] {
   height: 70px;
-}
-
-.h-\[calc\(100vh-200px\)\] {
-  height: calc(100vh - 200px);
 }
 
 .h-\[calc\(100vh-250px\)\] {
@@ -2052,6 +2044,10 @@ html {
 
 .pl-14 {
   padding-left: 3.5rem;
+}
+
+.pl-2 {
+  padding-left: 0.5rem;
 }
 
 .pl-4 {
@@ -3881,6 +3877,10 @@ textarea:focus-visible {
     grid-column: span 2 / span 2;
   }
 
+  .md\:inline {
+    display: inline;
+  }
+
   .md\:flex {
     display: flex;
   }
@@ -3938,6 +3938,10 @@ textarea:focus-visible {
     align-items: center;
   }
 
+  .md\:gap-3 {
+    gap: 0.75rem;
+  }
+
   .md\:gap-4 {
     gap: 1rem;
   }
@@ -3950,9 +3954,28 @@ textarea:focus-visible {
     padding: 3rem;
   }
 
+  .md\:px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .md\:pl-4 {
+    padding-left: 1rem;
+  }
+
+  .md\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
   .md\:text-5xl {
     font-size: 3rem;
     line-height: 1;
+  }
+
+  .md\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .md\:text-xl {

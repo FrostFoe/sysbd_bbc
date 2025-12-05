@@ -3,20 +3,27 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Auth Check
-if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
+// Auth Check - Redirect to login if not authenticated
+if (!isset($_SESSION["user_id"])) {
     header("Location: ../login/");
     exit();
 }
 
+// Redirect admins to admin panel
+if (isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin") {
+    header("Location: ../admin/index.php");
+    exit();
+}
+
+$user_email = $_SESSION["user_email"] ?? "Unknown User";
+$user_name = explode("@", $user_email)[0];
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Dashboard menu items
 $menu_items = [
-    ['name' => 'Dashboard', 'link' => 'index.php', 'icon' => 'layout-dashboard'],
-    ['name' => 'Articles', 'link' => 'articles.php', 'match' => ['articles.php', 'edit_article.php'], 'icon' => 'file-text'],
-    ['name' => 'Comments', 'link' => 'comments.php', 'icon' => 'message-circle'],
+    ['name' => 'Overview', 'link' => 'index.php', 'icon' => 'layout-dashboard'],
     ['name' => 'Messages', 'link' => 'inbox.php', 'icon' => 'mail'],
-    ['name' => 'Categories', 'link' => 'categories.php', 'icon' => 'folder'],
-    ['name' => 'Sections', 'link' => 'sections.php', 'icon' => 'layers'],
+    ['name' => 'Saved Articles', 'link' => '../?category=saved', 'icon' => 'bookmark'],
 ];
 ?>
 <!doctype html>
@@ -24,17 +31,15 @@ $menu_items = [
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel | BreachTimes</title>
+    <title>Dashboard | BreachTimes</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <link href="../../assets/css/styles.css" rel="stylesheet" />
     <script src="../../assets/js/lucide.js"></script>
     <script src="../../assets/js/dropdown.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500 flex flex-col h-screen overflow-hidden font-sans antialiased">
     <div id="toast-container" role="status" aria-live="polite" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[120] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
@@ -48,21 +53,18 @@ $menu_items = [
             <a href="../index.php" class="flex items-center select-none gap-2 group min-w-0">
                 <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300 flex-shrink-0">B</span>
                 <span class="font-bold text-xl md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors whitespace-nowrap">
-                    <span class="text-bbcRed">Breach</span>Times <span class="text-xs text-muted-text font-normal ml-2 uppercase tracking-widest hidden sm:inline-block">Admin</span>
+                    <span class="text-bbcRed">Breach</span>Times <span class="text-xs text-muted-text font-normal ml-2 uppercase tracking-widest hidden sm:inline-block">Dashboard</span>
                 </span>
             </a>
         </div>
 
         <div class="flex items-center gap-2 md:gap-4 flex-shrink-0">
-            <a href="edit_article.php" class="hidden sm:flex items-center gap-2 bg-bbcRed text-white px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-bold hover:bg-[#d40000] transition-colors shadow-sm hover:shadow-md flex-shrink-0">
-                <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i> <span class="hidden md:inline">New</span><span class="hidden lg:inline"> Article</span>
-            </a>
             <div class="hidden md:flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border-color flex-shrink-0">
                 <div class="text-right hidden lg:block leading-tight flex-shrink-0">
-                    <div class="font-bold text-sm">Administrator</div>
-                    <div class="text-[10px] text-muted-text">admin@breachtimes.com</div>
+                    <div class="font-bold text-sm"><?php echo htmlspecialchars($user_name); ?></div>
+                    <div class="text-[10px] text-muted-text"><?php echo htmlspecialchars($user_email); ?></div>
                 </div>
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md flex-shrink-0">A</div>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md flex-shrink-0"><?php echo strtoupper($user_name[0]); ?></div>
             </div>
         </div>
     </header>
@@ -76,7 +78,7 @@ $menu_items = [
         <aside id="sidebar" class="w-64 bg-card border-r border-border-color fixed inset-y-0 left-0 top-[70px] z-40 transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:inset-auto md:transform-none flex flex-col h-[calc(100vh-70px)] md:h-full shadow-xl md:shadow-none overflow-y-auto">
             <nav class="p-4 space-y-1.5">
                 <?php foreach ($menu_items as $item): 
-                    $isActive = $current_page === $item['link'] || (isset($item['match']) && in_array($current_page, $item['match']));
+                    $isActive = $current_page === $item['link'] || strpos($_SERVER['REQUEST_URI'], $item['link']) !== false;
                     $baseClass = "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 group";
                     $activeClass = "bg-bbcRed text-white shadow-md shadow-red-900/20";
                     $inactiveClass = "text-muted-text hover:bg-muted-bg hover:text-card-text";
@@ -92,10 +94,10 @@ $menu_items = [
                 <!-- Profile Section (Mobile) -->
                 <div class="md:hidden mb-4 pb-4 border-b border-border-color">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md">A</div>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md"><?php echo strtoupper($user_name[0]); ?></div>
                         <div class="text-left leading-tight flex-1">
-                            <div class="font-bold text-sm">Administrator</div>
-                            <div class="text-[10px] text-muted-text">admin@breachtimes.com</div>
+                            <div class="font-bold text-sm"><?php echo htmlspecialchars($user_name); ?></div>
+                            <div class="text-[10px] text-muted-text"><?php echo htmlspecialchars($user_email); ?></div>
                         </div>
                     </div>
                 </div>
