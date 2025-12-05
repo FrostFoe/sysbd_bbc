@@ -3,7 +3,10 @@ session_start();
 require_once "../../src/config/db.php";
 
 // Check if user is logged in
-if (!isset($_SESSION["user_id"]) || ($_SESSION["user_role"] ?? null) !== "user") {
+if (
+    !isset($_SESSION["user_id"]) ||
+    ($_SESSION["user_role"] ?? null) !== "user"
+) {
     header("Location: ../login/");
     exit();
 }
@@ -16,7 +19,7 @@ $userName = explode("@", $userEmail)[0];
 $adminStmt = $pdo->prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
 $adminStmt->execute();
 $adminUser = $adminStmt->fetch(PDO::FETCH_ASSOC);
-$adminId = $adminUser['id'] ?? 1;
+$adminId = $adminUser["id"] ?? 1;
 ?>
 <!DOCTYPE html>
 <html lang="en">

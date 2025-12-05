@@ -54,7 +54,7 @@ try {
     echo json_encode([
         "success" => true,
         "messages" => $messages,
-        "count" => count($messages)
+        "count" => count($messages),
     ]);
 } catch (Exception $e) {
     http_response_code(500);

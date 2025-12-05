@@ -2,20 +2,23 @@
 require_once "api_header.php";
 
 // Helper function to calculate read time (simple example)
-function calculate_read_time_from_text($text, $lang = 'en') {
+function calculate_read_time_from_text($text, $lang = "en")
+{
     $word_count = str_word_count(strip_tags($text));
     $words_per_minute = 200; // Average reading speed
     $minutes = ceil($word_count / $words_per_minute);
     $minutes = max(1, $minutes); // Ensure at least 1 minute
 
-    if ($lang === 'bn') {
+    if ($lang === "bn") {
         // Bengali translation for minutes
         $bengali_digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
         $minute_str = " মিনিট"; // Using plural form for consistency
         // Convert minutes to Bengali digits
         $tens = floor($minutes / 10);
         $ones = $minutes % 10;
-        return ($tens > 0 ? $bengali_digits[$tens] : '') . $bengali_digits[$ones] . $minute_str;
+        return ($tens > 0 ? $bengali_digits[$tens] : "") .
+            $bengali_digits[$ones] .
+            $minute_str;
     } else {
         return $minutes . " min";
     }
@@ -27,13 +30,13 @@ session_start();
 // --- Authorization Check ---
 if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
     send_response(["error" => "Unauthorized"], 403);
-    exit; // Stop execution if unauthorized
+    exit(); // Stop execution if unauthorized
 }
 // --- End Authorization Check ---
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     send_response(["error" => "Method not allowed"], 405);
-    exit;
+    exit();
 }
 
 $id = !empty($_POST["id"]) ? $_POST["id"] : uniqid();
@@ -54,8 +57,8 @@ $leaked_documents = $_POST["leaked_documents"] ?? null;
 $status = $_POST["status"] ?? "draft"; // Default to draft
 
 // Dynamically calculate read_time
-$read_time_bn = calculate_read_time_from_text($content_bn, 'bn');
-$read_time_en = calculate_read_time_from_text($content_en, 'en');
+$read_time_bn = calculate_read_time_from_text($content_bn, "bn");
+$read_time_en = calculate_read_time_from_text($content_en, "en");
 
 $stmt = $pdo->prepare("SELECT id FROM articles WHERE id = ?");
 $stmt->execute([$id]);
@@ -74,12 +77,19 @@ if ($exists) {
         WHERE id=?",
     );
     $stmt->execute([
-        $title_bn, $title_en,
-        $summary_bn, $summary_en,
-        $content_bn, $content_en,
-        $read_time_bn, $read_time_en,
-        $category_id, $sectionId,
-        $image, $leaked_documents, $status,
+        $title_bn,
+        $title_en,
+        $summary_bn,
+        $summary_en,
+        $content_bn,
+        $content_en,
+        $read_time_bn,
+        $read_time_en,
+        $category_id,
+        $sectionId,
+        $image,
+        $leaked_documents,
+        $status,
         $id,
     ]);
 } else {
@@ -97,12 +107,19 @@ if ($exists) {
     );
     $stmt->execute([
         $id,
-        $title_bn, $title_en,
-        $summary_bn, $summary_en,
-        $content_bn, $content_en,
-        $read_time_bn, $read_time_en,
-        $category_id, $sectionId,
-        $image, $leaked_documents, $status,
+        $title_bn,
+        $title_en,
+        $summary_bn,
+        $summary_en,
+        $content_bn,
+        $content_en,
+        $read_time_bn,
+        $read_time_en,
+        $category_id,
+        $sectionId,
+        $image,
+        $leaked_documents,
+        $status,
     ]);
 }
 

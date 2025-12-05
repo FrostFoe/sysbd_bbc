@@ -21,20 +21,29 @@ $content = $data["content"] ?? null;
 
 if (!$recipientId || !$content) {
     http_response_code(400);
-    echo json_encode(["success" => false, "error" => "Missing recipient or content"]);
+    echo json_encode([
+        "success" => false,
+        "error" => "Missing recipient or content",
+    ]);
     exit();
 }
 
 // Validate content
 if (strlen(trim($content)) < 1) {
     http_response_code(400);
-    echo json_encode(["success" => false, "error" => "Message cannot be empty"]);
+    echo json_encode([
+        "success" => false,
+        "error" => "Message cannot be empty",
+    ]);
     exit();
 }
 
 if (strlen($content) > 5000) {
     http_response_code(400);
-    echo json_encode(["success" => false, "error" => "Message too long (max 5000 chars)"]);
+    echo json_encode([
+        "success" => false,
+        "error" => "Message too long (max 5000 chars)",
+    ]);
     exit();
 }
 
@@ -42,7 +51,10 @@ try {
     // Users can only message admin, admins can message any user
     if (!$isAdmin && $recipientId != 1) {
         http_response_code(403);
-        echo json_encode(["success" => false, "error" => "Users can only message admin"]);
+        echo json_encode([
+            "success" => false,
+            "error" => "Users can only message admin",
+        ]);
         exit();
     }
 
@@ -51,16 +63,22 @@ try {
         INSERT INTO messages (sender_id, sender_type, recipient_id, recipient_type, content, created_at)
         VALUES (?, ?, ?, ?, ?, NOW())
     ");
-    
-    $senderType = $isAdmin ? 'admin' : 'user';
-    $recipientType = $isAdmin ? 'user' : 'admin';
 
-    $stmt->execute([$userId, $senderType, $recipientId, $recipientType, $content]);
+    $senderType = $isAdmin ? "admin" : "user";
+    $recipientType = $isAdmin ? "user" : "admin";
+
+    $stmt->execute([
+        $userId,
+        $senderType,
+        $recipientId,
+        $recipientType,
+        $content,
+    ]);
 
     echo json_encode([
         "success" => true,
         "message_id" => $pdo->lastInsertId(),
-        "timestamp" => date("Y-m-d H:i:s")
+        "timestamp" => date("Y-m-d H:i:s"),
     ]);
 } catch (Exception $e) {
     http_response_code(500);

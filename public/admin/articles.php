@@ -2,12 +2,14 @@
 require_once "includes/header.php";
 require_once "../../src/config/db.php";
 
-$status = isset($_GET['status']) ? $_GET['status'] : 'all';
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$catFilter = isset($_GET['cat']) ? $_GET['cat'] : '';
+$status = isset($_GET["status"]) ? $_GET["status"] : "all";
+$search = isset($_GET["search"]) ? trim($_GET["search"]) : "";
+$catFilter = isset($_GET["cat"]) ? $_GET["cat"] : "";
 
 // Fetch Categories for Filter
-$categories = $pdo->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSOC);
+$categories = $pdo
+    ->query("SELECT * FROM categories")
+    ->fetchAll(PDO::FETCH_ASSOC);
 
 // Build Query
 $sql = "SELECT a.id, a.title_bn, a.title_en, a.status, a.image, a.created_at, a.published_at, c.title_en as cat_en, c.title_bn as cat_bn 
@@ -16,7 +18,7 @@ $sql = "SELECT a.id, a.title_bn, a.title_en, a.status, a.image, a.created_at, a.
         WHERE 1=1";
 $params = [];
 
-if ($status !== 'all') {
+if ($status !== "all") {
     $sql .= " AND a.status = ?";
     $params[] = $status;
 }
@@ -45,17 +47,25 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
         <!-- Filter Form -->
         <form method="GET" class="flex gap-2 w-full md:w-auto">
-            <?php if($status !== 'all'): ?>
-                <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
+            <?php if ($status !== "all"): ?>
+                <input type="hidden" name="status" value="<?php echo htmlspecialchars(
+                    $status,
+                ); ?>">
             <?php endif; ?>
             
-            <input type="text" name="search" placeholder="Search articles..." value="<?php echo htmlspecialchars($search); ?>" class="p-2 rounded border border-border-color bg-card text-sm w-full md:w-48 focus:border-bbcRed outline-none">
+            <input type="text" name="search" placeholder="Search articles..." value="<?php echo htmlspecialchars(
+                $search,
+            ); ?>" class="p-2 rounded border border-border-color bg-card text-sm w-full md:w-48 focus:border-bbcRed outline-none">
             
             <select name="cat" class="custom-select p-2.5 rounded-lg border border-border-color bg-card text-sm w-32 md:w-40 text-card-text" onchange="this.form.submit()">
                 <option value="">All Categories</option>
                 <?php foreach ($categories as $c): ?>
-                    <option value="<?php echo $c['id']; ?>" <?php echo $catFilter === $c['id'] ? 'selected' : ''; ?>>
-                        <?php echo $c['title_en']; ?>
+                    <option value="<?php echo $c[
+                        "id"
+                    ]; ?>" <?php echo $catFilter === $c["id"]
+    ? "selected"
+    : ""; ?>>
+                        <?php echo $c["title_en"]; ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -97,53 +107,82 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr class="hover:bg-muted-bg transition-colors">
                     <td class="p-4">
                         <div class="flex items-center gap-4">
-                            <img src="<?php echo htmlspecialchars($a['image'] ?? ''); ?>" onerror="this.src='https://placehold.co/100x100?text=Img'" class="w-12 h-12 rounded object-cover bg-gray-200">
+                            <img src="<?php echo htmlspecialchars(
+                                $a["image"] ?? "",
+                            ); ?>" onerror="this.src='https://placehold.co/100x100?text=Img'" class="w-12 h-12 rounded object-cover bg-gray-200">
                             <div class="max-w-md">
-                                <?php if (!empty($a['title_bn'])): ?>
-                                    <a href="edit_article.php?id=<?php echo $a['id']; ?>" class="font-bold text-sm block hover:text-bbcRed line-clamp-1 font-hind mb-0.5">
-                                        <?php echo htmlspecialchars($a['title_bn']); ?>
+                                <?php if (!empty($a["title_bn"])): ?>
+                                    <a href="edit_article.php?id=<?php echo $a[
+                                        "id"
+                                    ]; ?>" class="font-bold text-sm block hover:text-bbcRed line-clamp-1 font-hind mb-0.5">
+                                        <?php echo htmlspecialchars(
+                                            $a["title_bn"],
+                                        ); ?>
                                     </a>
                                 <?php endif; ?>
-                                <?php if (!empty($a['title_en'])): ?>
+                                <?php if (!empty($a["title_en"])): ?>
                                     <span class="text-xs text-muted-text block line-clamp-1">
-                                        <?php echo htmlspecialchars($a['title_en']); ?>
+                                        <?php echo htmlspecialchars(
+                                            $a["title_en"],
+                                        ); ?>
                                     </span>
                                 <?php endif; ?>
-                                <?php if (empty($a['title_bn']) && empty($a['title_en'])): ?>
+                                <?php if (
+                                    empty($a["title_bn"]) &&
+                                    empty($a["title_en"])
+                                ): ?>
                                     <span class="text-xs italic text-muted-text">(No Title)</span>
                                 <?php endif; ?>
                             </div>
                         </div>
                     </td>
                     <td class="p-4">
-                        <?php 
+                        <?php
                         $statusColors = [
-                            'published' => 'bg-green-100 text-green-700 border-green-200',
-                            'draft' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                            'archived' => 'bg-gray-100 text-gray-700 border-gray-200'
+                            "published" =>
+                                "bg-green-100 text-green-700 border-green-200",
+                            "draft" =>
+                                "bg-yellow-100 text-yellow-700 border-yellow-200",
+                            "archived" =>
+                                "bg-gray-100 text-gray-700 border-gray-200",
                         ];
-                        $colorClass = $statusColors[$a['status']] ?? $statusColors['draft'];
+                        $colorClass =
+                            $statusColors[$a["status"]] ??
+                            $statusColors["draft"];
                         ?>
                         <span class="px-2 py-1 rounded-full text-xs font-bold border <?php echo $colorClass; ?>">
-                            <?php echo ucfirst($a['status']); ?>
+                            <?php echo ucfirst($a["status"]); ?>
                         </span>
                     </td>
                     <td class="p-4 text-sm">
                         <div class="flex flex-col">
-                            <span class="font-hind"><?php echo $a['cat_bn'] ?? '-'; ?></span>
-                            <span class="text-xs text-muted-text"><?php echo $a['cat_en'] ?? '-'; ?></span>
+                            <span class="font-hind"><?php echo $a["cat_bn"] ??
+                                "-"; ?></span>
+                            <span class="text-xs text-muted-text"><?php echo $a[
+                                "cat_en"
+                            ] ?? "-"; ?></span>
                         </div>
                     </td>
                     <td class="p-4 text-xs text-muted-text">
                         <div class="flex flex-col">
-                            <span>Pub: <?php echo date('M d, Y', strtotime($a['published_at'])); ?></span>
-                            <span class="opacity-70">Cr: <?php echo date('M d', strtotime($a['created_at'])); ?></span>
+                            <span>Pub: <?php echo date(
+                                "M d, Y",
+                                strtotime($a["published_at"]),
+                            ); ?></span>
+                            <span class="opacity-70">Cr: <?php echo date(
+                                "M d",
+                                strtotime($a["created_at"]),
+                            ); ?></span>
                         </div>
                     </td>
                     <td class="p-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <a href="edit_article.php?id=<?php echo $a['id']; ?>" class="p-2 text-blue-600 hover:bg-blue-50 rounded"><i data-lucide="edit-2" class="w-4 h-4"></i></a>
-                            <button onclick="deleteArticle('<?php echo $a['id']; ?>')" class="p-2 text-red-600 hover:bg-red-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            <a href="edit_article.php?id=<?php echo $a[
+                                "id"
+                            ]; ?>" class="p-2 text-blue-600 hover:bg-blue-50 rounded"><i data-lucide="edit-2" class="w-4 h-4"></i></a>
+                            <button onclick="deleteArticle('<?php echo $a[
+                                "id"
+                            ]; ?>')" class="p-2 text-red-600 hover:bg-red-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     </td>
                 </tr>

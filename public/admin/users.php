@@ -3,19 +3,25 @@ require_once "includes/header.php";
 require_once "../../src/config/db.php";
 
 // Fetch all users with mute status
-$users = $pdo->query("
+$users = $pdo
+    ->query(
+        "
     SELECT u.id, u.email, u.role, u.created_at, 
            m.id as is_muted, m.reason, m.created_at as muted_at
     FROM users u
     LEFT JOIN muted_users m ON u.id = m.user_id
     ORDER BY u.role DESC, u.created_at DESC
-")->fetchAll(PDO::FETCH_ASSOC);
+",
+    )
+    ->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">Users Management</h1>
     <div class="text-sm text-muted-text">
-        Total Users: <span class="font-bold text-card-text"><?php echo count($users); ?></span>
+        Total Users: <span class="font-bold text-card-text"><?php echo count(
+            $users,
+        ); ?></span>
     </div>
 </div>
 
@@ -25,7 +31,9 @@ $users = $pdo->query("
             <i data-lucide="users" class="w-16 h-16 mx-auto mb-4 text-border-color"></i>
             <p class="text-lg font-bold mb-2">No Users Found</p>
         </div>
-    <?php else: ?>
+    <?php // Can't mute yourself
+        // Can't mute yourself
+        else: ?>
         <table class="w-full text-left border-collapse">
             <thead class="bg-muted-bg text-muted-text text-xs uppercase">
                 <tr>
@@ -37,25 +45,36 @@ $users = $pdo->query("
                 </tr>
             </thead>
             <tbody class="divide-y divide-border-color">
-                <?php foreach ($users as $user): 
-                    $isMuted = !empty($user['is_muted']);
-                    $joinDate = date('M d, Y', strtotime($user['created_at']));
-                ?>
+                <?php foreach ($users as $user):
+
+                    $isMuted = !empty($user["is_muted"]);
+                    $joinDate = date("M d, Y", strtotime($user["created_at"]));
+                    ?>
                 <tr class="hover:bg-muted-bg transition-colors">
                     <td class="p-4">
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 flex items-center justify-center text-white text-xs font-bold">
-                                <?php echo strtoupper(substr($user['email'], 0, 1)); ?>
+                                <?php echo strtoupper(
+                                    substr($user["email"], 0, 1),
+                                ); ?>
                             </div>
                             <div>
-                                <p class="font-bold text-sm"><?php echo htmlspecialchars($user['email']); ?></p>
-                                <p class="text-xs text-muted-text">ID: <?php echo $user['id']; ?></p>
+                                <p class="font-bold text-sm"><?php echo htmlspecialchars(
+                                    $user["email"],
+                                ); ?></p>
+                                <p class="text-xs text-muted-text">ID: <?php echo $user[
+                                    "id"
+                                ]; ?></p>
                             </div>
                         </div>
                     </td>
                     <td class="p-4">
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold <?php echo $user['role'] === 'admin' ? 'bg-red-100 dark:bg-red-900/20 text-bbcRed' : 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'; ?>">
-                            <?php echo ucfirst($user['role']); ?>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold <?php echo $user[
+                            "role"
+                        ] === "admin"
+                            ? "bg-red-100 dark:bg-red-900/20 text-bbcRed"
+                            : "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"; ?>">
+                            <?php echo ucfirst($user["role"]); ?>
                         </span>
                     </td>
                     <td class="p-4 text-sm text-muted-text"><?php echo $joinDate; ?></td>
@@ -64,8 +83,10 @@ $users = $pdo->query("
                             <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-1.5 w-fit">
                                 <i data-lucide="ban" class="w-3 h-3"></i> Muted
                             </span>
-                            <?php if (!empty($user['reason'])): ?>
-                                <p class="text-xs text-muted-text mt-1">Reason: <?php echo htmlspecialchars($user['reason']); ?></p>
+                            <?php if (!empty($user["reason"])): ?>
+                                <p class="text-xs text-muted-text mt-1">Reason: <?php echo htmlspecialchars(
+                                    $user["reason"],
+                                ); ?></p>
                             <?php endif; ?>
                         <?php else: ?>
                             <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center gap-1.5 w-fit">
@@ -75,13 +96,19 @@ $users = $pdo->query("
                     </td>
                     <td class="p-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <?php if ($user['id'] != $_SESSION['user_id']): // Can't mute yourself ?>
+                            <?php if ($user["id"] != $_SESSION["user_id"]): ?>
                                 <?php if ($isMuted): ?>
-                                    <button onclick="unmuteUser(<?php echo $user['id']; ?>)" class="text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 p-2 rounded transition-colors" title="Unmute">
+                                    <button onclick="unmuteUser(<?php echo $user[
+                                        "id"
+                                    ]; ?>)" class="text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 p-2 rounded transition-colors" title="Unmute">
                                         <i data-lucide="check" class="w-4 h-4"></i>
                                     </button>
                                 <?php else: ?>
-                                    <button onclick="openMuteDialog(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['email']); ?>')" class="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 p-2 rounded transition-colors" title="Mute">
+                                    <button onclick="openMuteDialog(<?php echo $user[
+                                        "id"
+                                    ]; ?>, '<?php echo htmlspecialchars(
+    $user["email"],
+); ?>')" class="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 p-2 rounded transition-colors" title="Mute">
                                         <i data-lucide="ban" class="w-4 h-4"></i>
                                     </button>
                                 <?php endif; ?>
@@ -89,7 +116,8 @@ $users = $pdo->query("
                         </div>
                     </td>
                 </tr>
-                <?php endforeach; ?>
+                <?php
+                endforeach; ?>
             </tbody>
         </table>
     <?php endif; ?>

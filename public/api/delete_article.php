@@ -6,7 +6,7 @@ session_start();
 // --- Authorization Check ---
 if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
     send_response(["error" => "Unauthorized"], 403);
-    exit; // Stop execution if unauthorized
+    exit(); // Stop execution if unauthorized
 }
 // --- End Authorization Check ---
 

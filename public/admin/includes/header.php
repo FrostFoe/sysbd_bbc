@@ -9,14 +9,27 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
     exit();
 }
 
-$current_page = basename($_SERVER['PHP_SELF']);
+$current_page = basename($_SERVER["PHP_SELF"]);
 $menu_items = [
-    ['name' => 'Dashboard', 'link' => 'index.php', 'icon' => 'layout-dashboard'],
-    ['name' => 'Articles', 'link' => 'articles.php', 'match' => ['articles.php', 'edit_article.php'], 'icon' => 'file-text'],
-    ['name' => 'Comments', 'link' => 'comments.php', 'icon' => 'message-circle'],
-    ['name' => 'Messages', 'link' => 'inbox.php', 'icon' => 'mail'],
-    ['name' => 'Categories', 'link' => 'categories.php', 'icon' => 'folder'],
-    ['name' => 'Sections', 'link' => 'sections.php', 'icon' => 'layers'],
+    [
+        "name" => "Dashboard",
+        "link" => "index.php",
+        "icon" => "layout-dashboard",
+    ],
+    [
+        "name" => "Articles",
+        "link" => "articles.php",
+        "match" => ["articles.php", "edit_article.php"],
+        "icon" => "file-text",
+    ],
+    [
+        "name" => "Comments",
+        "link" => "comments.php",
+        "icon" => "message-circle",
+    ],
+    ["name" => "Messages", "link" => "inbox.php", "icon" => "mail"],
+    ["name" => "Categories", "link" => "categories.php", "icon" => "folder"],
+    ["name" => "Sections", "link" => "sections.php", "icon" => "layers"],
 ];
 ?>
 <!doctype html>
@@ -75,17 +88,33 @@ $menu_items = [
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 bg-card border-r border-border-color fixed inset-y-0 left-0 top-[70px] z-40 transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:inset-auto md:transform-none flex flex-col h-[calc(100vh-70px)] md:h-full shadow-xl md:shadow-none overflow-y-auto">
             <nav class="p-4 space-y-1.5">
-                <?php foreach ($menu_items as $item): 
-                    $isActive = $current_page === $item['link'] || (isset($item['match']) && in_array($current_page, $item['match']));
-                    $baseClass = "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 group";
-                    $activeClass = "bg-bbcRed text-white shadow-md shadow-red-900/20";
-                    $inactiveClass = "text-muted-text hover:bg-muted-bg hover:text-card-text";
-                ?>
-                    <a href="<?php echo $item['link']; ?>" class="<?php echo $baseClass . ' ' . ($isActive ? $activeClass : $inactiveClass); ?>">
-                        <i data-lucide="<?php echo $item['icon']; ?>" class="w-5 h-5 <?php echo $isActive ? 'text-white' : 'text-muted-text group-hover:text-bbcRed'; ?> transition-colors"></i>
-                        <?php echo $item['name']; ?>
+                <?php foreach ($menu_items as $item):
+
+                    $isActive =
+                        $current_page === $item["link"] ||
+                        (isset($item["match"]) &&
+                            in_array($current_page, $item["match"]));
+                    $baseClass =
+                        "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 group";
+                    $activeClass =
+                        "bg-bbcRed text-white shadow-md shadow-red-900/20";
+                    $inactiveClass =
+                        "text-muted-text hover:bg-muted-bg hover:text-card-text";
+                    ?>
+                    <a href="<?php echo $item[
+                        "link"
+                    ]; ?>" class="<?php echo $baseClass .
+    " " .
+    ($isActive ? $activeClass : $inactiveClass); ?>">
+                        <i data-lucide="<?php echo $item[
+                            "icon"
+                        ]; ?>" class="w-5 h-5 <?php echo $isActive
+    ? "text-white"
+    : "text-muted-text group-hover:text-bbcRed"; ?> transition-colors"></i>
+                        <?php echo $item["name"]; ?>
                     </a>
-                <?php endforeach; ?>
+                <?php
+                endforeach; ?>
             </nav>
             
             <div class="mt-auto p-4 border-t border-border-color">

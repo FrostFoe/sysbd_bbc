@@ -2,7 +2,7 @@
 require_once "includes/header.php";
 require_once "../../src/config/db.php";
 
-$id = isset($_GET['id']) ? $_GET['id'] : null;
+$id = isset($_GET["id"]) ? $_GET["id"] : null;
 
 $article = null;
 if ($id) {
@@ -12,7 +12,9 @@ if ($id) {
 }
 
 // Fetch Categories for dropdown
-$categories = $pdo->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSOC);
+$categories = $pdo
+    ->query("SELECT * FROM categories")
+    ->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch Sections for dropdown
 $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
@@ -20,13 +22,19 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="max-w-6xl mx-auto">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold"><?php echo $article ? 'Edit Article (Unified)' : 'Create New Article (Unified)'; ?></h1>
+        <h1 class="text-2xl font-bold"><?php echo $article
+            ? "Edit Article (Unified)"
+            : "Create New Article (Unified)"; ?></h1>
         <?php if ($article): ?>
             <div class="flex gap-2">
-                <a href="../read/index.php?id=<?php echo $article['id']; ?>&lang=bn" target="_blank" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                <a href="../read/index.php?id=<?php echo $article[
+                    "id"
+                ]; ?>&lang=bn" target="_blank" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
                     View (BN) <i data-lucide="external-link" class="w-3 h-3"></i>
                 </a>
-                <a href="../read/index.php?id=<?php echo $article['id']; ?>&lang=en" target="_blank" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                <a href="../read/index.php?id=<?php echo $article[
+                    "id"
+                ]; ?>&lang=en" target="_blank" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
                     View (EN) <i data-lucide="external-link" class="w-3 h-3"></i>
                 </a>
             </div>
@@ -34,7 +42,8 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <form id="articleForm" onsubmit="saveArticle(event)" class="space-y-8">
-        <input type="hidden" name="id" value="<?php echo $article['id'] ?? uniqid('art_'); ?>">
+        <input type="hidden" name="id" value="<?php echo $article["id"] ??
+            uniqid("art_"); ?>">
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Main Content -->
@@ -48,18 +57,24 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold mb-2">Title (বাংলা)</label>
-                            <input name="title_bn" id="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars($article['title_bn'] ?? ''); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
+                            <input name="title_bn" id="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars(
+                                $article["title_bn"] ?? "",
+                            ); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Summary (বাংলা)</label>
-                            <textarea name="summary_bn" id="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars($article['summary_bn'] ?? ''); ?></textarea>
+                            <textarea name="summary_bn" id="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars(
+                                $article["summary_bn"] ?? "",
+                            ); ?></textarea>
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Content (বাংলা)</label>
                             <div id="quill-bn" class="bg-card h-96 rounded-lg border border-border-color"></div>
-                            <input type="hidden" name="content_bn" id="content-bn-input" value="<?php echo htmlspecialchars($article['content_bn'] ?? ''); ?>">
+                            <input type="hidden" name="content_bn" id="content-bn-input" value="<?php echo htmlspecialchars(
+                                $article["content_bn"] ?? "",
+                            ); ?>">
                         </div>
                     </div>
                 </div>
@@ -72,18 +87,24 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold mb-2">Title (English)</label>
-                            <input name="title_en" id="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" value="<?php echo htmlspecialchars($article['title_en'] ?? ''); ?>" placeholder="Enter article title...">
+                            <input name="title_en" id="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" value="<?php echo htmlspecialchars(
+                                $article["title_en"] ?? "",
+                            ); ?>" placeholder="Enter article title...">
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Summary (English)</label>
-                            <textarea name="summary_en" id="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars($article['summary_en'] ?? ''); ?></textarea>
+                            <textarea name="summary_en" id="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars(
+                                $article["summary_en"] ?? "",
+                            ); ?></textarea>
                         </div>
 
                         <div>
                             <label class="block text-sm font-bold mb-2">Content (English)</label>
                             <div id="quill-en" class="bg-card h-96 rounded-lg border border-border-color"></div>
-                            <input type="hidden" name="content_en" id="content-en-input" value="<?php echo htmlspecialchars($article['content_en'] ?? ''); ?>">
+                            <input type="hidden" name="content_en" id="content-en-input" value="<?php echo htmlspecialchars(
+                                $article["content_en"] ?? "",
+                            ); ?>">
                         </div>
                     </div>
                 </div>
@@ -110,14 +131,34 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <div class="mb-4">
                         <label class="block text-xs font-bold mb-2">Status</label>
                         <select name="status" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
-                            <option value="draft" <?php echo ($article['status'] ?? '') === 'draft' ? 'selected' : ''; ?>>Draft</option>
-                            <option value="published" <?php echo ($article['status'] ?? '') === 'published' ? 'selected' : ''; ?>>Published</option>
-                            <option value="archived" <?php echo ($article['status'] ?? '') === 'archived' ? 'selected' : ''; ?>>Archived</option>
+                            <option value="draft" <?php echo ($article[
+                                "status"
+                            ] ??
+                                "") ===
+                            "draft"
+                                ? "selected"
+                                : ""; ?>>Draft</option>
+                            <option value="published" <?php echo ($article[
+                                "status"
+                            ] ??
+                                "") ===
+                            "published"
+                                ? "selected"
+                                : ""; ?>>Published</option>
+                            <option value="archived" <?php echo ($article[
+                                "status"
+                            ] ??
+                                "") ===
+                            "archived"
+                                ? "selected"
+                                : ""; ?>>Archived</option>
                         </select>
                     </div>
 
                     <button type="submit" class="w-full bg-bbcRed text-white py-3 rounded-lg font-bold hover:opacity-90 transition-opacity text-sm uppercase tracking-wide">
-                        <?php echo $article ? 'Update All Versions' : 'Publish Article'; ?>
+                        <?php echo $article
+                            ? "Update All Versions"
+                            : "Publish Article"; ?>
                     </button>
                 </div>
 
@@ -129,8 +170,16 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                         <select name="category_id" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                             <option value="">Select Category</option>
                             <?php foreach ($categories as $cat): ?>
-                                <option value="<?php echo $cat['id']; ?>" <?php echo ($article['category_id'] ?? '') === $cat['id'] ? 'selected' : ''; ?>>
-                                    <?php echo $cat['title_bn'] . ' / ' . $cat['title_en']; ?>
+                                <option value="<?php echo $cat[
+                                    "id"
+                                ]; ?>" <?php echo ($article["category_id"] ??
+    "") ===
+$cat["id"]
+    ? "selected"
+    : ""; ?>>
+                                    <?php echo $cat["title_bn"] .
+                                        " / " .
+                                        $cat["title_en"]; ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -141,8 +190,14 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                         <select name="sectionId" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                             <option value="">None</option>
                             <?php foreach ($sections as $sec): ?>
-                                <option value="<?php echo $sec['id']; ?>" <?php echo ($article['section_id'] ?? '') === $sec['id'] ? 'selected' : ''; ?>>
-                                    <?php echo $sec['title_en']; ?>
+                                <option value="<?php echo $sec[
+                                    "id"
+                                ]; ?>" <?php echo ($article["section_id"] ??
+    "") ===
+$sec["id"]
+    ? "selected"
+    : ""; ?>>
+                                    <?php echo $sec["title_en"]; ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -154,7 +209,9 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     
                     <div class="mb-4">
                         <label class="block text-xs font-bold mb-1">Featured Image URL</label>
-                        <input name="image" id="image-url" class="w-full p-2 rounded border border-border-color bg-muted-bg text-sm" value="<?php echo htmlspecialchars($article['image'] ?? ''); ?>">
+                        <input name="image" id="image-url" class="w-full p-2 rounded border border-border-color bg-muted-bg text-sm" value="<?php echo htmlspecialchars(
+                            $article["image"] ?? "",
+                        ); ?>">
                     </div>
                     
                     <div class="mb-4">
@@ -163,7 +220,9 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="aspect-video bg-muted-bg rounded overflow-hidden">
-                        <img id="image-preview" src="<?php echo htmlspecialchars($article['image'] ?? ''); ?>" class="w-full h-full object-cover opacity-50">
+                        <img id="image-preview" src="<?php echo htmlspecialchars(
+                            $article["image"] ?? "",
+                        ); ?>" class="w-full h-full object-cover opacity-50">
                     </div>
                 </div>
             </div>

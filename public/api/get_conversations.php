@@ -22,26 +22,34 @@ if (!$adminId) {
 
 try {
     // Get all unique user IDs that have messages with admin
-    $userIds = $pdo->query("
+    $userIds = $pdo
+        ->query(
+            "
         SELECT DISTINCT CASE 
             WHEN sender_id IN (SELECT id FROM users WHERE role = 'user') THEN sender_id 
             ELSE recipient_id 
         END as user_id
         FROM messages
-    ")->fetchAll(PDO::FETCH_ASSOC);
+    ",
+        )
+        ->fetchAll(PDO::FETCH_ASSOC);
 
     $conversations = [];
-    
+
     foreach ($userIds as $row) {
-        $userId = $row['user_id'];
-        
+        $userId = $row["user_id"];
+
         // Get user info
-        $userStmt = $pdo->prepare("SELECT id, email, created_at FROM users WHERE id = ?");
+        $userStmt = $pdo->prepare(
+            "SELECT id, email, created_at FROM users WHERE id = ?",
+        );
         $userStmt->execute([$userId]);
         $user = $userStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$user) continue;
-        
+
+        if (!$user) {
+            continue;
+        }
+
         // Get last message
         $msgStmt = $pdo->prepare("
             SELECT content, created_at, sender_id 
@@ -52,7 +60,7 @@ try {
         ");
         $msgStmt->execute([$userId, $adminId, $adminId, $userId]);
         $lastMsg = $msgStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         // Get unread count
         $unreadStmt = $pdo->prepare("
             SELECT COUNT(*) as count FROM messages
@@ -60,40 +68,43 @@ try {
         ");
         $unreadStmt->execute([$userId, $adminId]);
         $unread = $unreadStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $conversations[] = [
-            "user_id" => $user['id'],
-            "email" => $user['email'],
-            "user_joined" => $user['created_at'],
-            "last_message" => $lastMsg['content'] ?? null,
-            "last_message_time" => $lastMsg['created_at'] ?? null,
-            "last_sender_id" => $lastMsg['sender_id'] ?? null,
-            "unread_count" => (int)($unread['count'] ?? 0)
+            "user_id" => $user["id"],
+            "email" => $user["email"],
+            "user_joined" => $user["created_at"],
+            "last_message" => $lastMsg["content"] ?? null,
+            "last_message_time" => $lastMsg["created_at"] ?? null,
+            "last_sender_id" => $lastMsg["sender_id"] ?? null,
+            "unread_count" => (int) ($unread["count"] ?? 0),
         ];
     }
 
     // Sort conversations
     if ($sortBy === "unread") {
-        usort($conversations, function($a, $b) {
-            if ($b['unread_count'] != $a['unread_count']) {
-                return $b['unread_count'] - $a['unread_count'];
+        usort($conversations, function ($a, $b) {
+            if ($b["unread_count"] != $a["unread_count"]) {
+                return $b["unread_count"] - $a["unread_count"];
             }
-            return strtotime($b['last_message_time'] ?? 0) - strtotime($a['last_message_time'] ?? 0);
+            return strtotime($b["last_message_time"] ?? 0) -
+                strtotime($a["last_message_time"] ?? 0);
         });
-    } else if ($sortBy === "oldest") {
-        usort($conversations, function($a, $b) {
-            return strtotime($a['last_message_time'] ?? 0) - strtotime($b['last_message_time'] ?? 0);
+    } elseif ($sortBy === "oldest") {
+        usort($conversations, function ($a, $b) {
+            return strtotime($a["last_message_time"] ?? 0) -
+                strtotime($b["last_message_time"] ?? 0);
         });
     } else {
-        usort($conversations, function($a, $b) {
-            return strtotime($b['last_message_time'] ?? 0) - strtotime($a['last_message_time'] ?? 0);
+        usort($conversations, function ($a, $b) {
+            return strtotime($b["last_message_time"] ?? 0) -
+                strtotime($a["last_message_time"] ?? 0);
         });
     }
 
     echo json_encode([
         "success" => true,
         "conversations" => $conversations,
-        "count" => count($conversations)
+        "count" => count($conversations),
     ]);
 } catch (Exception $e) {
     http_response_code(500);

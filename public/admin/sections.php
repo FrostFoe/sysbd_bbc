@@ -38,17 +38,29 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tbody class="divide-y divide-border-color">
                 <?php foreach ($sections as $s): ?>
                 <tr class="hover:bg-muted-bg transition-colors">
-                    <td class="p-4 font-bold text-muted-text"><?php echo $s['sort_order']; ?></td>
-                    <td class="p-4 font-mono text-sm"><?php echo htmlspecialchars($s['id']); ?></td>
+                    <td class="p-4 font-bold text-muted-text"><?php echo $s[
+                        "sort_order"
+                    ]; ?></td>
+                    <td class="p-4 font-mono text-sm"><?php echo htmlspecialchars(
+                        $s["id"],
+                    ); ?></td>
                     <td class="p-4 font-bold">
                         <div class="flex flex-col">
-                            <span class="font-hind text-sm"><?php echo htmlspecialchars($s['title_bn']); ?></span>
-                            <span class="text-xs text-muted-text"><?php echo htmlspecialchars($s['title_en']); ?></span>
+                            <span class="font-hind text-sm"><?php echo htmlspecialchars(
+                                $s["title_bn"],
+                            ); ?></span>
+                            <span class="text-xs text-muted-text"><?php echo htmlspecialchars(
+                                $s["title_en"],
+                            ); ?></span>
                         </div>
                     </td>
-                    <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold uppercase"><?php echo htmlspecialchars($s['type']); ?></span></td>
+                    <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold uppercase"><?php echo htmlspecialchars(
+                        $s["type"],
+                    ); ?></span></td>
                     <td class="p-4 text-right">
-                        <button onclick="deleteSection('<?php echo $s['id']; ?>')" class="text-red-600 hover:bg-red-50 p-2 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="deleteSection('<?php echo $s[
+                            "id"
+                        ]; ?>')" class="text-red-600 hover:bg-red-50 p-2 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 </tr>
                 <?php endforeach; ?>

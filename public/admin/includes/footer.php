@@ -2,7 +2,9 @@
             
             <footer class="border-t border-border-color bg-card py-6 mt-auto shrink-0">
                 <div class="container mx-auto px-4 text-center text-muted-text text-xs">
-                    &copy; <?php echo date('Y'); ?> BreachTimes Admin Panel. All rights reserved.
+                    &copy; <?php echo date(
+                        "Y",
+                    ); ?> BreachTimes Admin Panel. All rights reserved.
                 </div>
             </footer>
         </div> <!-- End Content Wrapper -->

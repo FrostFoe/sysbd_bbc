@@ -49,7 +49,7 @@ if ($user_role === "admin") {
     <!-- Hidden Input for Import -->
     <input type="file" id="import-input" class="hidden" accept=".json" onchange="importData(this)" />
 
-    <?php include 'includes/header.php'; ?>
+    <?php include "includes/header.php"; ?>
 
     <!-- Dashboard Main Content -->
     <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-8 flex-1 animate-fade-in">
@@ -59,8 +59,12 @@ if ($user_role === "admin") {
                 Dashboard
             </h2>
             <div class="text-lg text-muted-text">
-                <p>Welcome, <span class="font-bold"><?php echo htmlspecialchars($user_email); ?></span>! This is your personal dashboard.</p>
-                <p class="mt-4">Your role: <span class="font-bold uppercase"><?php echo htmlspecialchars($user_role); ?></span></p>
+                <p>Welcome, <span class="font-bold"><?php echo htmlspecialchars(
+                    $user_email,
+                ); ?></span>! This is your personal dashboard.</p>
+                <p class="mt-4">Your role: <span class="font-bold uppercase"><?php echo htmlspecialchars(
+                    $user_role,
+                ); ?></span></p>
                 
                 <!-- Placeholder for dashboard widgets or content -->
                 <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -81,7 +85,7 @@ if ($user_role === "admin") {
         </div>
     </main>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include "includes/footer.php"; ?>
 
     <script>
         lucide.createIcons();

@@ -14,9 +14,7 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 }
 
 try {
-    $stmt = $pdo->query(
-        "SELECT * FROM sections ORDER BY sort_order ASC",
-    );
+    $stmt = $pdo->query("SELECT * FROM sections ORDER BY sort_order ASC");
     $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

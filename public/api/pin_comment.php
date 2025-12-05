@@ -4,13 +4,13 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     send_response(["error" => "Method not allowed"], 405);
-    exit;
+    exit();
 }
 
 // Only admin can pin comments
 if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
     send_response(["error" => "Only admin can pin comments"], 403);
-    exit;
+    exit();
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -19,7 +19,7 @@ $isPinned = $data["isPinned"] ?? false;
 
 if (!$commentId) {
     send_response(["error" => "commentId required"], 400);
-    exit;
+    exit();
 }
 
 // Verify comment exists
@@ -29,22 +29,28 @@ $comment = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$comment) {
     send_response(["error" => "Comment not found"], 404);
-    exit;
+    exit();
 }
 
 if ($isPinned) {
     // Get next pin order
-    $maxOrderStmt = $pdo->prepare("SELECT MAX(pin_order) as max_order FROM comments WHERE is_pinned = 1");
+    $maxOrderStmt = $pdo->prepare(
+        "SELECT MAX(pin_order) as max_order FROM comments WHERE is_pinned = 1",
+    );
     $maxOrderStmt->execute();
     $result = $maxOrderStmt->fetch(PDO::FETCH_ASSOC);
-    $nextOrder = (int)($result['max_order'] ?? 0) + 1;
-    
-    $updateStmt = $pdo->prepare("UPDATE comments SET is_pinned = 1, pin_order = ? WHERE id = ?");
+    $nextOrder = (int) ($result["max_order"] ?? 0) + 1;
+
+    $updateStmt = $pdo->prepare(
+        "UPDATE comments SET is_pinned = 1, pin_order = ? WHERE id = ?",
+    );
     $updateStmt->execute([$nextOrder, $commentId]);
     $message = "Comment pinned successfully";
 } else {
     // Unpin and reset order
-    $updateStmt = $pdo->prepare("UPDATE comments SET is_pinned = 0, pin_order = 0 WHERE id = ?");
+    $updateStmt = $pdo->prepare(
+        "UPDATE comments SET is_pinned = 0, pin_order = 0 WHERE id = ?",
+    );
     $updateStmt->execute([$commentId]);
     $message = "Comment unpinned successfully";
 }
@@ -52,6 +58,6 @@ if ($isPinned) {
 send_response([
     "success" => true,
     "isPinned" => $isPinned,
-    "message" => $message
+    "message" => $message,
 ]);
 ?>

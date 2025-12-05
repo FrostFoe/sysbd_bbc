@@ -4,7 +4,7 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     send_response(["error" => "Method not allowed"], 405);
-    exit;
+    exit();
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
@@ -13,24 +13,26 @@ $userName = $data["userName"] ?? null;
 
 if (!$userId && !$userName) {
     send_response(["error" => "User ID or name required"], 400);
-    exit;
+    exit();
 }
 
 // Get user info
-$userStmt = $pdo->prepare("SELECT id, email FROM users WHERE id = ? OR email = ?");
+$userStmt = $pdo->prepare(
+    "SELECT id, email FROM users WHERE id = ? OR email = ?",
+);
 $userStmt->execute([$userId, $userName]);
 $user = $userStmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
     send_response(["error" => "User not found"], 404);
-    exit;
+    exit();
 }
 
-$userId = $user['id'];
-$email = $user['email'];
+$userId = $user["id"];
+$email = $user["email"];
 
 // Extract display name from email
-$displayName = explode('@', $email)[0];
+$displayName = explode("@", $email)[0];
 
 // Get comment count
 $commentStmt = $pdo->prepare("
@@ -38,7 +40,7 @@ $commentStmt = $pdo->prepare("
     WHERE user_id = ? OR user_name = ?
 ");
 $commentStmt->execute([$userId, $displayName]);
-$commentCount = $commentStmt->fetch(PDO::FETCH_ASSOC)['count'];
+$commentCount = $commentStmt->fetch(PDO::FETCH_ASSOC)["count"];
 
 // Get total upvotes received
 $voteStmt = $pdo->prepare("
@@ -51,12 +53,13 @@ $voteStmt = $pdo->prepare("
 ");
 $voteStmt->execute([$userId, $displayName]);
 $votes = $voteStmt->fetch(PDO::FETCH_ASSOC);
-$upvotes = (int)($votes['upvotes'] ?? 0);
-$downvotes = (int)($votes['downvotes'] ?? 0);
+$upvotes = (int) ($votes["upvotes"] ?? 0);
+$downvotes = (int) ($votes["downvotes"] ?? 0);
 $score = $upvotes - $downvotes;
 
 // Get helpful score percentage (simple calculation)
-$helpfulPercent = $commentCount > 0 ? round(($upvotes / max($commentCount, 1)) * 100) : 0;
+$helpfulPercent =
+    $commentCount > 0 ? round(($upvotes / max($commentCount, 1)) * 100) : 0;
 $helpfulPercent = min($helpfulPercent, 100); // Cap at 100%
 
 // Get recent comments (last 5)
@@ -100,13 +103,15 @@ send_response([
         "score" => $score,
         "helpfulPercent" => $helpfulPercent,
         "badges" => $badges,
-        "recentComments" => array_map(function($c) {
+        "recentComments" => array_map(function ($c) {
             return [
-                "text" => htmlspecialchars(substr($c['text'], 0, 100)) . (strlen($c['text']) > 100 ? "..." : ""),
-                "upvotes" => $c['up'],
-                "time" => date('M d, Y', strtotime($c['created_at']))
+                "text" =>
+                    htmlspecialchars(substr($c["text"], 0, 100)) .
+                    (strlen($c["text"]) > 100 ? "..." : ""),
+                "upvotes" => $c["up"],
+                "time" => date("M d, Y", strtotime($c["created_at"])),
             ];
-        }, $recentComments)
-    ]
+        }, $recentComments),
+    ],
 ]);
 ?>

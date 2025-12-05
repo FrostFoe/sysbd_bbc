@@ -17,13 +17,17 @@ if (isset($_SESSION["user_role"]) && $_SESSION["user_role"] === "admin") {
 
 $user_email = $_SESSION["user_email"] ?? "Unknown User";
 $user_name = explode("@", $user_email)[0];
-$current_page = basename($_SERVER['PHP_SELF']);
+$current_page = basename($_SERVER["PHP_SELF"]);
 
 // Dashboard menu items
 $menu_items = [
-    ['name' => 'Overview', 'link' => 'index.php', 'icon' => 'layout-dashboard'],
-    ['name' => 'Messages', 'link' => 'inbox.php', 'icon' => 'mail'],
-    ['name' => 'Saved Articles', 'link' => '../?category=saved', 'icon' => 'bookmark'],
+    ["name" => "Overview", "link" => "index.php", "icon" => "layout-dashboard"],
+    ["name" => "Messages", "link" => "inbox.php", "icon" => "mail"],
+    [
+        "name" => "Saved Articles",
+        "link" => "../?category=saved",
+        "icon" => "bookmark",
+    ],
 ];
 ?>
 <!doctype html>
@@ -61,10 +65,16 @@ $menu_items = [
         <div class="flex items-center gap-2 md:gap-4 flex-shrink-0">
             <div class="hidden md:flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border-color flex-shrink-0">
                 <div class="text-right hidden lg:block leading-tight flex-shrink-0">
-                    <div class="font-bold text-sm"><?php echo htmlspecialchars($user_name); ?></div>
-                    <div class="text-[10px] text-muted-text"><?php echo htmlspecialchars($user_email); ?></div>
+                    <div class="font-bold text-sm"><?php echo htmlspecialchars(
+                        $user_name,
+                    ); ?></div>
+                    <div class="text-[10px] text-muted-text"><?php echo htmlspecialchars(
+                        $user_email,
+                    ); ?></div>
                 </div>
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md flex-shrink-0"><?php echo strtoupper($user_name[0]); ?></div>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md flex-shrink-0"><?php echo strtoupper(
+                    $user_name[0],
+                ); ?></div>
             </div>
         </div>
     </header>
@@ -77,27 +87,49 @@ $menu_items = [
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 bg-card border-r border-border-color fixed inset-y-0 left-0 top-[70px] z-40 transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:inset-auto md:transform-none flex flex-col h-[calc(100vh-70px)] md:h-full shadow-xl md:shadow-none overflow-y-auto">
             <nav class="p-4 space-y-1.5">
-                <?php foreach ($menu_items as $item): 
-                    $isActive = $current_page === $item['link'] || strpos($_SERVER['REQUEST_URI'], $item['link']) !== false;
-                    $baseClass = "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 group";
-                    $activeClass = "bg-bbcRed text-white shadow-md shadow-red-900/20";
-                    $inactiveClass = "text-muted-text hover:bg-muted-bg hover:text-card-text";
-                ?>
-                    <a href="<?php echo $item['link']; ?>" class="<?php echo $baseClass . ' ' . ($isActive ? $activeClass : $inactiveClass); ?>">
-                        <i data-lucide="<?php echo $item['icon']; ?>" class="w-5 h-5 <?php echo $isActive ? 'text-white' : 'text-muted-text group-hover:text-bbcRed'; ?> transition-colors"></i>
-                        <?php echo $item['name']; ?>
+                <?php foreach ($menu_items as $item):
+
+                    $isActive =
+                        $current_page === $item["link"] ||
+                        strpos($_SERVER["REQUEST_URI"], $item["link"]) !==
+                            false;
+                    $baseClass =
+                        "flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 group";
+                    $activeClass =
+                        "bg-bbcRed text-white shadow-md shadow-red-900/20";
+                    $inactiveClass =
+                        "text-muted-text hover:bg-muted-bg hover:text-card-text";
+                    ?>
+                    <a href="<?php echo $item[
+                        "link"
+                    ]; ?>" class="<?php echo $baseClass .
+    " " .
+    ($isActive ? $activeClass : $inactiveClass); ?>">
+                        <i data-lucide="<?php echo $item[
+                            "icon"
+                        ]; ?>" class="w-5 h-5 <?php echo $isActive
+    ? "text-white"
+    : "text-muted-text group-hover:text-bbcRed"; ?> transition-colors"></i>
+                        <?php echo $item["name"]; ?>
                     </a>
-                <?php endforeach; ?>
+                <?php
+                endforeach; ?>
             </nav>
             
             <div class="mt-auto p-4 border-t border-border-color">
                 <!-- Profile Section (Mobile) -->
                 <div class="md:hidden mb-4 pb-4 border-b border-border-color">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md"><?php echo strtoupper($user_name[0]); ?></div>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md"><?php echo strtoupper(
+                            $user_name[0],
+                        ); ?></div>
                         <div class="text-left leading-tight flex-1">
-                            <div class="font-bold text-sm"><?php echo htmlspecialchars($user_name); ?></div>
-                            <div class="text-[10px] text-muted-text"><?php echo htmlspecialchars($user_email); ?></div>
+                            <div class="font-bold text-sm"><?php echo htmlspecialchars(
+                                $user_name,
+                            ); ?></div>
+                            <div class="text-[10px] text-muted-text"><?php echo htmlspecialchars(
+                                $user_email,
+                            ); ?></div>
                         </div>
                     </div>
                 </div>

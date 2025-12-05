@@ -26,38 +26,51 @@ if (!$articleRaw) {
 
 // Map localized fields to generic keys
 $article = $articleRaw;
-$article['title'] = $lang === 'en' ? $articleRaw['title_en'] : $articleRaw['title_bn'];
-$article['summary'] = $lang === 'en' ? $articleRaw['summary_en'] : $articleRaw['summary_bn'];
-$article['content'] = $lang === 'en' ? $articleRaw['content_en'] : $articleRaw['content_bn'];
-$article['readTime'] = $lang === 'en' ? ($articleRaw['read_time_en'] ?? '') : ($articleRaw['read_time_bn'] ?? '');
+$article["title"] =
+    $lang === "en" ? $articleRaw["title_en"] : $articleRaw["title_bn"];
+$article["summary"] =
+    $lang === "en" ? $articleRaw["summary_en"] : $articleRaw["summary_bn"];
+$article["content"] =
+    $lang === "en" ? $articleRaw["content_en"] : $articleRaw["content_bn"];
+$article["readTime"] =
+    $lang === "en"
+        ? $articleRaw["read_time_en"] ?? ""
+        : $articleRaw["read_time_bn"] ?? "";
 
 // Fallback for title if empty (optional, but good UX)
-if (empty($article['title'])) {
-    $article['title'] = $lang === 'en' ? $articleRaw['title_bn'] : $articleRaw['title_en'];
-    $article['content'] = "<em>Content not available in this language.</em><br>" . ($lang === 'en' ? $articleRaw['content_bn'] : $articleRaw['content_en']);
+if (empty($article["title"])) {
+    $article["title"] =
+        $lang === "en" ? $articleRaw["title_bn"] : $articleRaw["title_en"];
+    $article["content"] =
+        "<em>Content not available in this language.</em><br>" .
+        ($lang === "en"
+            ? $articleRaw["content_bn"]
+            : $articleRaw["content_en"]);
 }
 
 // Check status
-$status = $article['status'] ?? 'published'; 
-if ($status !== 'published' && !$isAdmin) {
+$status = $article["status"] ?? "published";
+if ($status !== "published" && !$isAdmin) {
     header("Location: ../index.php");
     exit();
 }
 
 // Sanitize Content
-$article['content'] = sanitize_html($article['content']);
+$article["content"] = sanitize_html($article["content"]);
 
 // Fetch Category Name
 $categoryName = "News";
-if ($article['category_id']) {
-    $catStmt = $pdo->prepare("SELECT title_bn, title_en FROM categories WHERE id = ?");
-    $catStmt->execute([$article['category_id']]);
+if ($article["category_id"]) {
+    $catStmt = $pdo->prepare(
+        "SELECT title_bn, title_en FROM categories WHERE id = ?",
+    );
+    $catStmt->execute([$article["category_id"]]);
     $cat = $catStmt->fetch(PDO::FETCH_ASSOC);
     if ($cat) {
-        $categoryName = $lang === 'en' ? $cat['title_en'] : $cat['title_bn'];
+        $categoryName = $lang === "en" ? $cat["title_en"] : $cat["title_bn"];
     }
 }
-$article['category'] = $categoryName;
+$article["category"] = $categoryName;
 
 // Fetch Comments (with votes and replies)
 // Get pinned comments first, then regular comments
@@ -74,24 +87,24 @@ $rawComments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
 $processedComments = [];
 foreach ($rawComments as $c) {
     // Determine display name
-    $displayName = $c['user_name'];
-    if (!empty($c['email'])) {
-        $parts = explode('@', $c['email']);
-        $displayName = $parts[0]; 
+    $displayName = $c["user_name"];
+    if (!empty($c["email"])) {
+        $parts = explode("@", $c["email"]);
+        $displayName = $parts[0];
     }
-    
+
     // Get votes for this comment
     $voteStmt = $pdo->prepare(
         "SELECT 
             SUM(CASE WHEN vote_type = 'upvote' THEN 1 ELSE 0 END) as upvotes,
             SUM(CASE WHEN vote_type = 'downvote' THEN 1 ELSE 0 END) as downvotes
-        FROM comment_votes WHERE comment_id = ?"
+        FROM comment_votes WHERE comment_id = ?",
     );
-    $voteStmt->execute([$c['id']]);
+    $voteStmt->execute([$c["id"]]);
     $votes = $voteStmt->fetch(PDO::FETCH_ASSOC);
-    $upvotes = (int)($votes['upvotes'] ?? 0);
-    $downvotes = (int)($votes['downvotes'] ?? 0);
-    
+    $upvotes = (int) ($votes["upvotes"] ?? 0);
+    $downvotes = (int) ($votes["downvotes"] ?? 0);
+
     // Get replies for this comment
     $replyStmt = $pdo->prepare("
         SELECT c.id, c.text, c.created_at, c.user_name, c.user_id, u.email 
@@ -100,44 +113,45 @@ foreach ($rawComments as $c) {
         WHERE c.parent_comment_id = ? 
         ORDER BY c.created_at ASC
     ");
-    $replyStmt->execute([$c['id']]);
+    $replyStmt->execute([$c["id"]]);
     $rawReplies = $replyStmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $replies = [];
     foreach ($rawReplies as $r) {
-        $replyDisplayName = $r['user_name'];
-        if (!empty($r['email'])) {
-            $parts = explode('@', $r['email']);
+        $replyDisplayName = $r["user_name"];
+        if (!empty($r["email"])) {
+            $parts = explode("@", $r["email"]);
             $replyDisplayName = $parts[0];
         }
-        
+
         $replies[] = [
-            'id' => $r['id'],
-            'user' => $replyDisplayName,
-            'text' => htmlspecialchars($r['text']),
-            'time' => time_ago($r['created_at'], $lang),
-            'isAdmin' => !empty($r['email']) && strpos($r['email'], 'admin') !== false
+            "id" => $r["id"],
+            "user" => $replyDisplayName,
+            "text" => htmlspecialchars($r["text"]),
+            "time" => time_ago($r["created_at"], $lang),
+            "isAdmin" =>
+                !empty($r["email"]) && strpos($r["email"], "admin") !== false,
         ];
     }
-    
+
     $processedComments[] = [
-        'id' => $c['id'],
-        'user' => $displayName,
-        'text' => htmlspecialchars($c['text']),
-        'time' => time_ago($c['created_at'], $lang),
-        'upvotes' => $upvotes,
-        'downvotes' => $downvotes,
-        'isPinned' => (bool)$c['is_pinned'],
-        'replies' => $replies,
-        'userId' => $c['user_id']
+        "id" => $c["id"],
+        "user" => $displayName,
+        "text" => htmlspecialchars($c["text"]),
+        "time" => time_ago($c["created_at"], $lang),
+        "upvotes" => $upvotes,
+        "downvotes" => $downvotes,
+        "isPinned" => (bool) $c["is_pinned"],
+        "replies" => $replies,
+        "userId" => $c["user_id"],
     ];
 }
-$article['comments'] = $processedComments;
+$article["comments"] = $processedComments;
 
 // Decode leaked documents if any
 $leakedDocuments = [];
-if (!empty($article['leaked_documents'])) {
-    $leakedDocuments = json_decode($article['leaked_documents'], true);
+if (!empty($article["leaked_documents"])) {
+    $leakedDocuments = json_decode($article["leaked_documents"], true);
 }
 ?>
 <!doctype html>
@@ -145,27 +159,49 @@ if (!empty($article['leaked_documents'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><?php echo htmlspecialchars($article["title"]); ?> | BreachTimes</title>
+    <title><?php echo htmlspecialchars(
+        $article["title"],
+    ); ?> | BreachTimes</title>
     
     <!-- Open Graph / Social Sharing Meta Tags -->
     <meta property="og:type" content="article" />
-    <meta property="og:title" content="<?php echo htmlspecialchars($article["title"]); ?>" />
-    <meta property="og:description" content="<?php echo htmlspecialchars($article["summary"] ?? ""); ?>" />
-    <meta property="og:image" content="<?php echo htmlspecialchars($article["image"] ?? ""); ?>" />
-    <meta property="og:url" content="<?php echo "https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]; ?>" />
+    <meta property="og:title" content="<?php echo htmlspecialchars(
+        $article["title"],
+    ); ?>" />
+    <meta property="og:description" content="<?php echo htmlspecialchars(
+        $article["summary"] ?? "",
+    ); ?>" />
+    <meta property="og:image" content="<?php echo htmlspecialchars(
+        $article["image"] ?? "",
+    ); ?>" />
+    <meta property="og:url" content="<?php echo "https://" .
+        $_SERVER["HTTP_HOST"] .
+        $_SERVER["REQUEST_URI"]; ?>" />
     <meta property="og:site_name" content="BreachTimes" />
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="<?php echo htmlspecialchars($article["title"]); ?>" />
-    <meta name="twitter:description" content="<?php echo htmlspecialchars($article["summary"] ?? ""); ?>" />
-    <meta name="twitter:image" content="<?php echo htmlspecialchars($article["image"] ?? ""); ?>" />
+    <meta name="twitter:title" content="<?php echo htmlspecialchars(
+        $article["title"],
+    ); ?>" />
+    <meta name="twitter:description" content="<?php echo htmlspecialchars(
+        $article["summary"] ?? "",
+    ); ?>" />
+    <meta name="twitter:image" content="<?php echo htmlspecialchars(
+        $article["image"] ?? "",
+    ); ?>" />
     
     <!-- Article Meta Tags -->
-    <meta name="description" content="<?php echo htmlspecialchars($article["summary"] ?? ""); ?>" />
+    <meta name="description" content="<?php echo htmlspecialchars(
+        $article["summary"] ?? "",
+    ); ?>" />
     <meta name="author" content="BreachTimes" />
-    <meta name="publish_date" content="<?php echo htmlspecialchars($article["published_at"] ?? date("Y-m-d")); ?>" />
-    <meta name="category" content="<?php echo htmlspecialchars($article["category"] ?? "News"); ?>" />
+    <meta name="publish_date" content="<?php echo htmlspecialchars(
+        $article["published_at"] ?? date("Y-m-d"),
+    ); ?>" />
+    <meta name="category" content="<?php echo htmlspecialchars(
+        $article["category"] ?? "News",
+    ); ?>" />
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -203,11 +239,16 @@ if (!empty($article['leaked_documents'])) {
                         <i data-lucide="sun" class="w-5 h-5"></i>
                     </button>
                     <button onclick="toggleLanguage()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-green-400 transition-all active:scale-90">
-                        <span class="text-sm font-bold"><?php echo $lang === "bn" ? "EN" : "BN"; ?></span>
+                        <span class="text-sm font-bold"><?php echo $lang ===
+                        "bn"
+                            ? "EN"
+                            : "BN"; ?></span>
                     </button>
                     <?php if ($user): ?>
                         <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2">
-                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]"><?php echo strtoupper($user[0]); ?></div> সাইন আউট
+                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]"><?php echo strtoupper(
+                                $user[0],
+                            ); ?></div> সাইন আউট
                         </button>
                     <?php else: ?>
                         <a href="../login/" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all">সাইন ইন</a>
@@ -224,20 +265,31 @@ if (!empty($article['leaked_documents'])) {
                     <article class="bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
                         <!-- Article Header -->
                         <div class="mb-6">
-                            <span class="bg-bbcRed text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block"><?php echo htmlspecialchars($article["category"] ?? "News"); ?></span>
-                            <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4 text-card-text"><?php echo htmlspecialchars($article["title"]); ?></h1>
+                            <span class="bg-bbcRed text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block"><?php echo htmlspecialchars(
+                                $article["category"] ?? "News",
+                            ); ?></span>
+                            <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4 text-card-text"><?php echo htmlspecialchars(
+                                $article["title"],
+                            ); ?></h1>
                             
                             <div class="flex flex-wrap items-center gap-4 text-sm text-muted-text font-medium">
-                                <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> <?php echo time_ago($article["published_at"] ?? "now", $lang); ?></span>
+                                <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> <?php echo time_ago(
+                                    $article["published_at"] ?? "now",
+                                    $lang,
+                                ); ?></span>
                                 <?php if (isset($article["readTime"])): ?>
-                                    <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> <?php echo htmlspecialchars($article["readTime"]); ?></span>
+                                    <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> <?php echo htmlspecialchars(
+                                        $article["readTime"],
+                                    ); ?></span>
                                 <?php endif; ?>
                             </div>
                         </div>
 
                         <!-- Featured Image -->
                         <div class="mb-10 relative aspect-video bg-muted-bg rounded-2xl overflow-hidden shadow-lg">
-                            <img src="<?php echo htmlspecialchars($article["image"] ?? ""); ?>" onerror="this.src='https://placehold.co/1200x675/1a1a1a/FFF?text=BreachTimes'" class="w-full h-full object-cover">
+                            <img src="<?php echo htmlspecialchars(
+                                $article["image"] ?? "",
+                            ); ?>" onerror="this.src='https://placehold.co/1200x675/1a1a1a/FFF?text=BreachTimes'" class="w-full h-full object-cover">
                         </div>
 
                         <!-- Article Controls -->
@@ -251,7 +303,9 @@ if (!empty($article['leaked_documents'])) {
                                 <button aria-label="Share article" onclick="handleShare()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white transition-all text-sm font-bold text-card-text">
                                     <i data-lucide="share-2" class="w-4 h-4"></i> শেয়ার
                                 </button>
-                                <button aria-label="Toggle bookmark" onclick="toggleBookmark('<?php echo $article["id"]; ?>')" class="p-2.5 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white text-black dark:text-white transition-all shadow-sm flex items-center justify-center group">
+                                <button aria-label="Toggle bookmark" onclick="toggleBookmark('<?php echo $article[
+                                    "id"
+                                ]; ?>')" class="p-2.5 rounded-full bg-muted-bg hover:bg-bbcRed hover:text-white text-black dark:text-white transition-all shadow-sm flex items-center justify-center group">
                                     <i data-lucide="bookmark" class="w-5 h-5"></i>
                                 </button>
                             </div>
@@ -259,7 +313,9 @@ if (!empty($article['leaked_documents'])) {
 
                         <!-- Article Content -->
                         <div class="prose max-w-none font-size-md space-y-8 text-card-text transition-all duration-300">
-                            <?php echo $article["content"]; // Sanitized above ?>
+                            <?php echo $article["content"];
+// Sanitized above
+?>
                         </div>
                     </article>
 
@@ -272,7 +328,9 @@ if (!empty($article['leaked_documents'])) {
                         <!-- Table of Contents -->
                         <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
                             <h4 class="text-lg font-bold mb-4 text-card-text border-b border-border-color pb-2">
-                                <?php echo $lang === 'bn' ? 'সূচিপত্র' : 'Table of Contents'; ?>
+                                <?php echo $lang === "bn"
+                                    ? "সূচিপত্র"
+                                    : "Table of Contents"; ?>
                             </h4>
                             <nav id="toc-container" class="text-sm space-y-2 text-muted-text">
                                 <!-- JS will populate this -->
@@ -284,17 +342,23 @@ if (!empty($article['leaked_documents'])) {
                         <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
                             <h4 class="text-lg font-bold mb-4 text-card-text border-b border-border-color pb-2 flex items-center gap-2">
                                 <i data-lucide="file-warning" class="w-5 h-5 text-bbcRed"></i>
-                                <?php echo $lang === 'bn' ? 'ফাঁস হওয়া নথি' : 'Leaked Documents'; ?>
+                                <?php echo $lang === "bn"
+                                    ? "ফাঁস হওয়া নথি"
+                                    : "Leaked Documents"; ?>
                             </h4>
                             <ul class="space-y-3">
                                 <?php foreach ($leakedDocuments as $doc): ?>
                                 <li class="group flex items-center gap-3 p-2 rounded-lg hover:bg-muted-bg transition-colors cursor-pointer">
                                     <div class="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0 text-bbcRed font-bold text-xs border border-bbcRed/20">
-                                        <?php echo htmlspecialchars($doc['type'] ?? 'DOC'); ?>
+                                        <?php echo htmlspecialchars(
+                                            $doc["type"] ?? "DOC",
+                                        ); ?>
                                     </div>
                                     <div class="flex-grow min-w-0">
                                         <p class="text-sm font-bold text-card-text truncate group-hover:text-bbcRed transition-colors">
-                                            <?php echo htmlspecialchars($doc['title']); ?>
+                                            <?php echo htmlspecialchars(
+                                                $doc["title"],
+                                            ); ?>
                                         </p>
                                         <span class="text-[10px] text-muted-text uppercase tracking-wider">Download</span>
                                     </div>
@@ -308,21 +372,39 @@ if (!empty($article['leaked_documents'])) {
                         <!-- Quick Info Card -->
                         <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
                             <h4 class="text-lg font-bold mb-4 text-card-text">
-                                <?php echo $lang === 'bn' ? 'নিবন্ধ তথ্য' : 'Article Info'; ?>
+                                <?php echo $lang === "bn"
+                                    ? "নিবন্ধ তথ্য"
+                                    : "Article Info"; ?>
                             </h4>
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between items-center pb-3 border-b border-border-color">
-                                    <span class="text-muted-text"><?php echo $lang === 'bn' ? 'বিভাগ:' : 'Category:'; ?></span>
-                                    <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["category"] ?? "N/A"); ?></span>
+                                    <span class="text-muted-text"><?php echo $lang ===
+                                    "bn"
+                                        ? "বিভাগ:"
+                                        : "Category:"; ?></span>
+                                    <span class="font-bold text-card-text"><?php echo htmlspecialchars(
+                                        $article["category"] ?? "N/A",
+                                    ); ?></span>
                                 </div>
                                 <div class="flex justify-between items-center pb-3 border-b border-border-color">
-                                    <span class="text-muted-text"><?php echo $lang === 'bn' ? 'প্রকাশনা:' : 'Published:'; ?></span>
-                                    <span class="font-bold text-card-text"><?php echo time_ago($article["published_at"] ?? "now", $lang); ?></span>
+                                    <span class="text-muted-text"><?php echo $lang ===
+                                    "bn"
+                                        ? "প্রকাশনা:"
+                                        : "Published:"; ?></span>
+                                    <span class="font-bold text-card-text"><?php echo time_ago(
+                                        $article["published_at"] ?? "now",
+                                        $lang,
+                                    ); ?></span>
                                 </div>
                                 <?php if (isset($article["readTime"])): ?>
                                     <div class="flex justify-between items-center">
-                                        <span class="text-muted-text"><?php echo $lang === 'bn' ? 'পড়ার সময়:' : 'Read Time:'; ?></span>
-                                        <span class="font-bold text-card-text"><?php echo htmlspecialchars($article["readTime"]); ?></span>
+                                        <span class="text-muted-text"><?php echo $lang ===
+                                        "bn"
+                                            ? "পড়ার সময়:"
+                                            : "Read Time:"; ?></span>
+                                        <span class="font-bold text-card-text"><?php echo htmlspecialchars(
+                                            $article["readTime"],
+                                        ); ?></span>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -356,75 +438,135 @@ if (!empty($article['leaked_documents'])) {
                         <div class="flex justify-between items-center mt-3 gap-4">
                             <div id="char-counter" class="text-xs text-muted-text">0/5000</div>
                             <div id="error-message" class="text-xs text-red-500 font-bold hidden"></div>
-                            <button onclick="postComment('<?php echo $article["id"]; ?>')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm" id="post-btn">মন্তব্য প্রকাশ করুন</button>
+                            <button onclick="postComment('<?php echo $article[
+                                "id"
+                            ]; ?>')" class="bg-bbcDark dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm" id="post-btn">মন্তব্য প্রকাশ করুন</button>
                         </div>
                     </div>
 
                     <div class="space-y-6">
-                        <?php if (count($article['comments']) > 0): ?>
-                            <?php foreach ($article['comments'] as $comment): ?>
-                                <div class="bg-muted-bg p-4 rounded-xl border border-border-color" id="comment-<?php echo $comment['id']; ?>">
+                        <?php if (count($article["comments"]) > 0): ?>
+                            <?php foreach ($article["comments"] as $comment): ?>
+                                <div class="bg-muted-bg p-4 rounded-xl border border-border-color" id="comment-<?php echo $comment[
+                                    "id"
+                                ]; ?>">
                                     <!-- Pinned Badge -->
-                                    <?php if ($comment['isPinned']): ?>
+                                    <?php if ($comment["isPinned"]): ?>
                                         <div class="flex items-center gap-2 mb-3 text-xs font-bold text-bbcRed bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg w-fit">
-                                            <i data-lucide="pin" class="w-3 h-3"></i> <?php echo $lang === 'bn' ? 'অ্যাডমিন মতামত' : 'Admin Comment'; ?>
+                                            <i data-lucide="pin" class="w-3 h-3"></i> <?php echo $lang ===
+                                            "bn"
+                                                ? "অ্যাডমিন মতামত"
+                                                : "Admin Comment"; ?>
                                         </div>
                                     <?php endif; ?>
                                     
                                     <!-- Main Comment -->
                                     <div class="flex items-start gap-3 mb-2">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md flex-shrink-0"><?php echo strtoupper(substr($comment["user"], 0, 1)); ?></div>
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-bbcRed to-orange-500 flex items-center justify-center font-bold text-white text-sm shadow-md flex-shrink-0"><?php echo strtoupper(
+                                            substr($comment["user"], 0, 1),
+                                        ); ?></div>
                                         <div class="flex-grow min-w-0">
-                                            <span onclick="showUserProfile('<?php echo htmlspecialchars($comment['user']); ?>')" class="font-bold text-sm text-card-text block hover:text-bbcRed cursor-pointer transition-colors"><?php echo htmlspecialchars($comment["user"]); ?></span>
-                                            <span class="text-xs text-muted-text"><?php echo $comment["time"]; ?></span>
+                                            <span onclick="showUserProfile('<?php echo htmlspecialchars(
+                                                $comment["user"],
+                                            ); ?>')" class="font-bold text-sm text-card-text block hover:text-bbcRed cursor-pointer transition-colors"><?php echo htmlspecialchars(
+    $comment["user"],
+); ?></span>
+                                            <span class="text-xs text-muted-text"><?php echo $comment[
+                                                "time"
+                                            ]; ?></span>
                                         </div>
                                         <!-- Admin Pin Button -->
                                         <?php if ($isAdmin): ?>
-                                            <button onclick="togglePin(<?php echo $comment['id']; ?>, <?php echo $comment['isPinned'] ? 'true' : 'false'; ?>)" class="p-2 rounded hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors text-yellow-600 dark:text-yellow-400" title="<?php echo $comment['isPinned'] ? 'Unpin' : 'Pin'; ?>">
+                                            <button onclick="togglePin(<?php echo $comment[
+                                                "id"
+                                            ]; ?>, <?php echo $comment[
+    "isPinned"
+]
+    ? "true"
+    : "false"; ?>)" class="p-2 rounded hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors text-yellow-600 dark:text-yellow-400" title="<?php echo $comment[
+    "isPinned"
+]
+    ? "Unpin"
+    : "Pin"; ?>">
                                                 <i data-lucide="pin" class="w-4 h-4"></i>
                                             </button>
                                         <?php endif; ?>
                                     </div>
                                     
                                     <!-- Comment Text -->
-                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color mb-3"><?php echo $comment["text"]; ?></p>
+                                    <p class="text-sm text-card-text ml-12 leading-relaxed bg-card p-3 rounded-lg rounded-tl-none border border-border-color mb-3"><?php echo $comment[
+                                        "text"
+                                    ]; ?></p>
                                     
                                     <!-- Vote Section & Reply Button -->
                                     <div class="ml-12 flex items-center gap-3 text-xs">
                                         <div class="flex items-center gap-1 bg-card px-2 py-1 rounded-lg border border-border-color">
-                                            <button onclick="voteComment(<?php echo $comment['id']; ?>, 'upvote')" class="p-1 hover:text-green-500 transition-colors text-muted-text vote-btn-up" data-comment-id="<?php echo $comment['id']; ?>" title="Upvote">
+                                            <button onclick="voteComment(<?php echo $comment[
+                                                "id"
+                                            ]; ?>, 'upvote')" class="p-1 hover:text-green-500 transition-colors text-muted-text vote-btn-up" data-comment-id="<?php echo $comment[
+    "id"
+]; ?>" title="Upvote">
                                                 <i data-lucide="thumbs-up" class="w-3 h-3"></i>
                                             </button>
-                                            <span id="vote-count-<?php echo $comment['id']; ?>" class="text-xs font-bold text-muted-text min-w-[20px] text-center"><?php echo $comment['upvotes'] - $comment['downvotes']; ?></span>
-                                            <button onclick="voteComment(<?php echo $comment['id']; ?>, 'downvote')" class="p-1 hover:text-red-500 transition-colors text-muted-text vote-btn-down" data-comment-id="<?php echo $comment['id']; ?>" title="Downvote">
+                                            <span id="vote-count-<?php echo $comment[
+                                                "id"
+                                            ]; ?>" class="text-xs font-bold text-muted-text min-w-[20px] text-center"><?php echo $comment[
+    "upvotes"
+] - $comment["downvotes"]; ?></span>
+                                            <button onclick="voteComment(<?php echo $comment[
+                                                "id"
+                                            ]; ?>, 'downvote')" class="p-1 hover:text-red-500 transition-colors text-muted-text vote-btn-down" data-comment-id="<?php echo $comment[
+    "id"
+]; ?>" title="Downvote">
                                                 <i data-lucide="thumbs-down" class="w-3 h-3"></i>
                                             </button>
                                         </div>
                                         <?php if ($isAdmin): ?>
-                                            <button onclick="toggleReplyForm(<?php echo $comment['id']; ?>)" class="px-3 py-1 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded transition-colors font-bold">
-                                                <?php echo $lang === 'bn' ? 'উত্তর' : 'Reply'; ?>
+                                            <button onclick="toggleReplyForm(<?php echo $comment[
+                                                "id"
+                                            ]; ?>)" class="px-3 py-1 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded transition-colors font-bold">
+                                                <?php echo $lang === "bn"
+                                                    ? "উত্তর"
+                                                    : "Reply"; ?>
                                             </button>
                                         <?php endif; ?>
                                         <?php if ($isAdmin): ?>
-                                            <button onclick="deleteComment(<?php echo $comment['id']; ?>)" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                            <button onclick="deleteComment(<?php echo $comment[
+                                                "id"
+                                            ]; ?>)" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
                                                 <i data-lucide="trash-2" class="w-3 h-3"></i>
                                             </button>
                                         <?php endif; ?>
                                     </div>
                                     
                                     <!-- Replies Section -->
-                                    <?php if (!empty($comment['replies'])): ?>
+                                    <?php if (!empty($comment["replies"])): ?>
                                         <div class="ml-12 mt-4 space-y-3 border-l-2 border-border-color pl-4">
-                                            <?php foreach ($comment['replies'] as $reply): ?>
+                                            <?php foreach (
+                                                $comment["replies"]
+                                                as $reply
+                                            ): ?>
                                                 <div class="bg-card p-3 rounded-lg">
                                                     <div class="flex items-start gap-2 mb-1">
-                                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center font-bold text-white text-xs shadow-md flex-shrink-0"><?php echo strtoupper(substr($reply["user"], 0, 1)); ?></div>
+                                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center font-bold text-white text-xs shadow-md flex-shrink-0"><?php echo strtoupper(
+                                                            substr(
+                                                                $reply["user"],
+                                                                0,
+                                                                1,
+                                                            ),
+                                                        ); ?></div>
                                                         <div class="flex-grow min-w-0">
-                                                            <span class="font-bold text-xs text-card-text block"><?php echo htmlspecialchars($reply["user"]); ?></span>
-                                                            <span class="text-xs text-muted-text"><?php echo $reply["time"]; ?></span>
+                                                            <span class="font-bold text-xs text-card-text block"><?php echo htmlspecialchars(
+                                                                $reply["user"],
+                                                            ); ?></span>
+                                                            <span class="text-xs text-muted-text"><?php echo $reply[
+                                                                "time"
+                                                            ]; ?></span>
                                                         </div>
                                                     </div>
-                                                    <p class="text-xs text-card-text ml-9 leading-relaxed"><?php echo $reply["text"]; ?></p>
+                                                    <p class="text-xs text-card-text ml-9 leading-relaxed"><?php echo $reply[
+                                                        "text"
+                                                    ]; ?></p>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
@@ -432,14 +574,29 @@ if (!empty($article['leaked_documents'])) {
                                     
                                     <!-- Reply Form (Hidden by default) -->
                                     <?php if ($isAdmin): ?>
-                                        <div id="reply-form-<?php echo $comment['id']; ?>" class="ml-12 mt-4 hidden">
-                                            <textarea id="reply-input-<?php echo $comment['id']; ?>" placeholder="<?php echo $lang === 'bn' ? 'আপনার উত্তর লিখুন...' : 'Write your reply...'; ?>" class="w-full p-3 rounded-lg border border-border-color bg-card text-card-text focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none text-sm" rows="2"></textarea>
+                                        <div id="reply-form-<?php echo $comment[
+                                            "id"
+                                        ]; ?>" class="ml-12 mt-4 hidden">
+                                            <textarea id="reply-input-<?php echo $comment[
+                                                "id"
+                                            ]; ?>" placeholder="<?php echo $lang ===
+"bn"
+    ? "আপনার উত্তর লিখুন..."
+    : "Write your reply..."; ?>" class="w-full p-3 rounded-lg border border-border-color bg-card text-card-text focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none text-sm" rows="2"></textarea>
                                             <div class="flex justify-end gap-2 mt-2">
-                                                <button onclick="toggleReplyForm(<?php echo $comment['id']; ?>)" class="px-3 py-1.5 rounded-lg bg-muted-bg hover:bg-border-color transition-colors text-sm font-bold text-card-text">
-                                                    <?php echo $lang === 'bn' ? 'বাতিল' : 'Cancel'; ?>
+                                                <button onclick="toggleReplyForm(<?php echo $comment[
+                                                    "id"
+                                                ]; ?>)" class="px-3 py-1.5 rounded-lg bg-muted-bg hover:bg-border-color transition-colors text-sm font-bold text-card-text">
+                                                    <?php echo $lang === "bn"
+                                                        ? "বাতিল"
+                                                        : "Cancel"; ?>
                                                 </button>
-                                                <button onclick="postReply(<?php echo $comment['id']; ?>)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors text-sm font-bold">
-                                                    <?php echo $lang === 'bn' ? 'উত্তর পাঠান' : 'Send Reply'; ?>
+                                                <button onclick="postReply(<?php echo $comment[
+                                                    "id"
+                                                ]; ?>)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors text-sm font-bold">
+                                                    <?php echo $lang === "bn"
+                                                        ? "উত্তর পাঠান"
+                                                        : "Send Reply"; ?>
                                                 </button>
                                             </div>
                                         </div>
@@ -447,7 +604,10 @@ if (!empty($article['leaked_documents'])) {
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="text-center py-8 text-muted-text"><?php echo $lang === 'bn' ? 'এখনও কোনো মন্তব্য নেই।' : 'No comments yet.'; ?></div>
+                            <div class="text-center py-8 text-muted-text"><?php echo $lang ===
+                            "bn"
+                                ? "এখনও কোনো মন্তব্য নেই।"
+                                : "No comments yet."; ?></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -691,7 +851,10 @@ if (!empty($article['leaked_documents'])) {
             if (prose && tocContainer) {
                 const headers = prose.querySelectorAll('h2, h3');
                 if (headers.length === 0) {
-                    tocContainer.innerHTML = '<p class="italic opacity-50"><?php echo $lang === "bn" ? "কোনো সূচিপত্র নেই" : "No table of contents available"; ?></p>';
+                    tocContainer.innerHTML = '<p class="italic opacity-50"><?php echo $lang ===
+                    "bn"
+                        ? "কোনো সূচিপত্র নেই"
+                        : "No table of contents available"; ?></p>';
                     return;
                 }
 
@@ -748,7 +911,9 @@ if (!empty($article['leaked_documents'])) {
             const buttons = form.querySelectorAll('button');
 
             if (!text) {
-                showToastMsg("<?php echo $lang === 'bn' ? 'অনুগ্রহ করে কিছু লিখুন!' : 'Please write something!'; ?>", 'error');
+                showToastMsg("<?php echo $lang === "bn"
+                    ? "অনুগ্রহ করে কিছু লিখুন!"
+                    : "Please write something!"; ?>", 'error');
                 return;
             }
 
@@ -766,18 +931,29 @@ if (!empty($article['leaked_documents'])) {
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToastMsg("<?php echo $lang === 'bn' ? 'উত্তর পাঠানো হয়েছে! পেজ রিলোড হচ্ছে...' : 'Reply posted! Reloading...'; ?>");
+                    showToastMsg("<?php echo $lang === "bn"
+                        ? "উত্তর পাঠানো হয়েছে! পেজ রিলোড হচ্ছে..."
+                        : "Reply posted! Reloading..."; ?>");
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToastMsg(result.error || "<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error occurred!'; ?>", 'error');
+                    showToastMsg(result.error || "<?php echo $lang === "bn"
+                        ? "সমস্যা হয়েছে!"
+                        : "Error occurred!"; ?>", 'error');
                     buttons.forEach(btn => btn.disabled = false);
-                    if (sendBtn) sendBtn.textContent = "<?php echo $lang === 'bn' ? 'উত্তর পাঠান' : 'Send Reply'; ?>";
+                    if (sendBtn) sendBtn.textContent = "<?php echo $lang ===
+                    "bn"
+                        ? "উত্তর পাঠান"
+                        : "Send Reply"; ?>";
                 }
             } catch (e) {
                 console.error(e);
-                showToastMsg("<?php echo $lang === 'bn' ? 'সার্ভার ত্রুটি!' : 'Server error!'; ?>", 'error');
+                showToastMsg("<?php echo $lang === "bn"
+                    ? "সার্ভার ত্রুটি!"
+                    : "Server error!"; ?>", 'error');
                 buttons.forEach(btn => btn.disabled = false);
-                if (sendBtn) sendBtn.textContent = "<?php echo $lang === 'bn' ? 'উত্তর পাঠান' : 'Send Reply'; ?>";
+                if (sendBtn) sendBtn.textContent = "<?php echo $lang === "bn"
+                    ? "উত্তর পাঠান"
+                    : "Send Reply"; ?>";
             }
         }
 
@@ -811,13 +987,19 @@ if (!empty($article['leaked_documents'])) {
                     // Highlight votes with animation
                     highlightUserVotes();
                     
-                    showToastMsg("<?php echo $lang === 'bn' ? 'ভোট রেকর্ড হয়েছে!' : 'Vote recorded!'; ?>");
+                    showToastMsg("<?php echo $lang === "bn"
+                        ? "ভোট রেকর্ড হয়েছে!"
+                        : "Vote recorded!"; ?>");
                 } else {
-                    showToastMsg(result.error || "<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error occurred!'; ?>", 'error');
+                    showToastMsg(result.error || "<?php echo $lang === "bn"
+                        ? "সমস্যা হয়েছে!"
+                        : "Error occurred!"; ?>", 'error');
                 }
             } catch (e) {
                 console.error(e);
-                showToastMsg("<?php echo $lang === 'bn' ? 'সার্ভার ত্রুটি!' : 'Server error!'; ?>", 'error');
+                showToastMsg("<?php echo $lang === "bn"
+                    ? "সার্ভার ত্রুটি!"
+                    : "Server error!"; ?>", 'error');
             } finally {
                 // Remove loading state
                 upBtn.classList.remove('opacity-50');
@@ -856,16 +1038,22 @@ if (!empty($article['leaked_documents'])) {
                     showToastMsg(result.message);
                     setTimeout(() => location.reload(), 800);
                 } else {
-                    showToastMsg(result.error || "<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error occurred!'; ?>", 'error');
+                    showToastMsg(result.error || "<?php echo $lang === "bn"
+                        ? "সমস্যা হয়েছে!"
+                        : "Error occurred!"; ?>", 'error');
                 }
             } catch (e) {
                 console.error(e);
-                showToastMsg("<?php echo $lang === 'bn' ? 'সার্ভার ত্রুটি!' : 'Server error!'; ?>", 'error');
+                showToastMsg("<?php echo $lang === "bn"
+                    ? "সার্ভার ত্রুটি!"
+                    : "Server error!"; ?>", 'error');
             }
         }
 
         async function deleteComment(id) {
-            if (!confirm("<?php echo $lang === 'bn' ? 'এই মন্তব্য মুছে দিতে চান?' : 'Delete this comment?'; ?>")) return;
+            if (!confirm("<?php echo $lang === "bn"
+                ? "এই মন্তব্য মুছে দিতে চান?"
+                : "Delete this comment?"; ?>")) return;
             
             try {
                 const res = await fetch('../api/delete_comment.php', {
@@ -875,9 +1063,13 @@ if (!empty($article['leaked_documents'])) {
                 });
                 const result = await res.json();
                 if (result.success) {
-                    showToastMsg("<?php echo $lang === 'bn' ? 'মন্তব্য মুছে দেওয়া হয়েছে!' : 'Comment deleted!'; ?>");
+                    showToastMsg("<?php echo $lang === "bn"
+                        ? "মন্তব্য মুছে দেওয়া হয়েছে!"
+                        : "Comment deleted!"; ?>");
                     setTimeout(() => location.reload(), 800);
-                } else alert("<?php echo $lang === 'bn' ? 'সমস্যা হয়েছে!' : 'Error!'; ?>");
+                } else alert("<?php echo $lang === "bn"
+                    ? "সমস্যা হয়েছে!"
+                    : "Error!"; ?>");
             } catch(e) { console.error(e); }
         }
 
