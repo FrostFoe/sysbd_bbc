@@ -173,7 +173,7 @@ if (!empty($article['leaked_documents'])) {
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     
-    <link href="../assets/styles.css" rel="stylesheet" />
+    <link href="../assets/css/styles.css" rel="stylesheet" />
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <script src="../assets/js/lucide.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>

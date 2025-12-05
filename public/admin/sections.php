@@ -75,8 +75,8 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <input name="title_en" id="sectionTitleEn" required class="w-full p-2 rounded border border-border-color bg-muted-bg">
             </div>
             <div>
-                <label class="block text-sm font-bold mb-1">Type</label>
-                <select name="type" id="sectionType" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                <label class="block text-sm font-bold mb-2">Type</label>
+                <select name="type" id="sectionType" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                     <option value="hero">Hero</option>
                     <option value="grid">Grid</option>
                     <option value="list">List</option>

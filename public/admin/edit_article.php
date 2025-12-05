@@ -108,8 +108,8 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <h3 class="font-bold mb-4 text-sm uppercase text-muted-text">Publishing</h3>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold mb-1">Status</label>
-                        <select name="status" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                        <label class="block text-xs font-bold mb-2">Status</label>
+                        <select name="status" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                             <option value="draft" <?php echo ($article['status'] ?? '') === 'draft' ? 'selected' : ''; ?>>Draft</option>
                             <option value="published" <?php echo ($article['status'] ?? '') === 'published' ? 'selected' : ''; ?>>Published</option>
                             <option value="archived" <?php echo ($article['status'] ?? '') === 'archived' ? 'selected' : ''; ?>>Archived</option>
@@ -125,8 +125,8 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     <h3 class="font-bold mb-4 text-sm uppercase text-muted-text">Organization</h3>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold mb-1">Category</label>
-                        <select name="category_id" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                        <label class="block text-xs font-bold mb-2">Category</label>
+                        <select name="category_id" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                             <option value="">Select Category</option>
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?php echo $cat['id']; ?>" <?php echo ($article['category_id'] ?? '') === $cat['id'] ? 'selected' : ''; ?>>
@@ -137,8 +137,8 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-xs font-bold mb-1">Section (Homepage)</label>
-                        <select name="sectionId" class="w-full p-2 rounded border border-border-color bg-muted-bg">
+                        <label class="block text-xs font-bold mb-2">Section (Homepage)</label>
+                        <select name="sectionId" class="custom-select w-full p-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                             <option value="">None</option>
                             <?php foreach ($sections as $sec): ?>
                                 <option value="<?php echo $sec['id']; ?>" <?php echo ($article['section_id'] ?? '') === $sec['id'] ? 'selected' : ''; ?>>

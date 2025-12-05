@@ -51,7 +51,7 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             <input type="text" name="search" placeholder="Search articles..." value="<?php echo htmlspecialchars($search); ?>" class="p-2 rounded border border-border-color bg-card text-sm w-full md:w-48 focus:border-bbcRed outline-none">
             
-            <select name="cat" class="p-2 rounded border border-border-color bg-card text-sm w-32 md:w-40 focus:border-bbcRed outline-none" onchange="this.form.submit()">
+            <select name="cat" class="custom-select p-2.5 rounded-lg border border-border-color bg-card text-sm w-32 md:w-40 text-card-text" onchange="this.form.submit()">
                 <option value="">All Categories</option>
                 <?php foreach ($categories as $c): ?>
                     <option value="<?php echo $c['id']; ?>" <?php echo $catFilter === $c['id'] ? 'selected' : ''; ?>>

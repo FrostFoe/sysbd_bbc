@@ -64,7 +64,7 @@ $dashboard_content = "
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     
-    <link href="../assets/styles.css" rel="stylesheet" />
+    <link href="../assets/css/styles.css" rel="stylesheet" />
 
     <script src="../assets/js/lucide.js"></script>
 </head>
@@ -227,7 +227,7 @@ $dashboard_content = "
                                     <i data-lucide="${darkMode ? "sun" : "moon"}" class="w-5 h-5"></i>
                                 </button>
                                 <div class="hidden md:flex gap-3 items-center">
-                                    ${isAdmin ? `<a href="../admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : ""}
+                                    <!-- Admin button is intentionally not shown here. Admins are redirected to admin/index.php at PHP level (line 13-16) -->
                                     <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 btn-bounce">
                                         <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${escapeHtml(user_email.charAt(0).toUpperCase())}</div> ${t('sign_out')}
                                     </button>

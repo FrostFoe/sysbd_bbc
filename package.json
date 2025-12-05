@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "php -S 0.0.0.0:8000",
-    "build:css": "tailwindcss -i ./public/assets/custom.css -o ./public/assets/styles.css",
-    "watch:css": "tailwindcss -i ./public/assets/custom.css -o ./public/assets/styles.css --watch",
+    "build:css": "tailwindcss -i ./public/assets/css/custom.css -o ./public/assets/css/styles.css",
+    "watch:css": "tailwindcss -i ./public/assets/css/custom.css -o ./public/assets/css/styles.css --watch",
     "format": "prettier --write '**/*.{js,php,json,css}'",
     "db": "docker rm -f my-mysql && docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=rootpass -e MYSQL_DATABASE=breachtimes -p 3306:3306 -v $(pwd)/database/database.sql:/docker-entrypoint-initdb.d/init.sql -d mysql:8.0",
     "seed": "php database/seed.php",

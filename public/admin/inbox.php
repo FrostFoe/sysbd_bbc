@@ -15,7 +15,7 @@ $adminId = $_SESSION["user_id"] ?? null;
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold">Messages Inbox</h1>
         <div class="flex items-center gap-3">
-            <select id="sort-select" onchange="loadConversations()" class="px-4 py-2 rounded-lg border border-border-color bg-card">
+            <select id="sort-select" onchange="loadConversations()" class="custom-select px-4 py-2.5 rounded-lg border border-border-color bg-card text-card-text text-sm">
                 <option value="latest">Latest Messages</option>
                 <option value="unread">Unread First</option>
                 <option value="oldest">Oldest Messages</option>

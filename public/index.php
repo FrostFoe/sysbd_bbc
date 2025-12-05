@@ -21,7 +21,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     <!-- QuillJS CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
-    <link href="assets/styles.css" rel="stylesheet" />
+    <link href="assets/css/styles.css" rel="stylesheet" />
 
     <script src="assets/js/lucide.js"></script>
     <!-- QuillJS Script -->
@@ -93,6 +93,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 copyright: "© 2025 BreachTimes. All rights reserved.",
                 welcome: "Welcome",
                 admin_panel: "Admin Panel",
+                dashboard: "Dashboard",
                 sign_out: "Sign Out",
                 sign_in: "Sign In",
                 register: "Register",
@@ -156,6 +157,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 copyright: "© ২০২৫ ব্রিচটাইমস। সর্বস্বত্ব সংরক্ষিত।",
                 welcome: "স্বাগতম",
                 admin_panel: "অ্যাডমিন প্যানেল",
+                dashboard: "ড্যাশবোর্ড",
                 sign_out: "সাইন আউট",
                 sign_in: "সাইন ইন",
                 register: "নিবন্ধন",
@@ -1115,7 +1117,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 <div class="hidden md:flex gap-3 items-center">
                                     ${user
                     ? `
-                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : ""}
+                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : `<a href="dashboard/" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ${t('dashboard')}</a>`}
                                         <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 btn-bounce">
                                             <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${escapeHtml(user.charAt(0).toUpperCase())}</div> ${t('sign_out')}
                                         </button>
@@ -1206,7 +1208,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                         <div class="w-10 h-10 rounded-full bg-bbcRed text-white flex items-center justify-center font-bold text-lg">${escapeHtml(user.charAt(0).toUpperCase())}</div>
                                         <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">${t('welcome')}</span><span class="text-xs text-muted-text truncate max-w-[200px]">${escapeHtml(user)}</span></div>
                                     </div>
-                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> ${t('admin_panel')}</a>` : ""}
+                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> ${t('admin_panel')}</a>` : `<a href="dashboard/" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> ${t('dashboard')}</a>`}
                                     <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors btn-bounce"><i data-lucide="log-out" class="w-5 h-5"></i> ${t('sign_out')}</button>
                                 </div>
                             `
