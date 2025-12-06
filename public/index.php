@@ -1088,27 +1088,27 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 <header class="border-b border-border-color sticky top-0 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
                     <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
                         <div class="h-[70px] flex items-center justify-between">
-                            <div class="flex items-center gap-6">
-                                <button onclick="setState({isMobileMenuOpen: true})" class="p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-gray-200 transition-colors btn-bounce">
+                            <div class="flex items-center gap-3 md:gap-6">
+                                <button onclick="setState({isMobileMenuOpen: true})" class="p-2 md:p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-gray-200 transition-colors btn-bounce">
                                     <i data-lucide="menu" class="w-6 h-6"></i>
                                 </button>
                                 <a href="#" onclick="event.preventDefault(); navigate('home')" class="block text-black dark:text-white transition-transform hover:scale-[1.02] active:scale-95 duration-300">
                                     <div class="flex items-center select-none gap-2 group">
-                                        <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300">B</span>
-                                        <span class="font-bold text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                                        <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-lg md:text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300">B</span>
+                                        <span class="font-bold text-lg md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
                                             <span class="text-bbcRed">Breach</span>Times
                                         </span>
                                     </div>
                                 </a>
                             </div>
                             <div class="flex items-center gap-2 md:gap-4">
-                                <button onclick="toggleLanguage()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-green-400 transition-all active:scale-90">
+                                <button onclick="toggleLanguage()" class="p-2 md:p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-green-400 transition-all active:scale-90">
                                     <span class="text-sm font-bold">${state.language === 'bn' ? 'EN' : 'BN'}</span>
                                 </button>
-                                <button onclick="toggleTheme()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-yellow-400 transition-all active:scale-90">
+                                <button onclick="toggleTheme()" class="p-2 md:p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-yellow-400 transition-all active:scale-90">
                                     <i data-lucide="${darkMode ? "sun" : "moon"}" class="w-5 h-5"></i>
                                 </button>
-                                <button onclick="setState({isSearchOpen: true})" class="p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-white transition-all btn-bounce">
+                                <button onclick="setState({isSearchOpen: true})" class="p-2 md:p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-white transition-all btn-bounce">
                                     <i data-lucide="search" class="w-5 h-5"></i>
                                 </button>
                                 <div id="weather-display" class="hidden lg:flex items-center gap-3 text-sm font-medium border-l border-border-color pl-5 ml-2 transition-colors">
@@ -1253,10 +1253,10 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                             </button>
                         </div>
                         <div class="relative mb-16 group">
-                            <i data-lucide="search" class="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 w-10 h-10 group-focus-within:text-bbcRed transition-colors"></i>
+                            <i data-lucide="search" class="absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6 md:w-10 md:h-10 group-focus-within:text-bbcRed transition-colors"></i>
                             <input type="text" placeholder="${t('search_placeholder')}" value="${escapeHtml(searchQuery)}" 
                                 oninput="handleSearch(this.value)"
-                                class="w-full py-4 pl-14 text-4xl font-bold border-b-2 border-border-color focus:border-bbcRed dark:focus:border-bbcRed outline-none bg-transparent text-bbcDark dark:text-white placeholder-gray-300 dark:placeholder-gray-700 transition-colors">
+                                class="w-full py-4 pl-10 md:pl-14 text-2xl md:text-4xl font-bold border-b-2 border-border-color focus:border-bbcRed dark:focus:border-bbcRed outline-none bg-transparent text-bbcDark dark:text-white placeholder-gray-300 dark:placeholder-gray-700 transition-colors">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="search-results-container">
                             ${searchResults.map((a) => renderArticleCard(a, "grid", darkMode)).join("")}

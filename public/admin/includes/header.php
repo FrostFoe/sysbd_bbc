@@ -44,9 +44,9 @@ $menu_items = [
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
-    <link href="../../assets/css/styles.css" rel="stylesheet" />
-    <script src="../../assets/js/lucide.js"></script>
-    <script src="../../assets/js/dropdown.js"></script>
+    <link href="../assets/css/styles.css" rel="stylesheet" />
+    <script src="../assets/js/lucide.js"></script>
+    <script src="../assets/js/dropdown.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500 flex flex-col h-screen overflow-hidden font-sans antialiased">
@@ -59,8 +59,8 @@ $menu_items = [
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <a href="../index.php" class="flex items-center select-none gap-2 group min-w-0">
-                <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300 flex-shrink-0">B</span>
-                <span class="font-bold text-xl md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors whitespace-nowrap">
+                <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-lg md:text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300 flex-shrink-0">B</span>
+                <span class="font-bold text-lg md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors whitespace-nowrap">
                     <span class="text-bbcRed">Breach</span>Times <span class="text-xs text-muted-text font-normal ml-2 uppercase tracking-widest hidden sm:inline-block">Admin</span>
                 </span>
             </a>

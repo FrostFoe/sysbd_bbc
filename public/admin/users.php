@@ -34,7 +34,7 @@ $users = $pdo
     <?php // Can't mute yourself
         // Can't mute yourself
         else: ?>
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse responsive-table">
             <thead class="bg-muted-bg text-muted-text text-xs uppercase">
                 <tr>
                     <th class="p-4">Email</th>

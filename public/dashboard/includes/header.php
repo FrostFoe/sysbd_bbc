@@ -41,9 +41,9 @@ $menu_items = [
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
-    <link href="../../assets/css/styles.css" rel="stylesheet" />
-    <script src="../../assets/js/lucide.js"></script>
-    <script src="../../assets/js/dropdown.js"></script>
+    <link href="../assets/css/styles.css" rel="stylesheet" />
+    <script src="../assets/js/lucide.js"></script>
+    <script src="../assets/js/dropdown.js"></script>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500 flex flex-col h-screen overflow-hidden font-sans antialiased">
     <div id="toast-container" role="status" aria-live="polite" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[120] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
@@ -55,8 +55,8 @@ $menu_items = [
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <a href="../index.php" class="flex items-center select-none gap-2 group min-w-0">
-                <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300 flex-shrink-0">B</span>
-                <span class="font-bold text-xl md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors whitespace-nowrap">
+                <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-lg md:text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300 flex-shrink-0">B</span>
+                <span class="font-bold text-lg md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors whitespace-nowrap">
                     <span class="text-bbcRed">Breach</span>Times <span class="text-xs text-muted-text font-normal ml-2 uppercase tracking-widest hidden sm:inline-block">Dashboard</span>
                 </span>
             </a>

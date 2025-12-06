@@ -42,6 +42,9 @@ $adminId = $adminUser["id"] ?? 1;
     <!-- Header -->
     <header class="h-[70px] border-b border-border-color bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm flex items-center px-4 lg:px-6 justify-between flex-shrink-0">
         <div class="flex items-center gap-3">
+            <a href="index.php" class="p-2 -ml-2 rounded-lg hover:bg-muted-bg text-muted-text hover:text-card-text transition-colors flex-shrink-0">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
             <button onclick="toggleMobileSidebar()" class="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted-bg text-muted-text hover:text-card-text transition-colors flex-shrink-0">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>

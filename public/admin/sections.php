@@ -25,7 +25,7 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </button>
         </div>
     <?php else: ?>
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse responsive-table">
             <thead class="bg-muted-bg text-muted-text text-xs uppercase">
                 <tr>
                     <th class="p-4">Order</th>
