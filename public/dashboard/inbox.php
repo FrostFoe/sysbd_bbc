@@ -33,7 +33,6 @@ $adminId = $adminUser["id"] ?? 1;
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     <link href="../assets/css/styles.css" rel="stylesheet">
-    <link href="../assets/css/custom.css" rel="stylesheet">
     <script src="../assets/js/lucide.js"></script>
 </head>
 <body class="bg-page text-page-text transition-colors duration-500 antialiased flex flex-col h-screen overflow-hidden font-sans">

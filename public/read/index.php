@@ -221,7 +221,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
     
     <link href="../assets/css/styles.css" rel="stylesheet" />
-    <link href="../assets/css/custom.css" rel="stylesheet" />
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <script src="../assets/js/lucide.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>

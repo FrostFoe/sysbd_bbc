@@ -32,7 +32,6 @@ if ($user_role === "admin") {
     </style>
     
     <link href="../assets/css/styles.css" rel="stylesheet" />
-    <link href="../assets/css/custom.css" rel="stylesheet" />
 
     <script src="../assets/js/lucide.js"></script>
 </head>
