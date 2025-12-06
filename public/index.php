@@ -22,6 +22,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
     <link href="assets/css/styles.css" rel="stylesheet" />
+    <link href="assets/css/custom.css" rel="stylesheet" />
 
     <script src="assets/js/lucide.js"></script>
     <!-- QuillJS Script -->
@@ -30,7 +31,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
 
 <body
     class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
-    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_#B80000]" style="width: 0%">
+    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_var(--color-bbcRed)]" style="width: 0%">
     </div>
 
     <div id="app"></div>
@@ -707,7 +708,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 ? "border-gray-800"
                 : "border-border-color";
 
-            const bgClass = isSectionDark ? "bg-[#1E1E1E]" : "bg-card-elevated";
+            const bgClass = isSectionDark ? "bg-card-elevated" : "bg-card-elevated";
 
             const shadowClass = "shadow-soft hover:shadow-soft-hover";
             const isBookmarked = state.bookmarks.includes(article.id);
@@ -805,12 +806,12 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const isSectionDark = state.darkMode || section.style === "dark";
             let containerClass = "mb-12";
             if (section.style === "dark") {
-                containerClass = `bg-[#121212] text-white p-8 md:p-10 rounded-3xl mb-12 shadow-2xl relative overflow-hidden`;
+                containerClass = `bg-card-elevated text-white p-8 md:p-10 rounded-3xl mb-12 shadow-2xl relative overflow-hidden`;
             }
             const titleColor = isSectionDark ? "text-white" : "text-bbcDark";
             const borderColor = isSectionDark
                 ? "white"
-                : section.highlightColor || "#B80000";
+                : section.highlightColor || "var(--color-bbcRed)";
 
             let content = "";
 
@@ -913,7 +914,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         type: "grid", // Or 'list', 'grid' etc. 'grid' is a safe default
                         articles: savedArticles,
                         style: state.darkMode ? "dark" : "light", // Apply theme style
-                        highlightColor: "#B80000", // BBC Red
+                        highlightColor: "var(--color-bbcRed)", // BBC Red
                     },
                 ];
             } else if (state.category !== "home") {
@@ -1094,9 +1095,9 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 </button>
                                 <a href="#" onclick="event.preventDefault(); navigate('home')" class="block text-black dark:text-white transition-transform hover:scale-[1.02] active:scale-95 duration-300">
                                     <div class="flex items-center select-none gap-2 group">
-                                        <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-lg md:text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300">B</span>
+                                        <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-lg md:text-xl rounded shadow-md group-hover:bg-[var(--color-bbcRed-hover)] transition-colors duration-300">B</span>
                                         <span class="font-bold text-lg md:text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                                            <span class="text-bbcRed">Breach</span>Times
+                                            BT
                                         </span>
                                     </div>
                                 </a>
@@ -1147,7 +1148,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 border-b border-border-color pb-12 gap-8">
                             <div class="flex items-center select-none gap-2">
                                 <span class="bg-bbcRed text-white px-3 py-1 font-bold text-2xl rounded shadow">B</span>
-                                <span class="font-bold text-3xl tracking-tighter leading-none"><span class="text-bbcRed">Breach</span>Times</span>
+                                <span class="font-bold text-3xl tracking-tighter leading-none">BT</span>
                             </div>
                             <div class="flex gap-6">
                                 <a href="#" class="p-2 bg-muted-bg rounded-full hover:bg-bbcRed transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
@@ -1245,7 +1246,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         function renderSearchOverlay() {
             const { isSearchOpen, searchQuery, searchResults, darkMode } = state;
             return `
-                <div class="fixed inset-0 z-[70] bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-md overflow-y-auto transition-all duration-300 no-scrollbar ${isSearchOpen ? "opacity-100 visible animate-zoom-in" : "opacity-0 invisible"}">
+                <div class="fixed inset-0 z-[70] bg-white/98 dark:bg-card/98 backdrop-blur-md overflow-y-auto transition-all duration-300 no-scrollbar ${isSearchOpen ? "opacity-100 visible animate-zoom-in" : "opacity-0 invisible"}">
                     <div class="max-w-[1000px] mx-auto p-6 pt-12">
                         <div class="flex justify-end mb-12">
                             <button onclick="setState({isSearchOpen: false})" class="p-3 bg-muted-bg rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-black dark:text-white transition-all hover:rotate-90">

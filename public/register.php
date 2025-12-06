@@ -10,6 +10,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
     </style>
     <link href="assets/css/styles.css" rel="stylesheet" />
+    <link href="assets/css/custom.css" rel="stylesheet" />
     <script src="assets/js/lucide.js"></script>
 </head>
 <body class="bg-page text-card-text transition-colors duration-500">

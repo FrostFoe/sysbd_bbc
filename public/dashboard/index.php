@@ -39,7 +39,7 @@ if ($user_role === "admin") {
 
 <body
     class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white flex flex-col min-h-screen">
-    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_#B80000]" style="width: 0%">
+    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_var(--color-bbcRed)]" style="width: 0%">
     </div>
 
     <div id="toast-container"
@@ -54,10 +54,10 @@ if ($user_role === "admin") {
     <!-- Dashboard Main Content -->
     <main class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-8 flex-1 animate-fade-in">
         <div class="bg-card p-8 rounded-2xl shadow-soft border border-border-color">
-            <h2 class="text-3xl font-bold mb-6 flex items-center gap-3 text-card-text">
-                <span class="w-2 h-8 rounded-full" style="background-color: #B80000"></span>
-                Dashboard
-            </h2>
+            <div class="flex items-center gap-3 mb-8">
+                <span class="w-2 h-8 rounded-full" style="background-color: var(--color-bbcRed)"></span>
+                <h2 class="text-2xl font-bold">Dashboard Overview</h2>
+            </div>
             <div class="text-lg text-muted-text">
                 <p>Welcome, <span class="font-bold"><?php echo htmlspecialchars(
                     $user_email,

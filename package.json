@@ -8,7 +8,7 @@
     "build:css": "tailwindcss -i ./public/assets/css/custom.css -o ./public/assets/css/styles.css",
     "watch:css": "tailwindcss -i ./public/assets/css/custom.css -o ./public/assets/css/styles.css --watch",
     "format": "prettier --write '**/*.{js,php,json,css}'",
-    "db": "docker rm -f my-mysql && docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=rootpass -e MYSQL_DATABASE=breachtimes -p 3306:3306 -v $(pwd)/src/database/database.sql:/docker-entrypoint-initdb.d/init.sql -d mysql:8.0",
+    "db": "(docker rm -f my-mysql || true) && docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=rootpass -e MYSQL_DATABASE=breachtimes -p 3306:3306 -v $(pwd)/src/database/database.sql:/docker-entrypoint-initdb.d/init.sql -d mysql:8.0",
     "seed": "php src/database/seed.php",
     "push": "git add . && git commit -m 'update' && git push"
   },

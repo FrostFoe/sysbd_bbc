@@ -1,0 +1,45 @@
+# Security and MIME type configuration for uploads
+
+# Block direct PHP execution
+<FilesMatch "\\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Set proper MIME types
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/gif .gif
+AddType image/webp .webp
+
+AddType application/pdf .pdf
+AddType application/zip .zip
+
+AddType video/mp4 .mp4
+AddType video/webm .webm
+AddType video/quicktime .mov
+AddType video/x-matroska .mkv
+
+AddType audio/mpeg .mp3
+AddType audio/wav .wav
+AddType audio/ogg .ogg .oga
+AddType audio/mp4 .m4a
+
+AddType application/msword .doc
+AddType application/vnd.openxmlformats-officedocument.wordprocessingml.document .docx
+AddType application/vnd.ms-excel .xls
+AddType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet .xlsx
+AddType application/vnd.ms-powerpoint .ppt
+AddType application/vnd.openxmlformats-officedocument.presentationml.presentation .pptx
+AddType text/plain .txt
+
+# Allow downloads
+Header set Content-Disposition "attachment"
+
+# Cache control
+<FilesMatch "\\.(jpg|jpeg|png|gif|webp|mp4|mp3|pdf|zip)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes

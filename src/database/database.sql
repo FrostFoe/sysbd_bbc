@@ -52,12 +52,14 @@ CREATE TABLE IF NOT EXISTS `articles` (
   `title_bn` varchar(255) DEFAULT NULL,
   `summary_bn` text,
   `content_bn` longtext,
+  `toc_bn` longtext DEFAULT NULL,
   `read_time_bn` varchar(50) DEFAULT NULL,
 
   -- English Content
   `title_en` varchar(255) DEFAULT NULL,
   `summary_en` text,
   `content_en` longtext,
+  `toc_en` longtext DEFAULT NULL,
   `read_time_en` varchar(50) DEFAULT NULL,
 
   `image` longtext,
@@ -149,6 +151,26 @@ CREATE TABLE IF NOT EXISTS `messaging_preferences` (
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_messaging_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Documents Table (For downloadable files associated with articles)
+CREATE TABLE IF NOT EXISTS `documents` (
+  `id` varchar(50) NOT NULL,
+  `article_id` varchar(50) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_type` varchar(50) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `download_url` varchar(500) DEFAULT NULL,
+  `file_size` int(11) DEFAULT NULL,
+  `display_name_bn` varchar(255) NOT NULL,
+  `display_name_en` varchar(255) NOT NULL,
+  `description_bn` text,
+  `description_en` text,
+  `sort_order` int(11) DEFAULT 0,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `article_id` (`article_id`),
+  CONSTRAINT `fk_documents_article` FOREIGN KEY (`article_id`) REFERENCES `articles` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 COMMIT;

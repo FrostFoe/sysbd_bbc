@@ -47,68 +47,87 @@ $sections = $pdo->query("SELECT * FROM sections")->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Main Content -->
-            <div class="lg:col-span-2 space-y-10">
+            <div class="lg:col-span-2 space-y-8 bg-card p-6 rounded-xl border border-border-color shadow-sm">
                 
-                <!-- Bangla Section -->
-                <div class="bg-card p-6 rounded-xl border border-border-color shadow-sm relative">
-                    <div class="absolute top-0 right-0 bg-bbcRed text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">Bangla</div>
-                    <h3 class="font-bold text-lg mb-4 border-b border-border-color pb-2">Bangla Content</h3>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Title (বাংলা)</label>
-                            <input name="title_bn" id="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars(
-                                $article["title_bn"] ?? "",
-                            ); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Summary (বাংলা)</label>
-                            <textarea name="summary_bn" id="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars(
-                                $article["summary_bn"] ?? "",
-                            ); ?></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Content (বাংলা)</label>
-                            <div id="quill-bn" class="bg-card h-96 rounded-lg border border-border-color"></div>
-                            <input type="hidden" name="content_bn" id="content-bn-input" value="<?php echo htmlspecialchars(
-                                $article["content_bn"] ?? "",
-                            ); ?>">
-                        </div>
-                    </div>
+                <h3 class="font-bold text-lg mb-4 border-b border-border-color pb-2">Content (Unified)</h3>
+                
+                <!-- Title fields -->
+                <div>
+                    <label class="block text-sm font-bold mb-2">Title (বাংলা)</label>
+                    <input name="title_bn" id="title_bn" required class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" value="<?php echo htmlspecialchars(
+                        $article["title_bn"] ?? "",
+                    ); ?>" placeholder="নিবন্ধের শিরোনাম লিখুন...">
                 </div>
 
-                <!-- English Section -->
-                <div class="bg-card p-6 rounded-xl border border-border-color shadow-sm relative">
-                    <div class="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">English</div>
-                    <h3 class="font-bold text-lg mb-4 border-b border-border-color pb-2">English Content</h3>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Title (English)</label>
-                            <input name="title_en" id="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" value="<?php echo htmlspecialchars(
-                                $article["title_en"] ?? "",
-                            ); ?>" placeholder="Enter article title...">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Summary (English)</label>
-                            <textarea name="summary_en" id="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-blue-600 outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars(
-                                $article["summary_en"] ?? "",
-                            ); ?></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold mb-2">Content (English)</label>
-                            <div id="quill-en" class="bg-card h-96 rounded-lg border border-border-color"></div>
-                            <input type="hidden" name="content_en" id="content-en-input" value="<?php echo htmlspecialchars(
-                                $article["content_en"] ?? "",
-                            ); ?>">
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-bold mb-2">Title (English)</label>
+                    <input name="title_en" id="title_en" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none" value="<?php echo htmlspecialchars(
+                        $article["title_en"] ?? "",
+                    ); ?>" placeholder="Enter article title...">
                 </div>
 
+                <!-- Summary fields -->
+                <div>
+                    <label class="block text-sm font-bold mb-2">Summary (বাংলা)</label>
+                    <textarea name="summary_bn" id="summary_bn" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none font-hind" placeholder="সংক্ষিপ্ত সারসংক্ষেপ..."><?php echo htmlspecialchars(
+                        $article["summary_bn"] ?? "",
+                    ); ?></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Summary (English)</label>
+                    <textarea name="summary_en" id="summary_en" rows="3" class="w-full p-3 rounded-lg border border-border-color bg-card focus:border-bbcRed outline-none" placeholder="Brief summary..."><?php echo htmlspecialchars(
+                        $article["summary_en"] ?? "",
+                    ); ?></textarea>
+                </div>
+
+                <!-- Content fields -->
+                <div>
+                    <label class="block text-sm font-bold mb-2">Content (বাংলা)</label>
+                    <div id="quill-bn" class="bg-card h-96 rounded-lg border border-border-color"></div>
+                    <input type="hidden" name="content_bn" id="content-bn-input" value="<?php echo htmlspecialchars(
+                        $article["content_bn"] ?? "",
+                    ); ?>">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2">Content (English)</label>
+                    <div id="quill-en" class="bg-card h-96 rounded-lg border border-border-color"></div>
+                    <input type="hidden" name="content_en" id="content-en-input" value="<?php echo htmlspecialchars(
+                        $article["content_en"] ?? "",
+                    ); ?>">
+                </div>
+
+                <!-- TOC fields -->
+                <div class="border-t border-border-color pt-4 mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold">Table of Contents (Bangla)</label>
+                        <button type="button" onclick="generateTOC('bn')" class="text-xs bg-bbcRed text-white px-2 py-1 rounded hover:bg-[var(--color-bbcRed-hover)]">
+                            Generate from Content
+                        </button>
+                    </div>
+                    <div id="toc-bn-editor" class="space-y-2 bg-muted-bg p-3 rounded-lg min-h-[100px]">
+                        <p class="text-xs text-muted-text text-center py-4">No TOC generated yet.</p>
+                    </div>
+                    <input type="hidden" name="toc_bn" id="toc-bn-input" value="<?php echo htmlspecialchars(
+                        $article["toc_bn"] ?? "[]",
+                    ); ?>">
+                </div>
+
+                <div class="border-t border-border-color pt-4 mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold">Table of Contents (English)</label>
+                        <button type="button" onclick="generateTOC('en')" class="text-xs bg-bbcRed text-white px-2 py-1 rounded hover:bg-[var(--color-bbcRed-hover)]">
+                            Generate from Content
+                        </button>
+                    </div>
+                    <div id="toc-en-editor" class="space-y-2 bg-muted-bg p-3 rounded-lg min-h-[100px]">
+                        <p class="text-xs text-muted-text text-center py-4">No TOC generated yet.</p>
+                    </div>
+                    <input type="hidden" name="toc_en" id="toc-en-input" value="<?php echo htmlspecialchars(
+                        $article["toc_en"] ?? "[]",
+                    ); ?>">
+                </div>
             </div>
 
             <!-- Sidebar Settings -->
@@ -233,6 +252,8 @@ $sec["id"]
 <script>
     let quillBn, quillEn;
     const storageKey = 'article-draft-' + (new URLSearchParams(window.location.search).get('id') || 'new');
+    let tocBnData = [];
+    let tocEnData = [];
 
     // Initialize Quill editors
     document.addEventListener('DOMContentLoaded', () => {
@@ -240,7 +261,7 @@ $sec["id"]
             theme: 'snow',
             modules: {
                 toolbar: [
-                    [{ 'header': [1, 2, false] }],
+                    [{ 'header': [1, 2, 3, false] }], // Added h3
                     ['bold', 'italic', 'underline', 'strike'],
                     ['blockquote', 'code-block'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
@@ -255,7 +276,7 @@ $sec["id"]
             theme: 'snow',
             modules: {
                 toolbar: [
-                    [{ 'header': [1, 2, false] }],
+                    [{ 'header': [1, 2, 3, false] }], // Added h3
                     ['bold', 'italic', 'underline', 'strike'],
                     ['blockquote', 'code-block'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
@@ -276,6 +297,16 @@ $sec["id"]
         if (contentEnInput.value) {
             quillEn.root.innerHTML = contentEnInput.value;
         }
+
+        // Initialize TOC data
+        try {
+            tocBnData = JSON.parse(document.getElementById('toc-bn-input').value || '[]');
+            tocEnData = JSON.parse(document.getElementById('toc-en-input').value || '[]');
+        } catch (e) {
+            console.error("Error parsing TOC data", e);
+        }
+        renderTOC('bn', tocBnData);
+        renderTOC('en', tocEnData);
         
         // Check for autosave
         const saved = localStorage.getItem(storageKey);
@@ -312,6 +343,103 @@ $sec["id"]
         reader.readAsDataURL(file);
     }
 
+    function generateTOC(lang) {
+        const quill = lang === 'bn' ? quillBn : quillEn;
+        const root = quill.root;
+        const headers = root.querySelectorAll('h2, h3');
+        const toc = [];
+
+        headers.forEach((header, index) => {
+            let text = header.textContent.trim();
+            if (!text) return;
+
+            // Generate ID if missing
+            if (!header.id) {
+                // Simple ID generation: lang-h-index-random
+                const id = `${lang}-h-${index}-${Math.floor(Math.random() * 1000)}`;
+                header.id = id;
+            }
+
+            toc.push({
+                id: header.id,
+                text: text,
+                level: parseInt(header.tagName.substring(1))
+            });
+        });
+
+        if (lang === 'bn') {
+            tocBnData = toc;
+        } else {
+            tocEnData = toc;
+        }
+
+        renderTOC(lang, toc);
+        
+        // Notify user
+        showToastMsg(`Generated ${toc.length} TOC items for ${lang.toUpperCase()}`);
+    }
+
+    function renderTOC(lang, items) {
+        const container = document.getElementById(`toc-${lang}-editor`);
+        const input = document.getElementById(`toc-${lang}-input`);
+        
+        if (!items || items.length === 0) {
+            container.innerHTML = '<p class="text-xs text-muted-text text-center py-4">No TOC generated yet.</p>';
+            input.value = '[]';
+            return;
+        }
+
+        container.innerHTML = '';
+        items.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 mb-2 bg-card p-2 rounded border border-border-color';
+            row.style.marginLeft = (item.level - 2) * 20 + 'px'; // Indent h3
+
+            // Level Indicator
+            const badge = document.createElement('span');
+            badge.className = 'text-xs font-mono bg-muted-bg px-1 rounded text-muted-text';
+            badge.innerText = `H${item.level}`;
+
+            // Text Input
+            const textInput = document.createElement('input');
+            textInput.type = 'text';
+            textInput.value = item.text;
+            textInput.className = 'flex-1 text-sm bg-transparent border-none focus:outline-none';
+            textInput.onchange = (e) => {
+                items[index].text = e.target.value;
+                updateTOCInput(lang);
+            };
+
+            // ID (Hidden/Visible on hover? Keep simple for now)
+            
+            // Delete Button
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>';
+            delBtn.onclick = () => {
+                items.splice(index, 1);
+                if (lang === 'bn') tocBnData = items; else tocEnData = items;
+                renderTOC(lang, items);
+                // Note: We don't remove ID from content, just from TOC
+            };
+
+            row.appendChild(badge);
+            row.appendChild(textInput);
+            row.appendChild(delBtn);
+            container.appendChild(row);
+        });
+        
+        // Re-initialize icons
+        if (window.lucide) lucide.createIcons();
+
+        updateTOCInput(lang);
+    }
+
+    function updateTOCInput(lang) {
+        const data = lang === 'bn' ? tocBnData : tocEnData;
+        document.getElementById(`toc-${lang}-input`).value = JSON.stringify(data);
+    }
+
     async function saveArticle(e) {
         e.preventDefault();
         
@@ -321,6 +449,10 @@ $sec["id"]
         
         document.getElementById('content-bn-input').value = contentBn;
         document.getElementById('content-en-input').value = contentEn;
+        
+        // TOC inputs are already updated by renderTOC/onchange, but let's ensure
+        document.getElementById('toc-bn-input').value = JSON.stringify(tocBnData);
+        document.getElementById('toc-en-input').value = JSON.stringify(tocEnData);
 
         const formData = new FormData(e.target);
 
@@ -358,6 +490,8 @@ $sec["id"]
             title_en: document.getElementById('title_en')?.value,
             summary_en: document.getElementById('summary_en')?.value,
             content_en: quillEn.root.innerHTML,
+            toc_bn: tocBnData,
+            toc_en: tocEnData
         };
         
         localStorage.setItem(storageKey, JSON.stringify(formData));
@@ -379,6 +513,15 @@ $sec["id"]
             }
             if (data.content_en) {
                 quillEn.root.innerHTML = data.content_en;
+            }
+            
+            if (data.toc_bn) {
+                tocBnData = data.toc_bn;
+                renderTOC('bn', tocBnData);
+            }
+            if (data.toc_en) {
+                tocEnData = data.toc_en;
+                renderTOC('en', tocEnData);
             }
             
             document.getElementById('restore-alert').classList.add('hidden');

@@ -32,6 +32,10 @@ $article["summary"] =
     $lang === "en" ? $articleRaw["summary_en"] : $articleRaw["summary_bn"];
 $article["content"] =
     $lang === "en" ? $articleRaw["content_en"] : $articleRaw["content_bn"];
+$article["toc"] =
+    $lang === "en"
+        ? $articleRaw["toc_en"] ?? "[]"
+        : $articleRaw["toc_bn"] ?? "[]";
 $article["readTime"] =
     $lang === "en"
         ? $articleRaw["read_time_en"] ?? ""
@@ -153,6 +157,13 @@ $leakedDocuments = [];
 if (!empty($article["leaked_documents"])) {
     $leakedDocuments = json_decode($article["leaked_documents"], true);
 }
+
+// Fetch downloadable documents for this article
+$docsStmt = $pdo->prepare(
+    "SELECT id, display_name_bn, display_name_en, file_type, file_path, download_url, description_bn, description_en, file_size FROM documents WHERE article_id = ? ORDER BY sort_order ASC",
+);
+$docsStmt->execute([$articleId]);
+$articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="<?php echo $lang; ?>">
@@ -210,30 +221,26 @@ if (!empty($article["leaked_documents"])) {
     </style>
     
     <link href="../assets/css/styles.css" rel="stylesheet" />
+    <link href="../assets/css/custom.css" rel="stylesheet" />
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <script src="../assets/js/lucide.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
-    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_#B80000]" style="width: 0%" aria-hidden="true"></div>
+    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_var(--color-bbcRed)]" style="width: 0%" aria-hidden="true"></div>
 
-    <header role="banner" class="border-b border-border-color sticky bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
-        <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
+    <header role="banner" class="border-b border-border-color sticky bg-white/90 dark:bg-card/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
+        <div class="container mx-auto px-4 lg:px-8 max-w-[1000px]">
             <div class="h-[70px] flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="../index.php" class="p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-gray-200 transition-colors">
-                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                    </a>
-                    <a href="../index.php" class="block text-black dark:text-white transition-transform hover:scale-[1.02] active:scale-95 duration-300">
-                        <div class="flex items-center select-none gap-2 group">
-                            <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[#d40000] transition-colors duration-300">B</span>
-                            <span class="font-bold text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                                <span class="text-bbcRed">Breach</span>Times
-                            </span>
-                        </div>
-                    </a>
-                </div>
+                <a href="../" class="block text-black dark:text-white transition-transform hover:scale-[1.02] active:scale-95 duration-300" aria-label="Back to Home">
+                    <div class="flex items-center select-none gap-2 group">
+                        <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[var(--color-bbcRed-hover)] transition-colors duration-300">B</span>
+                        <span class="font-bold text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                            BT
+                        </span>
+                    </div>
+                </a>
                 <div class="flex items-center gap-2 md:gap-4">
                     <button onclick="toggleTheme()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-yellow-400 transition-all active:scale-90">
                         <i data-lucide="sun" class="w-5 h-5"></i>
@@ -260,6 +267,23 @@ if (!empty($article["leaked_documents"])) {
 
     <main role="main" class="bg-page min-h-screen font-sans animate-fade-in-up pb-12">
         <div class="max-w-[1280px] mx-auto px-4 py-8">
+            <!-- Mobile TOC (shown on mobile, hidden on lg+) -->
+            <div class="lg:hidden mb-8" id="mobile-toc-container">
+                <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
+                    <div class="flex items-center justify-between gap-2 mb-4 pb-2 border-b border-border-color cursor-pointer" onclick="toggleTOC(event)" id="toc-header">
+                        <h4 class="text-lg font-bold text-card-text">
+                            <?php echo $lang === "bn"
+                                ? "সূচিপত্র"
+                                : "Table of Contents"; ?>
+                        </h4>
+                        <i data-lucide="chevron-down" id="toc-toggle-icon" class="w-5 h-5 text-muted-text transition-transform"></i>
+                    </div>
+                    <nav id="toc-container" class="text-sm space-y-2 text-muted-text max-h-[500px] overflow-y-auto">
+                        <!-- JS will populate this -->
+                    </nav>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div class="lg:col-span-8">
                     <article class="bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
@@ -322,17 +346,17 @@ if (!empty($article["leaked_documents"])) {
                 </div>
 
                 <!-- Sidebar -->
-                <div class="lg:col-span-4 relative">
-                    <div class="w-full lg:fixed lg:top-28 lg:right-4 lg:w-[calc(33.33vw-4rem)] lg:max-w-[400px] lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto no-scrollbar space-y-6 z-40 lg:pr-2">
+                <div class="lg:col-span-4 w-full">
+                    <div class="w-full space-y-6 z-40 lg:fixed lg:top-28 lg:right-4 lg:w-[calc(33.33vw-4rem)] lg:max-w-[400px] lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 no-scrollbar">
                         
-                        <!-- Table of Contents -->
-                        <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
-                            <h4 class="text-lg font-bold mb-4 text-card-text border-b border-border-color pb-2">
+                        <!-- Desktop TOC (hidden on mobile, shown on lg+) -->
+                        <div class="hidden lg:block bg-card p-6 rounded-2xl shadow-soft border border-border-color">
+                            <h4 class="text-lg font-bold text-card-text mb-4 pb-2 border-b border-border-color">
                                 <?php echo $lang === "bn"
                                     ? "সূচিপত্র"
                                     : "Table of Contents"; ?>
                             </h4>
-                            <nav id="toc-container" class="text-sm space-y-2 text-muted-text">
+                            <nav id="toc-container-desktop" class="text-sm space-y-2 text-muted-text max-h-none overflow-y-visible">
                                 <!-- JS will populate this -->
                             </nav>
                         </div>
@@ -363,6 +387,57 @@ if (!empty($article["leaked_documents"])) {
                                         <span class="text-[10px] text-muted-text uppercase tracking-wider">Download</span>
                                     </div>
                                     <i data-lucide="download" class="w-4 h-4 text-muted-text group-hover:text-bbcRed transition-colors"></i>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Downloadable Documents -->
+                        <?php if (!empty($articleDocuments)): ?>
+                        <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
+                            <h4 class="text-lg font-bold mb-4 text-card-text border-b border-border-color pb-2 flex items-center gap-2">
+                                <i data-lucide="download" class="w-5 h-5 text-bbcRed"></i>
+                                <?php echo $lang === "bn"
+                                    ? "ডাউনলোডযোগ্য নথি"
+                                    : "Documents"; ?>
+                            </h4>
+                            <ul class="space-y-3">
+                                <?php foreach ($articleDocuments as $doc): ?>
+                                <li class="group flex items-center gap-3 p-3 rounded-lg hover:bg-muted-bg transition-colors cursor-pointer border border-transparent hover:border-bbcRed/30">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200/50">
+                                        <?php echo htmlspecialchars(
+                                            $doc["file_type"] ?? "DOC",
+                                        ); ?>
+                                    </div>
+                                    <div class="flex-grow min-w-0">
+                                        <p class="text-sm font-bold text-card-text truncate group-hover:text-bbcRed transition-colors" title="<?php echo htmlspecialchars(
+                                            $doc["display_name_bn"] ??
+                                                $doc["display_name_en"],
+                                        ); ?>">
+                                            <?php echo htmlspecialchars(
+                                                $lang === "bn"
+                                                    ? $doc["display_name_bn"] ??
+                                                        $doc["display_name_en"]
+                                                    : $doc["display_name_en"] ??
+                                                        $doc["display_name_bn"],
+                                            ); ?>
+                                        </p>
+                                        <?php if ($doc["file_size"]): ?>
+                                            <span class="text-[10px] text-muted-text uppercase tracking-wider"><?php echo number_format(
+                                                $doc["file_size"] / 1024,
+                                                1,
+                                            ); ?> KB</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <a href="<?php echo $doc["download_url"]
+                                        ? htmlspecialchars($doc["download_url"])
+                                        : "/downloads/?file=" .
+                                            urlencode(
+                                                $doc["file_path"],
+                                            ); ?>" download class="p-2 rounded-lg bg-bbcRed/10 text-bbcRed group-hover:bg-bbcRed group-hover:text-white transition-all" target="_blank" rel="noopener noreferrer">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </a>
                                 </li>
                                 <?php endforeach; ?>
                             </ul>
@@ -637,10 +712,31 @@ if (!empty($article["leaked_documents"])) {
     <script>
         const articleId = '<?php echo htmlspecialchars($articleId); ?>';
         const lang = '<?php echo $lang; ?>';
+        const savedTOC = <?php echo $article["toc"] ?: "[]"; ?>;
         let bookmarks = JSON.parse(localStorage.getItem("breachtimes-bookmarks") || "[]");
         let fontSize = "md";
         let userVotes = JSON.parse(localStorage.getItem(`votes-${articleId}`) || "{}");
         let commentSort = localStorage.getItem(`sort-${articleId}`) || "newest";
+
+        // Mobile TOC Toggle
+        let tocExpanded = true;
+        function toggleTOC(event) {
+            if (window.innerWidth >= 1024) return; // Don't toggle on lg screens
+            
+            const tocContainer = document.getElementById('toc-container');
+            const toggleIcon = document.getElementById('toc-toggle-icon');
+            
+            if (tocExpanded) {
+                tocContainer.classList.add('hidden');
+                toggleIcon.classList.add('rotate-180');
+                tocExpanded = false;
+            } else {
+                tocContainer.classList.remove('hidden');
+                toggleIcon.classList.remove('rotate-180');
+                tocExpanded = true;
+            }
+            lucide.createIcons();
+        }
 
         const savedTheme = localStorage.getItem("breachtimes-theme");
         const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -845,44 +941,85 @@ if (!empty($article["leaked_documents"])) {
 
         // Generate Table of Contents
         const tocInitialize = () => {
+            const tocContainerMobile = document.getElementById('toc-container');
+            const tocContainerDesktop = document.getElementById('toc-container-desktop');
             const prose = document.querySelector('.prose');
-            const tocContainer = document.getElementById('toc-container');
-            
-            if (prose && tocContainer) {
-                const headers = prose.querySelectorAll('h2, h3');
-                if (headers.length === 0) {
-                    tocContainer.innerHTML = '<p class="italic opacity-50"><?php echo $lang ===
-                    "bn"
-                        ? "কোনো সূচিপত্র নেই"
-                        : "No table of contents available"; ?></p>';
+
+            const populateTOC = (container) => {
+                if (!container) return;
+
+                // Use saved TOC if available
+                if (savedTOC && savedTOC.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'space-y-2 border-l border-border-color pl-4';
+
+                    savedTOC.forEach(item => {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        
+                        // Ideally, the IDs should match what's in the content. 
+                        // The Admin 'generateTOC' ensures IDs are added to H tags in the content.
+                        link.href = `#${item.id}`;
+                        link.textContent = item.text;
+                        link.className = `block hover:text-bbcRed transition-colors ${item.level === 3 ? 'pl-4 text-xs' : 'font-bold'}`;
+                        
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const target = document.getElementById(item.id);
+                            if (target) {
+                                target.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        });
+
+                        li.appendChild(link);
+                        ul.appendChild(li);
+                    });
+                    container.innerHTML = '';
+                    container.appendChild(ul);
                     return;
                 }
-
-                const ul = document.createElement('ul');
-                ul.className = 'space-y-2 border-l border-border-color pl-4';
-
-                headers.forEach((header, index) => {
-                    if (!header.id) {
-                        header.id = `section-${index}`;
+                
+                // Fallback to client-side generation
+                if (prose) {
+                    const headers = prose.querySelectorAll('h2, h3');
+                    if (headers.length === 0) {
+                        container.innerHTML = '<p class="italic opacity-50"><?php echo $lang ===
+                        "bn"
+                            ? "কোনো সূচিপত্র নেই"
+                            : "No table of contents available"; ?></p>';
+                        return;
                     }
 
-                    const li = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = `#${header.id}`;
-                    link.textContent = header.textContent;
-                    link.className = `block hover:text-bbcRed transition-colors ${header.tagName === 'H3' ? 'pl-4 text-xs' : 'font-bold'}`;
-                    
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        header.scrollIntoView({ behavior: 'smooth' });
-                    });
+                    const ul = document.createElement('ul');
+                    ul.className = 'space-y-2 border-l border-border-color pl-4';
 
-                    li.appendChild(link);
-                    ul.appendChild(li);
-                });
-                
-                tocContainer.appendChild(ul);
-            }
+                    headers.forEach((header, index) => {
+                        if (!header.id) {
+                            header.id = `section-${index}`;
+                        }
+
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = `#${header.id}`;
+                        link.textContent = header.textContent;
+                        link.className = `block hover:text-bbcRed transition-colors ${header.tagName === 'H3' ? 'pl-4 text-xs' : 'font-bold'}`;
+                        
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            header.scrollIntoView({ behavior: 'smooth' });
+                        });
+
+                        li.appendChild(link);
+                        ul.appendChild(li);
+                    });
+                    
+                    container.appendChild(ul);
+                }
+            };
+
+            // Populate both mobile and desktop TOC containers
+            populateTOC(tocContainerMobile);
+            populateTOC(tocContainerDesktop);
         };
         document.addEventListener('DOMContentLoaded', tocInitialize);
 

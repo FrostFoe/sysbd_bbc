@@ -47,7 +47,9 @@ $title_en = $_POST["title_en"] ?? "";
 $summary_bn = $_POST["summary_bn"] ?? "";
 $summary_en = $_POST["summary_en"] ?? "";
 $content_bn = $_POST["content_bn"] ?? "";
+$toc_bn = $_POST["toc_bn"] ?? "";
 $content_en = $_POST["content_en"] ?? "";
+$toc_en = $_POST["toc_en"] ?? "";
 
 // Common Fields
 $category_id = $_POST["category_id"] ?? "";
@@ -71,6 +73,7 @@ if ($exists) {
             title_bn=?, title_en=?, 
             summary_bn=?, summary_en=?, 
             content_bn=?, content_en=?, 
+            toc_bn=?, toc_en=?,
             read_time_bn=?, read_time_en=?,
             category_id=?, section_id=?, 
             image=?, leaked_documents=?, status=? 
@@ -83,6 +86,8 @@ if ($exists) {
         $summary_en,
         $content_bn,
         $content_en,
+        $toc_bn,
+        $toc_en,
         $read_time_bn,
         $read_time_en,
         $category_id,
@@ -100,10 +105,11 @@ if ($exists) {
             title_bn, title_en, 
             summary_bn, summary_en, 
             content_bn, content_en, 
+            toc_bn, toc_en,
             read_time_bn, read_time_en,
             category_id, section_id, 
             image, leaked_documents, status, published_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
     );
     $stmt->execute([
         $id,
@@ -113,6 +119,8 @@ if ($exists) {
         $summary_en,
         $content_bn,
         $content_en,
+        $toc_bn,
+        $toc_en,
         $read_time_bn,
         $read_time_en,
         $category_id,

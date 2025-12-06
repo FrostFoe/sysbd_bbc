@@ -40,7 +40,7 @@ $adminId = $adminUser["id"] ?? 1;
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[120] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
 
     <!-- Header -->
-    <header class="h-[70px] border-b border-border-color bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm flex items-center px-4 lg:px-6 justify-between flex-shrink-0">
+    <header class="h-[70px] border-b border-border-color bg-white/90 dark:bg-card/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm flex items-center px-4 lg:px-6 justify-between flex-shrink-0">
         <div class="flex items-center gap-3">
             <a href="index.php" class="p-2 -ml-2 rounded-lg hover:bg-muted-bg text-muted-text hover:text-card-text transition-colors flex-shrink-0">
                 <i data-lucide="arrow-left" class="w-6 h-6"></i>
@@ -113,7 +113,7 @@ $adminId = $adminUser["id"] ?? 1;
                     >
                     <button 
                         onclick="sendMessage()" 
-                        class="bg-bbcRed text-white px-5 py-3 rounded-full hover:bg-[#d40000] transition-colors font-bold shadow-md hover:shadow-lg flex-shrink-0 flex items-center gap-2"
+                        class="bg-bbcRed text-white px-5 py-3 rounded-full hover:bg-[var(--color-bbcRed-hover)] transition-colors font-bold shadow-md hover:shadow-lg flex-shrink-0 flex items-center gap-2"
                         title="Send message (Enter)"
                     >
                         <i data-lucide="send" class="w-5 h-5"></i>
