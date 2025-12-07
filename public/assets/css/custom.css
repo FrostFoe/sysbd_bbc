@@ -197,20 +197,6 @@
 }
 
 @media (max-width: 480px) {
-  .flex.items-center.justify-between {
-    @apply flex-col items-start gap-3;
-  }
-  
-  /* Prevent Header Breakage */
-  header .flex.items-center.justify-between {
-    @apply flex-row items-center justify-between gap-2;
-  }
-
-  /* Fix Mobile Sidebar Menu Items */
-  #mobile-menu-layer .flex.items-center.justify-between {
-    @apply flex-row items-center justify-between;
-  }
-
   h3.text-2xl {
     @apply text-xl;
   }
