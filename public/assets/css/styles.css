@@ -838,9 +838,6 @@
   .flex-col {
     flex-direction: column;
   }
-  .flex-nowrap {
-    flex-wrap: nowrap;
-  }
   .flex-wrap {
     flex-wrap: wrap;
   }
@@ -3451,6 +3448,11 @@
     align-items: center;
     justify-content: space-between;
     gap: calc(var(--spacing) * 2);
+  }
+  #mobile-menu-layer .flex.items-center.justify-between {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
   h3.text-2xl {
     font-size: var(--text-xl);
