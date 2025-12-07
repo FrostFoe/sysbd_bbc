@@ -535,7 +535,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             const container = document.getElementById("toast-container");
             const toast = document.createElement("div");
             toast.className =
-                "toast-enter fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+                "animate-[slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
             toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-400 dark:text-green-600"></i> ${msg}`;
             container.appendChild(toast);
             lucide.createIcons();
@@ -1012,13 +1012,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 <div class="container mx-auto px-4 lg:px-8 max-w-[1380px] py-6 min-h-[60vh]">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
                         <div class="col-span-1 md:col-span-2 lg:col-span-2">
-                            <div class="skeleton w-full aspect-video mb-5 rounded-xl"></div>
-                            <div class="skeleton w-3/4 h-8 mb-3 rounded"></div>
-                            <div class="skeleton w-full h-4 mb-2 rounded"></div>
-                            <div class="skeleton w-2/3 h-4 rounded"></div>
+                            <div class="bg-[linear-gradient(to_right,#f4f4f5_8%,#e4e4e7_18%,#f4f4f5_33%)] bg-[length:1200px_100%] animate-[shimmer_2s_infinite_linear] dark:bg-[linear-gradient(to_right,#18181b_8%,#27272a_18%,#18181b_33%)] w-full aspect-video mb-5 rounded-xl"></div>
+                            <div class="bg-[linear-gradient(to_right,#f4f4f5_8%,#e4e4e7_18%,#f4f4f5_33%)] bg-[length:1200px_100%] animate-[shimmer_2s_infinite_linear] dark:bg-[linear-gradient(to_right,#18181b_8%,#27272a_18%,#18181b_33%)] w-3/4 h-8 mb-3 rounded"></div>
+                            <div class="bg-[linear-gradient(to_right,#f4f4f5_8%,#e4e4e7_18%,#f4f4f5_33%)] bg-[length:1200px_100%] animate-[shimmer_2s_infinite_linear] dark:bg-[linear-gradient(to_right,#18181b_8%,#27272a_18%,#18181b_33%)] w-full h-4 mb-2 rounded"></div>
+                            <div class="bg-[linear-gradient(to_right,#f4f4f5_8%,#e4e4e7_18%,#f4f4f5_33%)] bg-[length:1200px_100%] animate-[shimmer_2s_infinite_linear] dark:bg-[linear-gradient(to_right,#18181b_8%,#27272a_18%,#18181b_33%)] w-2/3 h-4 rounded"></div>
                         </div>
                         <div class="col-span-1 md:col-span-2 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
-                            ${[1, 2, 3, 4].map((i) => `<div><div class="skeleton w-full aspect-video mb-3 rounded-lg"></div><div class="skeleton w-full h-5 rounded"></div></div>`).join("")}
+                            ${[1, 2, 3, 4].map((i) => `<div><div class="bg-[linear-gradient(to_right,#f4f4f5_8%,#e4e4e7_18%,#f4f4f5_33%)] bg-[length:1200px_100%] animate-[shimmer_2s_infinite_linear] dark:bg-[linear-gradient(to_right,#18181b_8%,#27272a_18%,#18181b_33%)] w-full aspect-video mb-3 rounded-lg"></div><div class="bg-[linear-gradient(to_right,#f4f4f5_8%,#e4e4e7_18%,#f4f4f5_33%)] bg-[length:1200px_100%] animate-[shimmer_2s_infinite_linear] dark:bg-[linear-gradient(to_right,#18181b_8%,#27272a_18%,#18181b_33%)] w-full h-5 rounded"></div></div>`).join("")}
                         </div>
                     </div>
                 </div>
@@ -1079,7 +1079,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             ];
             
             const navItems = menuItems.map((item) => `
-                <a href="?category=${item.id}" onclick="event.preventDefault(); navigate('${item.id}')" class="nav-link flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap transition-all hover:text-bbcRed ${category === item.id ? "active" : ""}">
+                <a href="?category=${item.id}" onclick="event.preventDefault(); navigate('${item.id}')" class="relative text-muted-text transition-colors duration-200 ease-out hover:text-bbcRed [&.active]:opacity-100 [&.active]:text-bbcRed [&.active]:font-semibold dark:[&.active]:text-danger after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:w-0 after:h-[2px] after:bg-bbcRed after:transition-all after:duration-300 after:ease-out after:-translate-x-1/2 dark:after:bg-danger [&.active]:after:w-full flex-shrink-0 py-2.5 px-1 text-sm font-bold whitespace-nowrap ${category === item.id ? "active" : ""}">
                     ${escapeHtml(item.label)}
                 </a>
             `).join("");
@@ -1089,7 +1089,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                     <div class="container mx-auto px-4 lg:px-8 max-w-[1380px]">
                         <div class="h-[70px] flex items-center justify-between">
                             <div class="flex items-center gap-3 md:gap-6">
-                                <button onclick="setState({isMobileMenuOpen: true})" class="p-2 md:p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-gray-200 transition-colors btn-bounce">
+                                <button onclick="setState({isMobileMenuOpen: true})" class="p-2 md:p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-gray-200 transition-colors active:scale-95">
                                     <i data-lucide="menu" class="w-6 h-6"></i>
                                 </button>
                                 <a href="#" onclick="event.preventDefault(); navigate('home')" class="block text-black dark:text-white transition-transform hover:scale-[1.02] active:scale-95 duration-300">
@@ -1108,7 +1108,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 <button onclick="toggleTheme()" class="p-2 md:p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-yellow-400 transition-all active:scale-90">
                                     <i data-lucide="${darkMode ? "sun" : "moon"}" class="w-5 h-5"></i>
                                 </button>
-                                <button onclick="setState({isSearchOpen: true})" class="p-2 md:p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-white transition-all btn-bounce">
+                                <button onclick="setState({isSearchOpen: true})" class="p-2 md:p-2.5 hover:bg-muted-bg rounded-full text-gray-700 dark:text-white transition-all active:scale-95">
                                     <i data-lucide="search" class="w-5 h-5"></i>
                                 </button>
                                 <div id="weather-display" class="hidden lg:flex items-center gap-3 text-sm font-medium border-l border-border-color pl-5 ml-2 transition-colors">
@@ -1117,13 +1117,13 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                 <div class="hidden md:flex gap-3 items-center">
                                     ${user
                     ? `
-                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : `<a href="dashboard/" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 btn-bounce"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ${t('dashboard')}</a>`}
-                                        <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 btn-bounce">
+                                        ${isAdmin ? `<a href="admin/index.php" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 active:scale-95"><i data-lucide="shield" class="w-4 h-4"></i> ${t('admin_panel')}</a>` : `<a href="dashboard/" class="flex items-center gap-2 px-4 py-2 bg-bbcRed text-white rounded-full text-sm font-bold shadow-lg shadow-bbcRed/30 hover:bg-red-700 hover:scale-105 transition-all mr-2 active:scale-95"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ${t('dashboard')}</a>`}
+                                        <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2 active:scale-95">
                                             <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]">${escapeHtml(user.charAt(0).toUpperCase())}</div> ${t('sign_out')}
                                         </button>
                                     `
                     : `
-                                        <a href="login/" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all btn-bounce">${t('sign_in')}</a>
+                                        <a href="login/" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95">${t('sign_in')}</a>
                                     `
                 }
                                 </div>
@@ -1194,10 +1194,10 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                 { label: t("saved"), id: "saved" },
             ];
             return `
-                <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "translate-x-0 animate-slide-in-right" : "-translate-x-full"}">
+                <div class="fixed top-0 left-0 bottom-0 z-[60] w-full sm:w-2/3 md:w-1/2 lg:w-1/4 bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-300 transform ${isMobileMenuOpen ? "animate-slide-in-left" : "-translate-x-full"}">
                     <div class="flex justify-between items-center p-6 border-b border-border-color">
                         <div class="font-bold text-2xl dark:text-white tracking-tight">${t('menu')}</div>
-                        <button onclick="setState({isMobileMenuOpen: false})" class="p-2 hover:bg-muted-bg rounded-full transition-transform hover:rotate-90 dark:text-white btn-bounce"><i data-lucide="x" class="w-8 h-8"></i></button>
+                        <button onclick="setState({isMobileMenuOpen: false})" class="p-2 hover:bg-muted-bg rounded-full transition-transform hover:rotate-90 dark:text-white active:scale-95"><i data-lucide="x" class="w-8 h-8"></i></button>
                     </div>
                     <div class="p-6 h-full overflow-y-auto pb-20 no-scrollbar">
                         <div class="mb-8 space-y-4">
@@ -1208,14 +1208,14 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
                                         <div class="w-10 h-10 rounded-full bg-bbcRed text-white flex items-center justify-center font-bold text-lg">${escapeHtml(user.charAt(0).toUpperCase())}</div>
                                         <div class="flex flex-col"><span class="font-bold text-bbcDark dark:text-white text-sm">${t('welcome')}</span><span class="text-xs text-muted-text truncate max-w-[200px]">${escapeHtml(user)}</span></div>
                                     </div>
-                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="shield" class="w-5 h-5"></i> ${t('admin_panel')}</a>` : `<a href="dashboard/" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 btn-bounce"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> ${t('dashboard')}</a>`}
-                                    <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors btn-bounce"><i data-lucide="log-out" class="w-5 h-5"></i> ${t('sign_out')}</button>
+                                    ${isAdmin ? `<a href="admin/index.php" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 active:scale-95"><i data-lucide="shield" class="w-5 h-5"></i> ${t('admin_panel')}</a>` : `<a href="dashboard/" class="w-full py-3 bg-bbcRed text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-bbcRed/20 active:scale-95"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> ${t('dashboard')}</a>`}
+                                    <button onclick="handleLogout(); setState({isMobileMenuOpen: false})" class="w-full py-3 bg-muted-bg text-bbcDark dark:text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors active:scale-95"><i data-lucide="log-out" class="w-5 h-5"></i> ${t('sign_out')}</button>
                                 </div>
                             `
                     : `
                                 <div class="grid grid-cols-2 gap-4">
-                                    <a href="login/" class="w-full py-3 bg-bbcDark dark:bg-white text-white dark:text-black rounded-xl font-bold shadow-lg btn-bounce text-center">${t('sign_in')}</a>
-                                    <a href="register.php" class="w-full py-3 border border-bbcDark dark:border-white text-bbcDark dark:text-white rounded-xl font-bold hover:bg-muted-bg transition-colors btn-bounce text-center">${t('register')}</a>
+                                    <a href="login/" class="w-full py-3 bg-bbcDark dark:bg-white text-white dark:text-black rounded-xl font-bold shadow-lg active:scale-95 text-center">${t('sign_in')}</a>
+                                    <a href="register.php" class="w-full py-3 border border-bbcDark dark:border-white text-bbcDark dark:text-white rounded-xl font-bold hover:bg-muted-bg transition-colors active:scale-95 text-center">${t('register')}</a>
                                 </div>
                             `
                 }

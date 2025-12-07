@@ -46,18 +46,18 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
         <!-- Filter Form -->
-        <form method="GET" class="flex gap-2 w-full md:w-auto">
+        <form method="GET" class="flex gap-2 w-full md:w-auto" id="filter-form">
             <?php if ($status !== "all"): ?>
                 <input type="hidden" name="status" value="<?php echo htmlspecialchars(
                     $status,
                 ); ?>">
             <?php endif; ?>
             
-            <input type="text" name="search" placeholder="Search articles..." value="<?php echo htmlspecialchars(
+            <input type="text" name="search" id="search-input" placeholder="Search articles..." value="<?php echo htmlspecialchars(
                 $search,
             ); ?>" class="p-2 rounded border border-border-color bg-card text-sm w-full md:w-48 focus:border-bbcRed outline-none">
             
-            <select name="cat" class="custom-select p-2.5 rounded-lg border border-border-color bg-card text-sm w-32 md:w-40 text-card-text" onchange="this.form.submit()">
+            <select name="cat" id="cat-select" class="custom-select p-2.5 rounded-lg border border-border-color bg-card text-sm w-32 md:w-40 text-card-text">
                 <option value="">All Categories</option>
                 <?php foreach ($categories as $c): ?>
                     <option value="<?php echo $c[

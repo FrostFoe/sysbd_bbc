@@ -42,26 +42,6 @@ $commentStmt = $pdo->prepare("
 $commentStmt->execute([$userId, $displayName]);
 $commentCount = $commentStmt->fetch(PDO::FETCH_ASSOC)["count"];
 
-// Get total upvotes received
-$voteStmt = $pdo->prepare("
-    SELECT 
-        SUM(CASE WHEN cv.vote_type = 'upvote' THEN 1 ELSE 0 END) as upvotes,
-        SUM(CASE WHEN cv.vote_type = 'downvote' THEN 1 ELSE 0 END) as downvotes
-    FROM comment_votes cv
-    INNER JOIN comments c ON cv.comment_id = c.id
-    WHERE c.user_id = ? OR c.user_name = ?
-");
-$voteStmt->execute([$userId, $displayName]);
-$votes = $voteStmt->fetch(PDO::FETCH_ASSOC);
-$upvotes = (int) ($votes["upvotes"] ?? 0);
-$downvotes = (int) ($votes["downvotes"] ?? 0);
-$score = $upvotes - $downvotes;
-
-// Get helpful score percentage (simple calculation)
-$helpfulPercent =
-    $commentCount > 0 ? round(($upvotes / max($commentCount, 1)) * 100) : 0;
-$helpfulPercent = min($helpfulPercent, 100); // Cap at 100%
-
 // Get recent comments (last 5)
 $recentStmt = $pdo->prepare("
     SELECT c.text, c.created_at, 
@@ -74,24 +54,6 @@ $recentStmt = $pdo->prepare("
 $recentStmt->execute([$userId, $displayName]);
 $recentComments = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Determine badges
-$badges = [];
-if ($commentCount >= 50) {
-    $badges[] = "👑 Active Member";
-}
-if ($upvotes >= 20) {
-    $badges[] = "⭐ Helpful Contributor";
-}
-if ($commentCount >= 100) {
-    $badges[] = "🏆 Expert Commentator";
-}
-if ($helpfulPercent >= 80 && $commentCount >= 10) {
-    $badges[] = "✅ Trusted Member";
-}
-if (empty($badges)) {
-    $badges[] = "🌟 New Member";
-}
-
 send_response([
     "success" => true,
     "profile" => [
@@ -99,10 +61,6 @@ send_response([
         "email" => htmlspecialchars($email),
         "commentCount" => $commentCount,
         "upvotes" => $upvotes,
-        "downvotes" => $downvotes,
-        "score" => $score,
-        "helpfulPercent" => $helpfulPercent,
-        "badges" => $badges,
         "recentComments" => array_map(function ($c) {
             return [
                 "text" =>

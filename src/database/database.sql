@@ -51,16 +51,12 @@ CREATE TABLE IF NOT EXISTS `articles` (
   -- Bangla Content
   `title_bn` varchar(255) DEFAULT NULL,
   `summary_bn` text,
-  `content_bn` longtext,
-  `toc_bn` longtext DEFAULT NULL,
-  `read_time_bn` varchar(50) DEFAULT NULL,
-
-  -- English Content
   `title_en` varchar(255) DEFAULT NULL,
   `summary_en` text,
-  `content_en` longtext,
-  `toc_en` longtext DEFAULT NULL,
-  `read_time_en` varchar(50) DEFAULT NULL,
+    `content_bn` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `content_en` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `read_time_bn` varchar(50) DEFAULT NULL,
+    `read_time_en` varchar(50) DEFAULT NULL,
 
   `image` longtext,
   `published_at` DATETIME DEFAULT CURRENT_TIMESTAMP,

@@ -32,10 +32,6 @@ $article["summary"] =
     $lang === "en" ? $articleRaw["summary_en"] : $articleRaw["summary_bn"];
 $article["content"] =
     $lang === "en" ? $articleRaw["content_en"] : $articleRaw["content_bn"];
-$article["toc"] =
-    $lang === "en"
-        ? $articleRaw["toc_en"] ?? "[]"
-        : $articleRaw["toc_bn"] ?? "[]";
 $article["readTime"] =
     $lang === "en"
         ? $articleRaw["read_time_en"] ?? ""
@@ -83,7 +79,7 @@ $commentStmt = $pdo->prepare("
     FROM comments c 
     LEFT JOIN users u ON c.user_id = u.id 
     WHERE c.article_id = ? AND c.parent_comment_id IS NULL
-    ORDER BY c.is_pinned DESC, c.pin_order ASC, c.created_at DESC
+    ORDER BY c.created_at DESC
 ");
 $commentStmt->execute([$articleId]);
 $rawComments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -131,7 +127,7 @@ foreach ($rawComments as $c) {
         $replies[] = [
             "id" => $r["id"],
             "user" => $replyDisplayName,
-            "text" => htmlspecialchars($r["text"]),
+            "text" => nl2br(htmlspecialchars($r["text"])),
             "time" => time_ago($r["created_at"], $lang),
             "isAdmin" =>
                 !empty($r["email"]) && strpos($r["email"], "admin") !== false,
@@ -141,7 +137,7 @@ foreach ($rawComments as $c) {
     $processedComments[] = [
         "id" => $c["id"],
         "user" => $displayName,
-        "text" => htmlspecialchars($c["text"]),
+        "text" => nl2br(htmlspecialchars($c["text"])),
         "time" => time_ago($c["created_at"], $lang),
         "upvotes" => $upvotes,
         "downvotes" => $downvotes,
@@ -221,9 +217,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
     
     <link href="../assets/css/styles.css" rel="stylesheet" />
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
     <script src="../assets/js/lucide.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
@@ -266,23 +260,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
 
     <main role="main" class="bg-page min-h-screen font-sans animate-fade-in-up pb-12">
         <div class="max-w-[1280px] mx-auto px-4 py-8">
-            <!-- Mobile TOC (shown on mobile, hidden on lg+) -->
-            <div class="lg:hidden mb-8" id="mobile-toc-container">
-                <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
-                    <div class="flex items-center justify-between gap-2 mb-4 pb-2 border-b border-border-color cursor-pointer" onclick="toggleTOC(event)" id="toc-header">
-                        <h4 class="text-lg font-bold text-card-text">
-                            <?php echo $lang === "bn"
-                                ? "সূচিপত্র"
-                                : "Table of Contents"; ?>
-                        </h4>
-                        <i data-lucide="chevron-down" id="toc-toggle-icon" class="w-5 h-5 text-muted-text transition-transform"></i>
-                    </div>
-                    <nav id="toc-container" class="text-sm space-y-2 text-muted-text max-h-[500px] overflow-y-auto">
-                        <!-- JS will populate this -->
-                    </nav>
-                </div>
-            </div>
-
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div class="lg:col-span-8">
                     <article class="bg-card p-6 md:p-10 rounded-2xl shadow-soft border border-border-color">
@@ -335,7 +312,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
 
                         <!-- Article Content -->
-                        <div class="prose max-w-none font-size-md space-y-8 text-card-text transition-all duration-300">
+                        <div class="prose max-w-none [&_p]:text-lg [&_p]:leading-[1.8] [&_p]:mb-[1em] space-y-8 text-card-text transition-all duration-300">
                             <?php echo $article["content"];
 // Sanitized above
 ?>
@@ -348,18 +325,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="lg:col-span-4 w-full">
                     <div class="w-full space-y-6 z-40 lg:fixed lg:top-28 lg:right-4 lg:w-[calc(33.33vw-4rem)] lg:max-w-[400px] lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 no-scrollbar">
                         
-                        <!-- Desktop TOC (hidden on mobile, shown on lg+) -->
-                        <div class="hidden lg:block bg-card p-6 rounded-2xl shadow-soft border border-border-color">
-                            <h4 class="text-lg font-bold text-card-text mb-4 pb-2 border-b border-border-color">
-                                <?php echo $lang === "bn"
-                                    ? "সূচিপত্র"
-                                    : "Table of Contents"; ?>
-                            </h4>
-                            <nav id="toc-container-desktop" class="text-sm space-y-2 text-muted-text max-h-none overflow-y-visible">
-                                <!-- JS will populate this -->
-                            </nav>
-                        </div>
-
                         <!-- Leaked Documents -->
                         <?php if (!empty($leakedDocuments)): ?>
                         <div class="bg-card p-6 rounded-2xl shadow-soft border border-border-color">
@@ -505,8 +470,8 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="mb-8">
-                        <!-- Quill Editor -->
-                        <div id="quill-editor" class="bg-card rounded-xl border border-border-color overflow-hidden" style="height: 300px;"></div>
+                        <!-- Text Area -->
+                        <textarea id="comment-input" class="w-full p-4 rounded-xl border border-border-color bg-card text-card-text focus:ring-2 focus:ring-bbcRed/20 focus:border-bbcRed outline-none transition-all resize-y text-base min-h-[150px]" placeholder="<?php echo $lang === "bn" ? "আপনার মতামত জানান..." : "Write your comment..."; ?>"></textarea>
                         
                         <!-- Character Counter -->
                         <div class="flex justify-between items-center mt-3 gap-4">
@@ -524,15 +489,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="bg-muted-bg p-4 rounded-xl border border-border-color" id="comment-<?php echo $comment[
                                     "id"
                                 ]; ?>">
-                                    <!-- Pinned Badge -->
-                                    <?php if ($comment["isPinned"]): ?>
-                                        <div class="flex items-center gap-2 mb-3 text-xs font-bold text-bbcRed bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg w-fit">
-                                            <i data-lucide="pin" class="w-3 h-3"></i> <?php echo $lang ===
-                                            "bn"
-                                                ? "অ্যাডমিন মতামত"
-                                                : "Admin Comment"; ?>
-                                        </div>
-                                    <?php endif; ?>
                                     
                                     <!-- Main Comment -->
                                     <div class="flex items-start gap-3 mb-2">
@@ -549,22 +505,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                                                 "time"
                                             ]; ?></span>
                                         </div>
-                                        <!-- Admin Pin Button -->
-                                        <?php if ($isAdmin): ?>
-                                            <button onclick="togglePin(<?php echo $comment[
-                                                "id"
-                                            ]; ?>, <?php echo $comment[
-    "isPinned"
-]
-    ? "true"
-    : "false"; ?>)" class="p-2 rounded hover:bg-yellow-100 dark:hover:bg-yellow-900/20 transition-colors text-yellow-600 dark:text-yellow-400" title="<?php echo $comment[
-    "isPinned"
-]
-    ? "Unpin"
-    : "Pin"; ?>">
-                                                <i data-lucide="pin" class="w-4 h-4"></i>
-                                            </button>
-                                        <?php endif; ?>
                                     </div>
                                     
                                     <!-- Comment Text -->
@@ -577,7 +517,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                                         <div class="flex items-center gap-1 bg-card px-2 py-1 rounded-lg border border-border-color">
                                             <button onclick="voteComment(<?php echo $comment[
                                                 "id"
-                                            ]; ?>, 'upvote')" class="p-1 hover:text-green-500 transition-colors text-muted-text vote-btn-up" data-comment-id="<?php echo $comment[
+                                            ]; ?>, 'upvote')" class="p-1 hover:text-green-500 transition-colors text-muted-text vote-btn-up flex items-center justify-center min-w-[36px] min-h-[36px] [&.active]:text-green-500 [&.active]:font-bold [&.active]:animate-[pulse-pop_0.3s_ease-out]" data-comment-id="<?php echo $comment[
     "id"
 ]; ?>" title="Upvote">
                                                 <i data-lucide="thumbs-up" class="w-3 h-3"></i>
@@ -589,7 +529,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
 ] - $comment["downvotes"]; ?></span>
                                             <button onclick="voteComment(<?php echo $comment[
                                                 "id"
-                                            ]; ?>, 'downvote')" class="p-1 hover:text-red-500 transition-colors text-muted-text vote-btn-down" data-comment-id="<?php echo $comment[
+                                            ]; ?>, 'downvote')" class="p-1 hover:text-red-500 transition-colors text-muted-text vote-btn-down flex items-center justify-center min-w-[36px] min-h-[36px] [&.active]:text-red-500 [&.active]:font-bold [&.active]:animate-[pulse-pop_0.3s_ease-out]" data-comment-id="<?php echo $comment[
     "id"
 ]; ?>" title="Downvote">
                                                 <i data-lucide="thumbs-down" class="w-3 h-3"></i>
@@ -711,31 +651,10 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
     <script>
         const articleId = '<?php echo htmlspecialchars($articleId); ?>';
         const lang = '<?php echo $lang; ?>';
-        const savedTOC = <?php echo $article["toc"] ?: "[]"; ?>;
         let bookmarks = JSON.parse(localStorage.getItem("breachtimes-bookmarks") || "[]");
         let fontSize = "md";
         let userVotes = JSON.parse(localStorage.getItem(`votes-${articleId}`) || "{}");
         let commentSort = localStorage.getItem(`sort-${articleId}`) || "newest";
-
-        // Mobile TOC Toggle
-        let tocExpanded = true;
-        function toggleTOC(event) {
-            if (window.innerWidth >= 1024) return; // Don't toggle on lg screens
-            
-            const tocContainer = document.getElementById('toc-container');
-            const toggleIcon = document.getElementById('toc-toggle-icon');
-            
-            if (tocExpanded) {
-                tocContainer.classList.add('hidden');
-                toggleIcon.classList.add('rotate-180');
-                tocExpanded = false;
-            } else {
-                tocContainer.classList.remove('hidden');
-                toggleIcon.classList.remove('rotate-180');
-                tocExpanded = true;
-            }
-            lucide.createIcons();
-        }
 
         const savedTheme = localStorage.getItem("breachtimes-theme");
         const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -755,64 +674,32 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Character counter
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Quill editor for comments
-            window.quillEditor = new Quill('#quill-editor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote', 'code-block'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['link'],
-                        ['clean']
-                    ]
-                },
-                placeholder: 'আপনার মতামত জানান...'
-            });
-
-            // Character counter
-            window.quillEditor.on('text-change', () => {
-                const text = window.quillEditor.getText().trim();
-                const count = text.length;
-                const charCountEl = document.getElementById('char-counter');
-                charCountEl.textContent = count + '/5000';
-                
-                // Show warning at 80%
-                if (count >= 4000) {
-                    charCountEl.classList.add('text-orange-500');
-                    charCountEl.classList.remove('text-red-500');
-                }
-                // Show danger at 95%
-                else if (count >= 4750) {
-                    charCountEl.classList.add('text-red-500');
-                    charCountEl.classList.remove('text-orange-500');
-                } else {
-                    charCountEl.classList.remove('text-orange-500', 'text-red-500');
-                }
-            });
-
             const charInput = document.getElementById('comment-input');
+            const charCountEl = document.getElementById('char-counter');
+
             if (charInput) {
                 charInput.addEventListener('input', () => {
+                    const text = charInput.value.trim(); // Don't trim for counting, maybe? Usually we count actual chars.
+                    // But user wants "properly parse". Let's count length.
                     const count = charInput.value.length;
-                    const charCountEl = document.getElementById('char-count');
-                    charCountEl.textContent = count;
+                    
+                    charCountEl.textContent = count + '/5000';
                     
                     // Show warning at 80%
                     if (count >= 4000) {
-                        charCountEl.classList.add('near-limit');
-                        charCountEl.classList.remove('over-limit');
+                        charCountEl.classList.add('text-orange-500');
+                        charCountEl.classList.remove('text-red-500');
                     }
                     // Show danger at 95%
                     else if (count >= 4750) {
-                        charCountEl.classList.add('over-limit');
-                        charCountEl.classList.remove('near-limit');
+                        charCountEl.classList.add('text-red-500');
+                        charCountEl.classList.remove('text-orange-500');
                     } else {
-                        charCountEl.classList.remove('near-limit', 'over-limit');
+                        charCountEl.classList.remove('text-orange-500', 'text-red-500');
                     }
                 });
             }
+            
             // Restore sort preference
             const select = document.getElementById('sort-comments');
             if (select) select.value = commentSort;
@@ -822,8 +709,18 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
         function setFontSize(size) {
             fontSize = size;
             const proseEl = document.querySelector(".prose");
-            proseEl.classList.remove("font-size-sm", "font-size-md", "font-size-lg");
-            proseEl.classList.add(`font-size-${size}`);
+            
+            const sizes = {
+                sm: ["[&_p]:text-[0.95rem]", "[&_p]:leading-[1.6]", "[&_p]:mb-[1em]"],
+                md: ["[&_p]:text-lg", "[&_p]:leading-[1.8]", "[&_p]:mb-[1em]"],
+                lg: ["[&_p]:text-[1.35rem]", "[&_p]:leading-loose", "[&_p]:mb-[1em]"]
+            };
+
+            // Remove all possible font size classes
+            Object.values(sizes).flat().forEach(cls => proseEl.classList.remove(cls));
+            
+            // Add the selected size classes
+            sizes[size].forEach(cls => proseEl.classList.add(cls));
         }
 
         function showToastMsg(msg, type = 'success') {
@@ -832,7 +729,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
             const icon = type === 'error' ? 'alert-circle' : 'check-circle';
             const color = type === 'error' ? 'text-red-500' : 'text-green-400 dark:text-green-600';
             
-            toast.className = "toast-enter fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
+            toast.className = "animate-[slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_forwards] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/80 dark:bg-white/90 backdrop-blur text-white dark:text-black px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-2 mb-2 text-sm w-auto";
             toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 ${color}"></i> ${msg}`;
             container.appendChild(toast);
             lucide.createIcons();
@@ -869,7 +766,8 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         async function postComment(articleId) {
-            const text = window.quillEditor?.getText?.()?.trim() || '';
+            const charInput = document.getElementById('comment-input');
+            const text = charInput ? charInput.value : '';
             const trimmedText = text.trim();
             const errorMsg = document.getElementById("error-message");
             const postBtn = document.getElementById("post-btn");
@@ -896,7 +794,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                 const res = await fetch("../api/post_comment.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ articleId, user: "Anonymous", text: window.quillEditor.root.innerHTML, lang })
+                    body: JSON.stringify({ articleId, user: "Anonymous", text: text, lang })
                 });
                 const result = await res.json();
                 if (result.success) {
@@ -922,13 +820,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
             const theme = isDark ? "dark" : "light";
             localStorage.setItem("breachtimes-theme", theme);
             
-            // Save to backend if logged in
-            fetch("../api/save_theme.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ theme })
-            }).catch(console.error);
-            
             // Show visual feedback
             showToastMsg(isDark ? "🌙 গাঢ় মোড সক্রিয় হয়েছে" : "☀️ হালকা মোড সক্রিয় হয়েছে");
         }
@@ -937,90 +828,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
             const newLang = lang === "bn" ? "en" : "bn";
             window.location.href = `?id=${articleId}&lang=${newLang}`;
         }
-
-        // Generate Table of Contents
-        const tocInitialize = () => {
-            const tocContainerMobile = document.getElementById('toc-container');
-            const tocContainerDesktop = document.getElementById('toc-container-desktop');
-            const prose = document.querySelector('.prose');
-
-            const populateTOC = (container) => {
-                if (!container) return;
-
-                // Use saved TOC if available
-                if (savedTOC && savedTOC.length > 0) {
-                    const ul = document.createElement('ul');
-                    ul.className = 'space-y-2 border-l border-border-color pl-4';
-
-                    savedTOC.forEach(item => {
-                        const li = document.createElement('li');
-                        const link = document.createElement('a');
-                        
-                        // Ideally, the IDs should match what's in the content. 
-                        // The Admin 'generateTOC' ensures IDs are added to H tags in the content.
-                        link.href = `#${item.id}`;
-                        link.textContent = item.text;
-                        link.className = `block hover:text-bbcRed transition-colors ${item.level === 3 ? 'pl-4 text-xs' : 'font-bold'}`;
-                        
-                        link.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            const target = document.getElementById(item.id);
-                            if (target) {
-                                target.scrollIntoView({ behavior: 'smooth' });
-                            }
-                        });
-
-                        li.appendChild(link);
-                        ul.appendChild(li);
-                    });
-                    container.innerHTML = '';
-                    container.appendChild(ul);
-                    return;
-                }
-                
-                // Fallback to client-side generation
-                if (prose) {
-                    const headers = prose.querySelectorAll('h2, h3');
-                    if (headers.length === 0) {
-                        container.innerHTML = '<p class="italic opacity-50"><?php echo $lang ===
-                        "bn"
-                            ? "কোনো সূচিপত্র নেই"
-                            : "No table of contents available"; ?></p>';
-                        return;
-                    }
-
-                    const ul = document.createElement('ul');
-                    ul.className = 'space-y-2 border-l border-border-color pl-4';
-
-                    headers.forEach((header, index) => {
-                        if (!header.id) {
-                            header.id = `section-${index}`;
-                        }
-
-                        const li = document.createElement('li');
-                        const link = document.createElement('a');
-                        link.href = `#${header.id}`;
-                        link.textContent = header.textContent;
-                        link.className = `block hover:text-bbcRed transition-colors ${header.tagName === 'H3' ? 'pl-4 text-xs' : 'font-bold'}`;
-                        
-                        link.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            header.scrollIntoView({ behavior: 'smooth' });
-                        });
-
-                        li.appendChild(link);
-                        ul.appendChild(li);
-                    });
-                    
-                    container.appendChild(ul);
-                }
-            };
-
-            // Populate both mobile and desktop TOC containers
-            populateTOC(tocContainerMobile);
-            populateTOC(tocContainerDesktop);
-        };
-        document.addEventListener('DOMContentLoaded', tocInitialize);
 
         async function handleLogout() {
             try {
@@ -1162,30 +969,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
             });
         }
 
-        async function togglePin(commentId, isPinned) {
-            try {
-                const res = await fetch("../api/pin_comment.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ commentId, isPinned: !isPinned })
-                });
-                const result = await res.json();
-                if (result.success) {
-                    showToastMsg(result.message);
-                    setTimeout(() => location.reload(), 800);
-                } else {
-                    showToastMsg(result.error || "<?php echo $lang === "bn"
-                        ? "সমস্যা হয়েছে!"
-                        : "Error occurred!"; ?>", 'error');
-                }
-            } catch (e) {
-                console.error(e);
-                showToastMsg("<?php echo $lang === "bn"
-                    ? "সার্ভার ত্রুটি!"
-                    : "Server error!"; ?>", 'error');
-            }
-        }
-
         async function deleteComment(id) {
             if (!confirm("<?php echo $lang === "bn"
                 ? "এই মন্তব্য মুছে দিতে চান?"
@@ -1265,7 +1048,6 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if (result.success) {
                     const profile = result.profile;
-                    const starRating = '⭐'.repeat(Math.min(Math.ceil(profile.helpfulPercent / 20), 5));
                     
                     content.innerHTML = `
                         <div class="space-y-4">
@@ -1288,36 +1070,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
                                 </div>
                                 <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
                                     <div class="text-2xl font-bold text-green-500">${profile.upvotes}</div>
-                                    <div class="text-xs text-muted-text">ঊর্ধ্বমূলক ভোট</div>
-                                </div>
-                                <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
-                                    <div class="text-2xl font-bold text-blue-500">${profile.score}</div>
-                                    <div class="text-xs text-muted-text">মোট স্কোর</div>
-                                </div>
-                                <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
-                                    <div class="text-lg font-bold">${profile.helpfulPercent}%</div>
-                                    <div class="text-xs text-muted-text">সহায়ক রেটিং</div>
-                                </div>
-                            </div>
-
-                            <!-- Helpful Rating -->
-                            <div class="bg-muted-bg p-3 rounded-lg border border-border-color">
-                                <div class="text-sm font-bold text-card-text mb-2">সহায়কতা রেটিং</div>
-                                <div class="flex items-center gap-2">
-                                    <div class="text-lg">${starRating}</div>
-                                    <div class="text-sm text-muted-text">${profile.helpfulPercent}% সহায়ক</div>
-                                </div>
-                            </div>
-
-                            <!-- Badges -->
-                            <div>
-                                <div class="text-sm font-bold text-card-text mb-2">🏆 ব্যাজ</div>
-                                <div class="flex flex-wrap gap-2">
-                                    ${profile.badges.map(badge => `
-                                        <span class="bg-bbcRed/20 text-bbcRed text-xs font-bold px-3 py-1 rounded-full border border-bbcRed/30">
-                                            ${badge}
-                                        </span>
-                                    `).join('')}
+                                    <div class="text-xs text-muted-text">প্রাপ্ত লাইক</div>
                                 </div>
                             </div>
 

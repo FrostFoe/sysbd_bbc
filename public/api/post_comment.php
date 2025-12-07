@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 $data = json_decode(file_get_contents("php://input"), true);
 $articleId = $data["articleId"] ?? null;
 $rawText = $data["text"] ?? "";
-$text = htmlspecialchars($rawText, ENT_QUOTES, "UTF-8");
+$text = $rawText; // Store raw text, escape on output
 
 // Validation with specific error messages
 if (!$articleId) {

@@ -15,7 +15,7 @@ if (!isset($_SESSION["user_role"]) || $_SESSION["user_role"] !== "admin") {
 
 $data = json_decode(file_get_contents("php://input"), true);
 $parentCommentId = $data["parentCommentId"] ?? null;
-$text = htmlspecialchars($data["text"] ?? "", ENT_QUOTES, "UTF-8");
+$text = $data["text"] ?? "";
 
 if (!$parentCommentId || !$text) {
     send_response(

@@ -25,8 +25,8 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </button>
         </div>
     <?php else: ?>
-        <table class="w-full text-left border-collapse responsive-table">
-            <thead class="bg-muted-bg text-muted-text text-xs uppercase">
+        <table class="w-full text-left border-collapse max-md:border-0">
+            <thead class="bg-muted-bg text-muted-text text-xs uppercase max-md:sr-only">
                 <tr>
                     <th class="p-4">Order</th>
                     <th class="p-4">ID</th>
@@ -37,14 +37,14 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </thead>
             <tbody class="divide-y divide-border-color">
                 <?php foreach ($sections as $s): ?>
-                <tr class="hover:bg-muted-bg transition-colors">
-                    <td class="p-4 font-bold text-muted-text"><?php echo $s[
+                <tr class="hover:bg-muted-bg transition-colors max-md:flex max-md:flex-col max-md:border-b max-md:border-border-color max-md:p-4 max-md:mb-4 max-md:bg-card max-md:rounded-xl max-md:shadow-sm">
+                    <td class="p-4 font-bold text-muted-text max-md:block max-md:text-[0.8em] max-md:text-left max-md:py-2 max-md:w-full max-md:border-b-0"><?php echo $s[
                         "sort_order"
                     ]; ?></td>
-                    <td class="p-4 font-mono text-sm"><?php echo htmlspecialchars(
+                    <td class="p-4 font-mono text-sm max-md:block max-md:text-[0.8em] max-md:text-left max-md:py-2 max-md:w-full max-md:border-b-0"><?php echo htmlspecialchars(
                         $s["id"],
                     ); ?></td>
-                    <td class="p-4 font-bold">
+                    <td class="p-4 font-bold max-md:block max-md:text-[0.8em] max-md:text-left max-md:py-2 max-md:w-full max-md:border-b-0">
                         <div class="flex flex-col">
                             <span class="font-hind text-sm"><?php echo htmlspecialchars(
                                 $s["title_bn"],
@@ -54,10 +54,10 @@ $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             ); ?></span>
                         </div>
                     </td>
-                    <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold uppercase"><?php echo htmlspecialchars(
+                    <td class="p-4 max-md:block max-md:text-[0.8em] max-md:text-left max-md:py-2 max-md:w-full max-md:border-b-0"><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold uppercase"><?php echo htmlspecialchars(
                         $s["type"],
                     ); ?></span></td>
-                    <td class="p-4 text-right">
+                    <td class="p-4 text-right max-md:block max-md:text-[0.8em] max-md:text-left max-md:py-2 max-md:w-full max-md:border-b-0 max-md:mt-2 max-md:pt-4 max-md:border-t max-md:border-border-color">
                         <button onclick="deleteSection('<?php echo $s[
                             "id"
                         ]; ?>')" class="text-red-600 hover:bg-red-50 p-2 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
