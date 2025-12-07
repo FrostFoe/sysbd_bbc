@@ -219,45 +219,13 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="../assets/css/styles.css" rel="stylesheet" />
     <script src="../assets/js/lucide.js"></script>
     <script src="../assets/js/dropdown.js"></script>
+    <script src="../assets/js/layout.js"></script>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-bbcRed z-[100] shadow-[0_0_10px_var(--color-bbcRed)]" style="width: 0%" aria-hidden="true"></div>
 
-    <header role="banner" class="border-b border-border-color sticky bg-white/90 dark:bg-card/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm">
-        <div class="container mx-auto px-4 lg:px-8 max-w-[1000px]">
-            <div class="h-[70px] flex items-center justify-between">
-                <a href="../" class="block text-black dark:text-white transition-transform hover:scale-[1.02] active:scale-95 duration-300" aria-label="Back to Home">
-                    <div class="flex items-center select-none gap-2 group">
-                        <span class="bg-bbcRed text-white px-2.5 py-0.5 font-bold text-xl rounded shadow-md group-hover:bg-[var(--color-bbcRed-hover)] transition-colors duration-300">B</span>
-                        <span class="font-bold text-2xl tracking-tight leading-none text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                            BT
-                        </span>
-                    </div>
-                </a>
-                <div class="flex items-center gap-2 md:gap-4">
-                    <button onclick="toggleTheme()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-yellow-400 transition-all active:scale-90">
-                        <i data-lucide="sun" class="w-5 h-5"></i>
-                    </button>
-                    <button onclick="toggleLanguage()" class="p-2.5 rounded-full hover:bg-muted-bg text-gray-600 dark:text-green-400 transition-all active:scale-90">
-                        <span class="text-sm font-bold"><?php echo $lang ===
-                        "bn"
-                            ? "EN"
-                            : "BN"; ?></span>
-                    </button>
-                    <?php if ($user): ?>
-                        <button onclick="handleLogout()" class="text-sm font-bold px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-bbcRed rounded-full transition-all flex items-center gap-2">
-                            <div class="w-4 h-4 bg-bbcRed rounded-full text-white flex items-center justify-center text-[10px]"><?php echo strtoupper(
-                                $user[0],
-                            ); ?></div> সাইন আউট
-                        </button>
-                    <?php else: ?>
-                        <a href="../login/" class="text-sm font-bold px-5 py-2.5 bg-bbcDark dark:bg-white text-white dark:text-black rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all">সাইন ইন</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </header>
+    <?php require_once "../includes/header.php"; ?>
 
     <main role="main" class="bg-page min-h-screen font-sans animate-fade-in-up pb-12">
         <div class="max-w-[1280px] mx-auto px-4 py-8">
@@ -648,6 +616,8 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </div>
+
+    <?php require_once "../includes/footer.php"; ?>
 
     <script>
         const articleId = '<?php echo htmlspecialchars($articleId); ?>';

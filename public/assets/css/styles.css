@@ -295,6 +295,9 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .sticky {
     position: sticky;
   }
@@ -557,6 +560,9 @@
   .inline-flex {
     display: inline-flex;
   }
+  .table {
+    display: table;
+  }
   .aspect-\[9\/16\] {
     aspect-ratio: 9/16;
   }
@@ -604,9 +610,6 @@
   }
   .h-20 {
     height: calc(var(--spacing) * 20);
-  }
-  .h-24 {
-    height: calc(var(--spacing) * 24);
   }
   .h-64 {
     height: calc(var(--spacing) * 64);
@@ -691,9 +694,6 @@
   }
   .w-20 {
     width: calc(var(--spacing) * 20);
-  }
-  .w-24 {
-    width: calc(var(--spacing) * 24);
   }
   .w-32 {
     width: calc(var(--spacing) * 32);
@@ -795,9 +795,6 @@
   }
   .transform {
     transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
-  }
-  .animate-\[shimmer_2s_infinite_linear\] {
-    animation: shimmer 2s infinite linear;
   }
   .animate-\[slide-up_0\.4s_cubic-bezier\(0\.16\,1\,0\.3\,1\)_forwards\] {
     animation: slide-up 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
@@ -1258,9 +1255,6 @@
     --tw-gradient-position: to top in oklab;
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
-  .bg-\[linear-gradient\(to_right\,\#f4f4f5_8\%\,\#e4e4e7_18\%\,\#f4f4f5_33\%\)\] {
-    background-image: linear-gradient(to right,#f4f4f5 8%,#e4e4e7 18%,#f4f4f5 33%);
-  }
   .from-bbcRed {
     --tw-gradient-from: var(--color-bbcRed);
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -1306,9 +1300,6 @@
   .to-transparent {
     --tw-gradient-to: transparent;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
-  }
-  .bg-\[length\:1200px_100\%\] {
-    background-size: 1200px 100%;
   }
   .fill-current {
     fill: currentcolor;
@@ -1558,6 +1549,9 @@
   .break-words {
     overflow-wrap: break-word;
   }
+  .break-all {
+    word-break: break-all;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -1747,6 +1741,9 @@
   }
   .blur-3xl {
     --tw-blur: blur(var(--blur-3xl));
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
   }
   .backdrop-blur {
@@ -3051,11 +3048,6 @@
       }
     }
   }
-  .dark\:bg-\[linear-gradient\(to_right\,\#18181b_8\%\,\#27272a_18\%\,\#18181b_33\%\)\] {
-    @media (prefers-color-scheme: dark) {
-      background-image: linear-gradient(to right,#18181b 8%,#27272a 18%,#18181b 33%);
-    }
-  }
   .dark\:text-black {
     @media (prefers-color-scheme: dark) {
       color: var(--color-black);
@@ -3114,14 +3106,6 @@
         @media (hover: hover) {
           color: var(--color-gray-300);
         }
-      }
-    }
-  }
-  .dark\:after\:bg-danger {
-    @media (prefers-color-scheme: dark) {
-      &::after {
-        content: var(--tw-content);
-        background-color: var(--color-danger);
       }
     }
   }
@@ -3269,17 +3253,6 @@
       font-weight: var(--font-weight-bold);
     }
   }
-  .\[\&\.active\]\:font-semibold {
-    &.active {
-      --tw-font-weight: var(--font-weight-semibold);
-      font-weight: var(--font-weight-semibold);
-    }
-  }
-  .\[\&\.active\]\:text-bbcRed {
-    &.active {
-      color: var(--color-bbcRed);
-    }
-  }
   .\[\&\.active\]\:text-green-500 {
     &.active {
       color: var(--color-green-500);
@@ -3290,23 +3263,11 @@
       color: var(--color-red-500);
     }
   }
-  .\[\&\.active\]\:opacity-100 {
-    &.active {
-      opacity: 100%;
-    }
-  }
   .\[\&\.active\]\:after\:w-full {
     &.active {
       &::after {
         content: var(--tw-content);
         width: 100%;
-      }
-    }
-  }
-  .dark\:\[\&\.active\]\:text-danger {
-    @media (prefers-color-scheme: dark) {
-      &.active {
-        color: var(--color-danger);
       }
     }
   }
