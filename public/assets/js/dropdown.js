@@ -132,10 +132,10 @@ class CustomDropdown {
   }
 }
 
-// Initialize all select elements with class 'custom-select'
+// Initialize all select elements
 document.addEventListener("DOMContentLoaded", () => {
   const selects = document.querySelectorAll(
-    'select.custom-select, select[data-custom="true"]',
+    'select:not(.no-custom)',
   );
   selects.forEach((select) => {
     new CustomDropdown(select);
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Also provide a manual initialization function
 window.initializeCustomDropdowns = function () {
   const selects = document.querySelectorAll(
-    'select.custom-select, select[data-custom="true"]',
+    'select:not(.no-custom)',
   );
   selects.forEach((select) => {
     if (!select.classList.contains("custom-select-hidden")) {

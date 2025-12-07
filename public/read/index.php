@@ -218,6 +218,7 @@ $articleDocuments = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
     
     <link href="../assets/css/styles.css" rel="stylesheet" />
     <script src="../assets/js/lucide.js"></script>
+    <script src="../assets/js/dropdown.js"></script>
 </head>
 <body class="bg-page text-page-text font-sans transition-colors duration-500 antialiased selection:bg-bbcRed selection:text-white">
     <div id="toast-container" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2"></div>

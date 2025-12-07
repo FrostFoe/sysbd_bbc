@@ -56,7 +56,7 @@ $menu_items = [
     <!-- Header -->
     <header class="h-[70px] border-b border-border-color bg-white/90 dark:bg-card/90 backdrop-blur-md z-50 transition-colors duration-300 shadow-sm shrink-0 flex items-center px-4 lg:px-8 justify-between relative min-w-0">
         <div class="flex items-center gap-3 md:gap-4 min-w-0">
-            <button onclick="toggleSidebar()" class="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted-bg text-muted-text hover:text-card-text transition-colors flex-shrink-0">
+            <button type="button" onclick="toggleSidebar()" class="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted-bg text-muted-text hover:text-card-text transition-colors flex-shrink-0">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <a href="../index.php" class="flex items-center select-none gap-2 group min-w-0">

@@ -24,6 +24,7 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     <link href="assets/css/styles.css" rel="stylesheet" />
 
     <script src="assets/js/lucide.js"></script>
+    <script src="assets/js/dropdown.js"></script>
     <!-- QuillJS Script -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
@@ -34,6 +35,8 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
     </div>
 
     <div id="app"></div>
+    <div id="mobile-menu-layer"></div>
+    <div id="search-overlay-layer"></div>
 
     <div id="toast-container"
         class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[110] pointer-events-none w-full max-w-sm flex flex-col items-center gap-2">
@@ -497,7 +500,53 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
         }
 
         function setState(updates, shouldRender = true) {
+            const keys = Object.keys(updates);
+            const skipRenderKeys = ['isMobileMenuOpen', 'isSearchOpen', 'searchQuery', 'searchResults'];
+            
+            // Check if we can skip full render
+            if (shouldRender && keys.every(k => skipRenderKeys.includes(k))) {
+                shouldRender = false;
+            }
+
             Object.assign(state, updates);
+            
+            // Handle Visibility Toggles directly to avoid full re-render
+            if (updates.hasOwnProperty('isMobileMenuOpen')) {
+                const el = document.querySelector('#mobile-menu-layer > div');
+                if (el) {
+                    if (state.isMobileMenuOpen) {
+                        el.classList.remove('-translate-x-full');
+                        el.classList.add('animate-slide-in-left');
+                    } else {
+                        el.classList.add('-translate-x-full');
+                        el.classList.remove('animate-slide-in-left');
+                    }
+                } else {
+                     // If element doesn't exist (e.g. first load), force render
+                     shouldRender = true;
+                }
+            }
+
+            if (updates.hasOwnProperty('isSearchOpen')) {
+                const el = document.querySelector('#search-overlay-layer > div');
+                if (el) {
+                     if (state.isSearchOpen) {
+                        el.classList.remove('opacity-0', 'invisible');
+                        el.classList.add('opacity-100', 'visible', 'animate-zoom-in');
+                        // Focus input
+                        setTimeout(() => {
+                            const input = el.querySelector('input');
+                            if(input) input.focus();
+                        }, 100);
+                    } else {
+                        el.classList.add('opacity-0', 'invisible');
+                        el.classList.remove('opacity-100', 'visible', 'animate-zoom-in');
+                    }
+                } else {
+                    shouldRender = true;
+                }
+            }
+
             if (shouldRender) render();
         }
 
@@ -1046,14 +1095,16 @@ $initialCategory = isset($_GET["category"]) ? $_GET["category"] : "home";
             else if (view === "home") mainHtml = renderHomeView();
             // Add cases for other views like 'admin' if they exist and need rendering here
 
-            const mobileMenu = renderMobileMenu();
-            const searchOverlay = renderSearchOverlay();
+            // Update external layers
+            const mobileLayer = document.getElementById("mobile-menu-layer");
+            if (mobileLayer) mobileLayer.innerHTML = renderMobileMenu();
+            
+            const searchLayer = document.getElementById("search-overlay-layer");
+            if (searchLayer) searchLayer.innerHTML = renderSearchOverlay();
+
             const backToTop = renderBackToTop();
 
             app.innerHTML = `
-                ${mobileMenu}
-                ${searchOverlay}
-            
                 ${headerHtml}
                 ${mainHtml}
                 ${footerHtml}
